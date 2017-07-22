@@ -1,0 +1,211 @@
+------------------------------------------------------------------------
+r114 | gk | 2010-01-29 02:06:14 +0000 (Fri, 29 Jan 2010) | 2 lines
+Changed paths:
+   M /trunk/CalibCornerPatch.cc
+   M /trunk/Tracker.cc
+
+Fix two crash bugs: One common case in Calibrator, on rare case in PTAM
+
+------------------------------------------------------------------------
+r113 | gk | 2009-11-02 18:27:34 +0000 (Mon, 02 Nov 2009) | 2 lines
+Changed paths:
+   M /trunk/LICENSE.txt
+
+Minor tweak to contact details in license
+
+------------------------------------------------------------------------
+r112 | gk | 2009-07-14 16:05:11 +0100 (Tue, 14 Jul 2009) | 4 lines
+Changed paths:
+   M /trunk/Build/Linux/Makefile
+   M /trunk/Bundle.cc
+
+Set a lower bound for the M-Estimator's robust sigma estimate. This fixes
+the empty-map-on-startup bug that appeared recently.
+
+
+------------------------------------------------------------------------
+r111 | gk | 2009-05-11 16:37:58 +0100 (Mon, 11 May 2009) | 5 lines
+Changed paths:
+   M /trunk/ARDriver.cc
+   M /trunk/ARDriver.h
+   M /trunk/ATANCamera.cc
+   M /trunk/ATANCamera.h
+   M /trunk/Bundle.cc
+   M /trunk/Bundle.h
+   M /trunk/CalibCornerPatch.cc
+   M /trunk/CalibCornerPatch.h
+   M /trunk/CalibImage.cc
+   M /trunk/CalibImage.h
+   M /trunk/CameraCalibrator.cc
+   M /trunk/EyeGame.cc
+   M /trunk/EyeGame.h
+   M /trunk/GLWindow2.cc
+   M /trunk/GLWindow2.h
+   M /trunk/HomographyInit.cc
+   M /trunk/HomographyInit.h
+   M /trunk/KeyFrame.cc
+   M /trunk/KeyFrame.h
+   D /trunk/LapackCholesky.h
+   M /trunk/LevelHelpers.h
+   M /trunk/MEstimator.h
+   M /trunk/MapMaker.cc
+   M /trunk/MapMaker.h
+   M /trunk/MapPoint.h
+   M /trunk/MapViewer.cc
+   M /trunk/MapViewer.h
+   M /trunk/MiniPatch.h
+   M /trunk/PatchFinder.cc
+   M /trunk/PatchFinder.h
+   M /trunk/README.txt
+   M /trunk/Relocaliser.cc
+   M /trunk/Relocaliser.h
+   M /trunk/SmallBlurryImage.cc
+   M /trunk/SmallBlurryImage.h
+   M /trunk/SmallMatrixOpts.h
+   M /trunk/System.cc
+   M /trunk/Tracker.cc
+   M /trunk/Tracker.h
+   M /trunk/TrackerData.h
+   M /trunk/libraries_date
+
+- Changed from using old TooN v1 to TooN v2. TooN2 is a complete overhaul and fixes TooN1's aliasing-breaking bug. PTAM no longer works with TooN1.
+
+- Fixed old bug whereby some accumulator matrices were not zeroed each iteration of bundle adjustment. Bundler should now behave more sanely.
+
+
+------------------------------------------------------------------------
+r110 | gk | 2009-03-09 17:35:25 +0000 (Mon, 09 Mar 2009) | 3 lines
+Changed paths:
+   M /trunk/MapMaker.cc
+   M /trunk/MapMaker.h
+
+Setting WiggleScale to something other than 0.1 now doesn't break everything. Thanks again to Mark Salisbury for pointing this out.
+
+
+------------------------------------------------------------------------
+r109 | gk | 2009-03-04 17:49:29 +0000 (Wed, 04 Mar 2009) | 9 lines
+Changed paths:
+   M /trunk/MapMaker.cc
+   M /trunk/README.txt
+   M /trunk/libraries_date
+
+Minor fixes / updates:
+
+- The initial map-scaling-to-10cm was missing a sqrt (thanks Mark Salisbury)
+
+- Checked against current libcvd, gvars, TooN
+
+- Added ``-r Maintenance_Branch_1_x'' to TooN downloading instruction
+
+
+------------------------------------------------------------------------
+r108 | gk | 2008-12-18 17:36:21 +0000 (Thu, 18 Dec 2008) | 5 lines
+Changed paths:
+   M /trunk/ATANCamera.cc
+   M /trunk/ATANCamera.h
+   M /trunk/CameraCalibrator.cc
+   M /trunk/CameraCalibrator.h
+
+Added button to CameraCalibrator which kills of radial distortion, and assumes a linear camera
+Use this if you have a zoomier lens or one with pincushion distortion. 
+The calibrator and tracker will still perform poorly with zoomy lenses though!
+
+
+------------------------------------------------------------------------
+r107 | gk | 2008-11-18 11:58:52 +0000 (Tue, 18 Nov 2008) | 2 lines
+Changed paths:
+   M /trunk/ATANCamera.h
+   M /trunk/CalibCornerPatch.cc
+   M /trunk/CalibCornerPatch.h
+   M /trunk/CalibImage.cc
+   M /trunk/CameraCalibrator.cc
+
+Minor: Camera calibrator tweaks
+
+------------------------------------------------------------------------
+r106 | gk | 2008-11-17 18:28:21 +0000 (Mon, 17 Nov 2008) | 2 lines
+Changed paths:
+   M /trunk/CalibCornerPatch.cc
+   M /trunk/CalibImage.cc
+   M /trunk/CalibImage.h
+   M /trunk/CameraCalibrator.cc
+
+Camera calibrator: Now draws errors (10x mag), and also gain opti is re-instated for the corner optimiser
+
+------------------------------------------------------------------------
+r105 | gk | 2008-11-03 15:12:18 +0000 (Mon, 03 Nov 2008) | 3 lines
+Changed paths:
+   M /trunk/PatchFinder.cc
+   M /trunk/Relocaliser.cc
+   M /trunk/SmallBlurryImage.cc
+   M /trunk/Tracker.cc
+
+Fix ancient factor-of-two gradient calc bug for subpixel-alignment routines.
+Makes subpix convergence faster in SBI and PatchFinder.
+
+------------------------------------------------------------------------
+r104 | gk | 2008-10-03 14:35:54 +0100 (Fri, 03 Oct 2008) | 6 lines
+Changed paths:
+   M /trunk/MapMaker.cc
+   M /trunk/SmallBlurryImage.cc
+   M /trunk/SmallBlurryImage.h
+   M /trunk/Tracker.cc
+   M /trunk/Tracker.h
+
+- Added frame-to-frame motion initialiser based on SBI as described in ECCV 2008 paper
+  This can be turned off with Tracker.UseRotationEstimator=0 if moving clutter becomes a problem
+
+- Changed SBI size to 1/16th size (40x30 for 640x480 source)
+
+
+------------------------------------------------------------------------
+r103 | gk | 2008-09-30 11:25:45 +0100 (Tue, 30 Sep 2008) | 2 lines
+Changed paths:
+   M /trunk/calibrator_settings.cfg
+   M /trunk/settings.cfg
+
+Minor: cfg files with Unix (not DOS) linebreaks
+
+------------------------------------------------------------------------
+r102 | gk | 2008-09-30 10:57:47 +0100 (Tue, 30 Sep 2008) | 3 lines
+Changed paths:
+   A /trunk/calibrator_settings.cfg
+   M /trunk/settings.cfg
+
+Minor: Added skeleton calibrator_settings.cfg after people asked why it's
+not there, and added some explanatory text to it and setting.cfg
+
+------------------------------------------------------------------------
+r101 | gk | 2008-09-25 19:07:27 +0100 (Thu, 25 Sep 2008) | 4 lines
+Changed paths:
+   M /trunk/Build/Linux/Makefile
+   M /trunk/CalibImage.cc
+   M /trunk/CameraCalibrator.cc
+   M /trunk/GLWindow2.cc
+   M /trunk/HomographyInit.cc
+   M /trunk/HomographyInit.h
+   M /trunk/MapMaker.cc
+   M /trunk/System.cc
+   M /trunk/Tracker.cc
+   M /trunk/main.cc
+
+Minor: Fixes for missing headers with gcc 4.3
+Minor: Add -fno-strict-aliasing flag to work around TooN aliasing bug
+Minor: Small bug in CalibImage, reference in HomographyInit
+
+------------------------------------------------------------------------
+r100 | gk | 2008-09-05 15:21:15 +0100 (Fri, 05 Sep 2008) | 2 lines
+Changed paths:
+   M /trunk/libraries_date
+
+Checked OK against current libCVD, TooN, GVars3
+
+------------------------------------------------------------------------
+r99 | gk | 2008-09-05 14:37:23 +0100 (Fri, 05 Sep 2008) | 2 lines
+Changed paths:
+   M /trunk/make_package_script
+   M /trunk/www_script
+
+Added CHANGELOG export
+
+------------------------------------------------------------------------
