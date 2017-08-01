@@ -14,6 +14,7 @@ PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented r
 
 ## Compiling & Installing
 * Build 3rdParty on Linux: build_3rdParty.sh
+* [PTAM Compilation on Linux](http://hustcalm.me/blog/2013/09/27/ptam-compilation-on-linux-howto/)
 * [Build PTAM on Ubuntu 11.10](http://irawiki.disco.unimib.it/irawiki/index.php/PTAM)
 * [Installation of PTAM in ROS](https://sites.google.com/site/zhilongliuwebsite/research/computer-vision-embedded-systems/ptam)
 
