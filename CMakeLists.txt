@@ -5,6 +5,7 @@ set( CMAKE_CXX_COMPILER "g++" )
 set( CMAKE_BUILD_TYPE "Release" )
 set( CMAKE_CXX_FLAGS "-D_LINUX -D_REENTRANT -Wall -std=c++11 -march=nocona -O3 -msse3" )# -march=native
 
+
 # add cmake modules
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules )
 #set( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
@@ -79,7 +80,8 @@ include_directories( "${PROJECT_SOURCE_DIR}/include" )
 # file( GLOB SRC_CC_LIST "${PROJECT_SOURCE_DIR}/src/*.cc")
 # aux_source_directory( ${PROJECT_SOURCE_DIR}/src SRC_LIST)
 
-set( VIDEOSOURCE ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_V4L.cc )
+# VideoSource_Linux_DV.cc VideoSource_Linux_V4L.cc VideoSource_Linux_DataSet.cc
+set( VIDEOSOURCE ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_DataSet.cc )
 
 ### PTAM
 add_executable( PTAM
@@ -106,13 +108,13 @@ add_executable( PTAM
         ${VIDEOSOURCE} )
 # target_link_libraries( PTAM ${THIRD_PARTY_LIBS} )
 
-### CameraCalibrator
-add_executable( CameraCalibrator
-        ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
-        ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
-        ${PROJECT_SOURCE_DIR}/src/CalibImage.cc
-        ${PROJECT_SOURCE_DIR}/src/CalibCornerPatch.cc
-        ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
-        ${PROJECT_SOURCE_DIR}/src/CameraCalibrator.cc
-        ${VIDEOSOURCE} )
-# target_link_libraries( CameraCalibrator ${THIRD_PARTY_LIBS} )
+#### CameraCalibrator
+#add_executable( CameraCalibrator
+#        ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
+#        ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
+#        ${PROJECT_SOURCE_DIR}/src/CalibImage.cc
+#        ${PROJECT_SOURCE_DIR}/src/CalibCornerPatch.cc
+#        ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
+#        ${PROJECT_SOURCE_DIR}/src/CameraCalibrator.cc
+#        ${VIDEOSOURCE} )
+## target_link_libraries( CameraCalibrator ${THIRD_PARTY_LIBS} )
