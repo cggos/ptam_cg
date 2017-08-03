@@ -36,4 +36,5 @@ private:
 
     std::string mDatasetPath;
     std::ifstream mFileIn;
+    unsigned int mIndexImg;
 };

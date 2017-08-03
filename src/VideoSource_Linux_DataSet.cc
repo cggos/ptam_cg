@@ -12,7 +12,7 @@ using namespace CVD;
 using namespace std;
 using namespace GVars3;
 
-VideoSource::VideoSource():mDatasetPath("")
+VideoSource::VideoSource():mDatasetPath(""),mIndexImg(0)
 {
     cout << "VideoSource_Linux: Opening RGB Image DataSet..." << endl;
 
@@ -23,10 +23,11 @@ VideoSource::VideoSource():mDatasetPath("")
     cout << "VideoSource.Resolution: " << mirSize << endl;
 
     std::string rgb_txt = mDatasetPath + "/rgb.txt";
-    mFileIn.open(rgb_txt,ios_base::in);
+//    mFileIn.open(rgb_txt,ios_base::in);
+    mFileIn = std::ifstream(rgb_txt);
     if (!mFileIn.is_open())
     {
-        std::cerr<<"Cann't find rgb.txt!"<<std::endl;
+        std::cerr<<"VideoSource_Linux: cann't find rgb.txt!"<<std::endl;
         return;
     }
 
@@ -40,18 +41,39 @@ ImageRef VideoSource::Size()
 
 void VideoSource::GetAndFillFrameBWandRGB(Image<byte> &imBW, Image<Rgb<byte> > &imRGB)
 {
+    if (!mFileIn.is_open())
+    {
+        std::cerr<<"GetAndFillFrameBWandRGB: cann't find rgb.txt!"<<std::endl;
+        return;
+    }
+    if(mFileIn.eof() && mFileIn.fail())
+    {
+        std::cout<<"GetAndFillFrameBWandRGB: mFileIn file end!"<<std::endl;
+        mFileIn.close();
+        return;
+    }
+
+    for(int i=0;i<10;i++)
+        usleep(50000);//delay 50 milliseconds
+
     try
     {
-        if(mFileIn.eof())
+        if(mIndexImg == 0)
         {
-            mFileIn.close();
-            return;
+            string rgb_line;
+            std::cout << "\nwhile loop begin" << std::endl;
+            getline(mFileIn,rgb_line);
+            while(rgb_line.find('#')!=std::string::npos)
+            {
+                std::cout << rgb_line << std::endl;
+                getline(mFileIn,rgb_line);
+            }
+            std::cout << "while loop end\n" << std::endl;
         }
+
         std::string rgb_file, time_rgb;
         mFileIn >> time_rgb >> rgb_file;
-        //getline(mFileIn,strLine);
-        cout << "time_rgb: " << time_rgb << endl;
-        cout << "rgb_file: " << rgb_file << endl;
+        std::cout << "Img Index: " << ++mIndexImg << ", time_rgb rgb_file: " << time_rgb << " " << rgb_file << std::endl;
 
         std::string rgb_path = mDatasetPath+"/"+rgb_file;
         Image<Rgb<byte> > rgb_img = img_load( rgb_path );
@@ -59,11 +81,17 @@ void VideoSource::GetAndFillFrameBWandRGB(Image<byte> &imBW, Image<Rgb<byte> > &
         convert_image(rgb_img, imBW);
         convert_image(rgb_img, imRGB);
 
-        img_save(imBW,"imBW.bmp");
-        img_save(imRGB,"imRGB.bmp");
+//        img_save(imBW,"imBW.bmp");
+//        img_save(imRGB,"imRGB.bmp");
     }
     catch(std::exception &e)
     {
-        cout<<"GetAndFillFrameBWandRGB exception: "<< e.what() <<endl;
+        cout<<"GetAndFillFrameBWandRGB: exception-->\n"<< e.what() <<endl;
+    }
+    catch(...)
+    {
+        cout<<"===================================\n"<<endl;
+        cout<<"GetAndFillFrameBWandRGB: exception!\n"<<endl;
+        cout<<"===================================\n"<<endl;
     }
 }

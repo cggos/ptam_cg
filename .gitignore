@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# TUM DataSet
+rgbd_dataset_freiburg1_xyz.tgz
+rgbd_dataset_freiburg1_xyz/
