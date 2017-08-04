@@ -20,18 +20,18 @@
 class Relocaliser
 {
 public:
-  Relocaliser(Map &map, ATANCamera &camera);
-  bool AttemptRecovery(KeyFrame &k);
-  SE3<> BestPose();
-  
+    Relocaliser(Map &map, ATANCamera &camera);
+    bool AttemptRecovery(KeyFrame &k);
+    SE3<> BestPose();
+
 protected:
-  void ScoreKFs(KeyFrame &kCurrentF);
-  Map &mMap;
-  ATANCamera mCamera;
-  int mnBest;
-  double mdBestScore;
-  SE2<> mse2;
-  SE3<> mse3Best;
+    void ScoreKFs(KeyFrame &kCurrentF);
+    Map &mMap;
+    ATANCamera mCamera;
+    int mnBest;
+    double mdBestScore;
+    SE2<> mse2;
+    SE3<> mse3Best;
 
 };
 #endif

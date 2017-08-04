@@ -23,24 +23,24 @@ class Map;
 class MapViewer
 {
 public:
-  MapViewer(Map &map, GLWindow2 &glw);
-  void DrawMap(SE3<> se3CamFromWorld);
-  std::string GetMessageForUser();
-  
-protected:
-  Map &mMap;
-  GLWindow2 &mGLWindow;
-  
-  void DrawGrid();
-  void DrawMapDots();
-  void DrawCamera(SE3<> se3, bool bSmall=false);
-  void SetupFrustum();
-  void SetupModelView(SE3<> se3WorldFromCurrent = SE3<>());
-  
-  Vector<3> mv3MassCenter;
-  SE3<> mse3ViewerFromWorld;
+    MapViewer(Map &map, GLWindow2 &glw);
+    void DrawMap(SE3<> se3CamFromWorld);
+    std::string GetMessageForUser();
 
-  std::ostringstream mMessageForUser;
+protected:
+    Map &mMap;
+    GLWindow2 &mGLWindow;
+
+    void DrawGrid();
+    void DrawMapDots();
+    void DrawCamera(SE3<> se3, bool bSmall=false);
+    void SetupFrustum();
+    void SetupModelView(SE3<> se3WorldFromCurrent = SE3<>());
+
+    Vector<3> mv3MassCenter;
+    SE3<> mse3ViewerFromWorld;
+
+    std::ostringstream mMessageForUser;
 };
 
 #endif

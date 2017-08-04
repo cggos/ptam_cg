@@ -17,51 +17,51 @@ class GLWindowMenu;
 class GLWindow2 : public CVD::GLWindow, public CVD::GLWindow::EventHandler
 {
 public:
-  GLWindow2(CVD::ImageRef irSize, std::string sTitle);
-  
-  // The preferred event handler..
-  void HandlePendingEvents();
-  
-  // Menu interface:
-  void AddMenu(std::string sName, std::string sTitle);
-  void DrawMenus();
-  
-  // Some OpenGL helpers:
-  void SetupViewport();
-  void SetupVideoOrtho();
-  void SetupUnitOrtho();
-  void SetupWindowOrtho();
-  void SetupVideoRasterPosAndZoom();
+    GLWindow2(CVD::ImageRef irSize, std::string sTitle);
 
-  // Text display functions:
-  void PrintString(CVD::ImageRef irPos, std::string s);
-  void DrawCaption(std::string s);
-  
-  // Map viewer mouse interface:
-  std::pair<TooN::Vector<6>, TooN::Vector<6> > GetMousePoseUpdate();
-  
+    // The preferred event handler..
+    void HandlePendingEvents();
+
+    // Menu interface:
+    void AddMenu(std::string sName, std::string sTitle);
+    void DrawMenus();
+
+    // Some OpenGL helpers:
+    void SetupViewport();
+    void SetupVideoOrtho();
+    void SetupUnitOrtho();
+    void SetupWindowOrtho();
+    void SetupVideoRasterPosAndZoom();
+
+    // Text display functions:
+    void PrintString(CVD::ImageRef irPos, std::string s);
+    void DrawCaption(std::string s);
+
+    // Map viewer mouse interface:
+    std::pair<TooN::Vector<6>, TooN::Vector<6> > GetMousePoseUpdate();
+
 
 protected:
-  void GUICommandHandler(std::string sCommand, std::string sParams);
-  static void GUICommandCallBack(void* ptr, std::string sCommand, std::string sParams);
-  
-  // User interface menus:
-  std::vector<GLWindowMenu*> mvpGLWindowMenus;
+    void GUICommandHandler(std::string sCommand, std::string sParams);
+    static void GUICommandCallBack(void* ptr, std::string sCommand, std::string sParams);
 
-  CVD::ImageRef mirVideoSize;   // The size of the source video material.
-  
+    // User interface menus:
+    std::vector<GLWindowMenu*> mvpGLWindowMenus;
 
-  // Event handling routines:
-  virtual void on_key_down(GLWindow&, int key);
-  virtual void on_mouse_move(GLWindow& win, CVD::ImageRef where, int state);
-  virtual void on_mouse_down(GLWindow& win, CVD::ImageRef where, int state, int button);
-  virtual void on_event(GLWindow& win, int event);
-  CVD::ImageRef mirLastMousePos;
+    CVD::ImageRef mirVideoSize;   // The size of the source video material.
 
-  // Storage for map viewer updates:
-  TooN::Vector<6> mvMCPoseUpdate;
-  TooN::Vector<6> mvLeftPoseUpdate;
-  
+
+    // Event handling routines:
+    virtual void on_key_down(GLWindow&, int key);
+    virtual void on_mouse_move(GLWindow& win, CVD::ImageRef where, int state);
+    virtual void on_mouse_down(GLWindow& win, CVD::ImageRef where, int state, int button);
+    virtual void on_event(GLWindow& win, int event);
+    CVD::ImageRef mirLastMousePos;
+
+    // Storage for map viewer updates:
+    TooN::Vector<6> mvMCPoseUpdate;
+    TooN::Vector<6> mvLeftPoseUpdate;
+
 
 };
 

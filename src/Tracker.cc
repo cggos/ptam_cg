@@ -117,7 +117,9 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
         glDrawPixels(mCurrentKF.aLevels[0].im);
         if(GV2.GetInt("Tracker.DrawFASTCorners",0, SILENT))
         {
-            glColor3f(1,0,1);  glPointSize(1); glBegin(GL_POINTS);
+            glColor3f(1,0,1);
+            glPointSize(1);
+            glBegin(GL_POINTS);
             for(unsigned int i=0; i<mCurrentKF.aLevels[0].vCorners.size(); i++)
                 glVertex(mCurrentKF.aLevels[0].vCorners[i]);
             glEnd();

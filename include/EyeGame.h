@@ -15,25 +15,25 @@ using namespace TooN;
 
 class EyeGame
 {
- public:
-  EyeGame();
-  void DrawStuff(Vector<3> v3CameraPos);
-  void Reset();
-  void Init();
+public:
+    EyeGame();
+    void DrawStuff(Vector<3> v3CameraPos);
+    void Reset();
+    void Init();
 
-  
- protected:
-  bool mbInitialised;
-  void DrawEye();
-  void LookAt(int nEye, Vector<3> v3, double dRotLimit);
-  void MakeShadowTex();
- 
-  GLuint mnEyeDisplayList;
-  GLuint mnShadowTex;
-  double mdEyeRadius;
-  double mdShadowHalfSize;
-  SE3<> ase3WorldFromEye[4];
-  int mnFrameCounter;
+
+protected:
+    bool mbInitialised;
+    void DrawEye();
+    void LookAt(int nEye, Vector<3> v3, double dRotLimit);
+    void MakeShadowTex();
+
+    GLuint mnEyeDisplayList;
+    GLuint mnShadowTex;
+    double mdEyeRadius;
+    double mdShadowHalfSize;
+    SE3<> ase3WorldFromEye[4];
+    int mnFrameCounter;
 
 };
 

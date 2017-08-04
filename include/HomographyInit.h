@@ -21,44 +21,44 @@ using namespace TooN;
 // to the Z=1 plane.
 struct HomographyMatch
 {
-  // To be filled in by MapMaker:
-  Vector<2> v2CamPlaneFirst;
-  Vector<2> v2CamPlaneSecond;
-  Matrix<2> m2PixelProjectionJac;
+    // To be filled in by MapMaker:
+    Vector<2> v2CamPlaneFirst;
+    Vector<2> v2CamPlaneSecond;
+    Matrix<2> m2PixelProjectionJac;
 };
 
 // Storage for each homography decomposition
 struct HomographyDecomposition
 {
-  Vector<3> v3Tp;
-  Matrix<3> m3Rp;
-  double d;
-  Vector<3> v3n;
-  
-  // The resolved composition..
-  SE3<> se3SecondFromFirst;
-  int nScore;
+    Vector<3> v3Tp;
+    Matrix<3> m3Rp;
+    double d;
+    Vector<3> v3n;
+
+    // The resolved composition..
+    SE3<> se3SecondFromFirst;
+    int nScore;
 };
 
 class HomographyInit
 {
 public:
-  bool Compute(std::vector<HomographyMatch> vMatches, double dMaxPixelError, SE3<> &se3SecondCameraPose);
+    bool Compute(std::vector<HomographyMatch> vMatches, double dMaxPixelError, SE3<> &se3SecondCameraPose);
 protected:
-  Matrix<3> HomographyFromMatches(std::vector<HomographyMatch> vMatches);
-  void BestHomographyFromMatches_MLESAC();
-  void DecomposeHomography();
-  void ChooseBestDecomposition();
-  void RefineHomographyWithInliers();
-  
-  bool IsHomographyInlier(Matrix<3> m3Homography, HomographyMatch match);
-  double MLESACScore(Matrix<3> m3Homography, HomographyMatch match);
-  
-  double mdMaxPixelErrorSquared;
-  Matrix<3> mm3BestHomography;
-  std::vector<HomographyMatch> mvMatches;
-  std::vector<HomographyMatch> mvHomographyInliers;
-  std::vector<HomographyDecomposition> mvDecompositions;
+    Matrix<3> HomographyFromMatches(std::vector<HomographyMatch> vMatches);
+    void BestHomographyFromMatches_MLESAC();
+    void DecomposeHomography();
+    void ChooseBestDecomposition();
+    void RefineHomographyWithInliers();
+
+    bool IsHomographyInlier(Matrix<3> m3Homography, HomographyMatch match);
+    double MLESACScore(Matrix<3> m3Homography, HomographyMatch match);
+
+    double mdMaxPixelErrorSquared;
+    Matrix<3> mm3BestHomography;
+    std::vector<HomographyMatch> mvMatches;
+    std::vector<HomographyMatch> mvHomographyInliers;
+    std::vector<HomographyDecomposition> mvDecompositions;
 };
 
 

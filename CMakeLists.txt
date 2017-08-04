@@ -80,7 +80,9 @@ include_directories( "${PROJECT_SOURCE_DIR}/include" )
 # file( GLOB SRC_CC_LIST "${PROJECT_SOURCE_DIR}/src/*.cc")
 # aux_source_directory( ${PROJECT_SOURCE_DIR}/src SRC_LIST)
 
-# VideoSource_Linux_DV.cc VideoSource_Linux_V4L.cc VideoSource_Linux_DataSet.cc
+# VideoSource_Linux_DV.cc      --> VideoSource.h
+# VideoSource_Linux_V4L.cc     --> VideoSource.h
+# VideoSource_Linux_DataSet.cc --> VideoSource_Linux_DataSet.h
 set( VIDEOSOURCE ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_DataSet.cc )
 
 ### PTAM

@@ -15,21 +15,21 @@
 
 class SmallBlurryImage
 {
- public:
-  SmallBlurryImage();
-  SmallBlurryImage(KeyFrame &kf, double dBlur = 2.5);
-  void MakeFromKF(KeyFrame &kf, double dBlur = 2.5);
-  void MakeJacs();
-  double ZMSSD(SmallBlurryImage &other);
-  std::pair<SE2<>,double> IteratePosRelToTarget(SmallBlurryImage &other, int nIterations = 10);
-  static SE3<> SE3fromSE2(SE2<> se2, ATANCamera camera);
-  
+public:
+    SmallBlurryImage();
+    SmallBlurryImage(KeyFrame &kf, double dBlur = 2.5);
+    void MakeFromKF(KeyFrame &kf, double dBlur = 2.5);
+    void MakeJacs();
+    double ZMSSD(SmallBlurryImage &other);
+    std::pair<SE2<>,double> IteratePosRelToTarget(SmallBlurryImage &other, int nIterations = 10);
+    static SE3<> SE3fromSE2(SE2<> se2, ATANCamera camera);
+
 protected:
-  CVD::Image<CVD::byte> mimSmall;
-  CVD::Image<float> mimTemplate;
-  CVD::Image<Vector<2> > mimImageJacs;
-  bool mbMadeJacs;
-  static CVD::ImageRef mirSize;
+    CVD::Image<CVD::byte> mimSmall;
+    CVD::Image<float> mimTemplate;
+    CVD::Image<Vector<2> > mimImageJacs;
+    bool mbMadeJacs;
+    static CVD::ImageRef mirSize;
 };
 
 

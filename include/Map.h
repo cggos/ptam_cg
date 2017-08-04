@@ -23,18 +23,18 @@ struct KeyFrame;
 
 struct Map
 {
-  Map();
-  inline bool IsGood() {return bGood;}
-  void Reset();
-  
-  void MoveBadPointsToTrash();
-  void EmptyTrash();
-  
-  std::vector<MapPoint*> vpPoints;
-  std::vector<MapPoint*> vpPointsTrash;
-  std::vector<KeyFrame*> vpKeyFrames;
+    Map();
+    inline bool IsGood() {return bGood;}
+    void Reset();
 
-  bool bGood;
+    void MoveBadPointsToTrash();
+    void EmptyTrash();
+
+    std::vector<MapPoint*> vpPoints;
+    std::vector<MapPoint*> vpPointsTrash;
+    std::vector<KeyFrame*> vpKeyFrames;
+
+    bool bGood;
 };
 
 

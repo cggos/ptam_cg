@@ -34,3 +34,6 @@
 # TUM DataSet
 rgbd_dataset_freiburg1_xyz.tgz
 rgbd_dataset_freiburg1_xyz/
+
+# build directory
+PTAM-linux-build/
