@@ -4,12 +4,11 @@ project ( PTAM_linux )
 set( CMAKE_CXX_COMPILER "g++" )
 set( CMAKE_BUILD_TYPE "Release" )
 set( CMAKE_CXX_FLAGS "-D_LINUX -D_REENTRANT -Wall -std=c++11 -march=nocona -O3 -msse3" )# -march=native
-
+#set( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/PTAM-linux-build )
 
 # add cmake modules
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules )
-#set( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
-#set( LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib )
+
 
 ############### dependencies ######################
 
@@ -71,6 +70,32 @@ link_libraries( GVars3 )
 #include_directories( ${PCL_INCLUDE_DIRS} )
 #add_definitions( ${PCL_DEFINITIONS} )
 #link_libraries( ${PCL_LIBRARIES} )
+
+
+############### Generating API documentation with Doxygen ######################
+
+# add a target to generate API documentation with Doxygen
+find_package(Doxygen)
+option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
+
+if(BUILD_DOCUMENTATION)
+    if(NOT DOXYGEN_FOUND)
+        message(FATAL_ERROR "Doxygen is needed to build the documentation.")
+    endif()
+
+    set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+    set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+    configure_file(${doxyfile_in} ${doxyfile} @ONLY)
+
+    add_custom_target(doc
+        COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM)
+
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc)
+endif()
 
 
 ############### project: PTAM & CameraCalibrator ######################
