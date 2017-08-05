@@ -36,4 +36,9 @@ rgbd_dataset_freiburg1_xyz.tgz
 rgbd_dataset_freiburg1_xyz/
 
 # build directory
-PTAM-linux-build/
+*[Bb]uild*/
+
+# 3rdParty
+3rdParty/
+
+CMakeLists.txt.user

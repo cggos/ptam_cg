@@ -3,10 +3,12 @@
 #include <cvd/colourspace_convert.h>
 #include <cvd/colourspaces.h>
 #include <cvd/image_io.h>
+#include <cvd/exceptions.h>
 #include <gvars3/instances.h>
 
 #include <unistd.h>
 #include <exception>
+#include <iomanip>
 
 using namespace CVD;
 using namespace std;
@@ -44,37 +46,51 @@ void VideoSource::GetAndFillFrameBWandRGB(Image<byte> &imBW, Image<Rgb<byte> > &
     if (!mFileIn.is_open())
     {
         std::cerr<<"GetAndFillFrameBWandRGB: cann't find rgb.txt!"<<std::endl;
+        GUI.ParseLine("quit");
         return;
     }
-    if(mFileIn.eof() && mFileIn.fail())
+    if(mFileIn.fail())
     {
-        std::cout<<"GetAndFillFrameBWandRGB: mFileIn file end!"<<std::endl;
         mFileIn.close();
+        GUI.ParseLine("quit");
         return;
     }
+FILE_END:
+    if(mFileIn.eof())
+    {
+        std::cout<<"GetAndFillFrameBWandRGB: mFileIn file end!\n"<<std::endl;
 
-    for(int i=0;i<10;i++)
-        usleep(50000);//delay 50 milliseconds
+        std::cout<<"GetAndFillFrameBWandRGB: read mFileIn file again!"<<std::endl;
+        mFileIn.clear();// very important !!!
+        mFileIn.seekg(0,ios_base::beg);
+        mIndexImg = 0;
+    }
 
+    // 25 FPS (Frame per second)
+    usleep(40000);//delay 40 milliseconds
+
+    if(mIndexImg == 0)
+    {
+        string rgb_line;
+        std::cout << "\nwhile loop begin" << std::endl;
+        getline(mFileIn,rgb_line);
+        while(rgb_line.find('#')!=std::string::npos)
+        {
+            std::cout << rgb_line << std::endl;
+            getline(mFileIn,rgb_line);
+        }
+        std::cout << "while loop end\n" << std::endl;
+    }
+
+    std::string rgb_file, time_rgb;
+    mFileIn >> time_rgb >> rgb_file;
+    if(mFileIn.fail())//file end
+    {
+        goto FILE_END;
+    }
+    std::cout << "Img Index: " << setfill('0') << setw(3) << ++mIndexImg << ", time_rgb rgb_file: " << time_rgb << " " << rgb_file << std::endl;
     try
     {
-        if(mIndexImg == 0)
-        {
-            string rgb_line;
-            std::cout << "\nwhile loop begin" << std::endl;
-            getline(mFileIn,rgb_line);
-            while(rgb_line.find('#')!=std::string::npos)
-            {
-                std::cout << rgb_line << std::endl;
-                getline(mFileIn,rgb_line);
-            }
-            std::cout << "while loop end\n" << std::endl;
-        }
-
-        std::string rgb_file, time_rgb;
-        mFileIn >> time_rgb >> rgb_file;
-        std::cout << "Img Index: " << ++mIndexImg << ", time_rgb rgb_file: " << time_rgb << " " << rgb_file << std::endl;
-
         std::string rgb_path = mDatasetPath+"/"+rgb_file;
         Image<Rgb<byte> > rgb_img = img_load( rgb_path );
 
@@ -86,12 +102,27 @@ void VideoSource::GetAndFillFrameBWandRGB(Image<byte> &imBW, Image<Rgb<byte> > &
     }
     catch(std::exception &e)
     {
-        cout<<"GetAndFillFrameBWandRGB: exception-->\n"<< e.what() <<endl;
+        cout<<"GetAndFillFrameBWandRGB: std::exception-->\n"<< e.what() <<endl;
+        GUI.ParseLine("quit");
+    }
+    catch(CVD::Exceptions::Image::All &e)
+    {
+        cout<<"GetAndFillFrameBWandRGB: CVD::Exceptions::Image::All-->\n"<< e.what <<endl;
+        GUI.ParseLine("quit");
     }
     catch(...)
     {
         cout<<"===================================\n"<<endl;
         cout<<"GetAndFillFrameBWandRGB: exception!\n"<<endl;
         cout<<"===================================\n"<<endl;
+        GUI.ParseLine("quit");
+    }
+}
+
+VideoSource::~VideoSource()
+{
+    if (mFileIn.is_open())
+    {
+        mFileIn.close();
     }
 }

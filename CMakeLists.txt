@@ -1,42 +1,77 @@
 cmake_minimum_required( VERSION 3.3 )
 project ( PTAM_linux )
 
-set( CMAKE_CXX_COMPILER "g++" )
 set( CMAKE_BUILD_TYPE "Release" )
-set( CMAKE_CXX_FLAGS "-D_LINUX -D_REENTRANT -Wall -std=c++11 -march=nocona -O3 -msse3" )# -march=native
-#set( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/PTAM-linux-build )
+set( CMAKE_CXX_COMPILER "g++" )
+if(CMAKE_COMPILER_IS_GNUCXX)
+    SET(CMAKE_CXX_FLAGS_DEBUG   "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -O0 -Wall -lpthread -lm -g -ggdb")
+    SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -O3 -Wall -lpthread -lm")
+endif()
+
+message(${CMAKE_CXX_FLAGS_RELEASE})
+
+message(${CMAKE_CURRENT_BINARY_DIR})
+message(${CMAKE_BINARY_DIR})
+message(${PROJECT_BINARY_DIR})
+
+# set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
 
 # add cmake modules
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules )
 
-
 ############### dependencies ######################
 
-# Boost
-set(Boost_USE_STATIC_LIBS  OFF)
-set(Boost_USE_MULTITHREADED ON)
-find_package(Boost COMPONENTS system thread REQUIRED)
+## Boost
+#set(Boost_USE_STATIC_LIBS  OFF)
+#set(Boost_USE_MULTITHREADED ON)
+#find_package(Boost COMPONENTS system thread REQUIRED)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
-find_package(GLEW REQUIRED)
-link_libraries( ${OPENGL_LIBRARY} GLU glut )
+if(OPENGL_FOUND)
+    link_libraries( ${OPENGL_LIBRARY} )
+endif()
+
+## GLUT
+#find_package(GLUT REQUIRED)
+#if(GLUT_FOUND)
+#    link_libraries( ${GLUT_LIBRARY} )
+#endif()
+
+## GLEW
+#find_package(GLEW REQUIRED)
+#if (GLEW_FOUND)
+#    include_directories(${GLEW_INCLUDE_DIRS})
+#    link_libraries(${GLEW_LIBRARIES})
+#endif()
 
 # Eigen
 find_package(Eigen3 REQUIRED)
-include_directories( ${EIGEN3_INCLUDE_DIR} )
+if(EIGEN3_FOUND)
+    include_directories( ${EIGEN3_INCLUDE_DIR} )
+endif()
 
-# lapack
-find_package(LAPACK REQUIRED)
+## lapack
+link_libraries( lapack )
+#??????????????????????????????????????????????
+#find_package(LAPACK REQUIRED)
+#if(LAPACK_FOUND)
+#    link_libraries( ${LAPACK_LIBRARIES} )
+#    message(STATUS "    LAPACK Libraries: ")
+#    foreach (lib ${LAPACK_LIBRARIES})
+#        message(STATUS "        " ${lib})
+#    endforeach()
+#endif()
 
 ## Sophus
 #find_package( Sophus REQUIRED )
-#include_directories( ${Sophus_INCLUDE_DIRS} )
-#link_libraries( ${Sophus_LIBRARIES} )
+#if(Sophus_FOUND)
+#    include_directories( ${Sophus_INCLUDE_DIRS} )
+#    link_libraries( ${Sophus_LIBRARIES} )
+#endif()
 
 # TooN
-link_libraries( lapack )
+# Require linking the lapack library
 
 # libCVD
 link_libraries( cvd )
@@ -46,30 +81,40 @@ link_libraries( GVars3 )
 
 ## Ceres
 #find_package( Ceres REQUIRED )
-#include_directories( ${CERES_INCLUDE_DIRS} )
-#link_libraries( ${CERES_LIBRARIES} )
+#if(Ceres_FOUND)
+#    include_directories( ${CERES_INCLUDE_DIRS} )
+#    link_libraries( ${CERES_LIBRARIES} )
+#endif()
 
 ## G2O
 #find_package( G2O REQUIRED )
-#include_directories( ${G2O_INCLUDE_DIRS} )
-#link_libraries( g2o_core g2o_stuff g2o_types_sba )
+#if(G2O_FOUND)
+#    include_directories( ${G2O_INCLUDE_DIRS} )
+#    link_libraries( g2o_core g2o_stuff g2o_types_sba )
+#endif()
 
 ## Pangolin
 #find_package( Pangolin )
-#include_directories( ${Pangolin_INCLUDE_DIRS} )
-#link_directories( "/usr/local/lib/" )
+#if(Pangolin_FOUND)
+#    include_directories( ${Pangolin_INCLUDE_DIRS} )
+#    link_directories( ${Pangolin_LIBRARIES} )
+#endif()
 
 ## OpenCV
 #find_package( OpenCV 3.1 REQUIRED )
-#include_directories( ${OpenCV_INCLUDE_DIRS} )
-#link_libraries( ${OpenCV_LIBS} )
+#if(OpenCV_FOUND)
+#    include_directories( ${OpenCV_INCLUDE_DIRS} )
+#    link_libraries( ${OpenCV_LIBS} )
+#endif()
 
 ## pcl
 #set( PCL_DIR "/usr/local/share/pcl-1.7/" )
 #find_package( PCL REQUIRED COMPONENTS common io )
-#include_directories( ${PCL_INCLUDE_DIRS} )
-#add_definitions( ${PCL_DEFINITIONS} )
-#link_libraries( ${PCL_LIBRARIES} )
+#if(PCL_FOUND)
+#    include_directories( ${PCL_INCLUDE_DIRS} )
+#    add_definitions( ${PCL_DEFINITIONS} )
+#    link_libraries( ${PCL_LIBRARIES} )
+#endif()
 
 
 ############### Generating API documentation with Doxygen ######################
