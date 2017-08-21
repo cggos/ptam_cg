@@ -16,10 +16,10 @@ message(${PROJECT_BINARY_DIR})
 
 # set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
 
+############### dependencies ######################
+
 # add cmake modules
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules )
-
-############### dependencies ######################
 
 ## Boost
 #set(Boost_USE_STATIC_LIBS  OFF)
@@ -116,6 +116,11 @@ link_libraries( GVars3 )
 #    link_libraries( ${PCL_LIBRARIES} )
 #endif()
 
+############### Static Analysis of C/C++ using cppcheck ######################
+# generating compile_commands.json(JSON compilation database)
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+# execute `make cppcheck` after `cmake`
+include(cmake_modules/cppcheck.cmake)
 
 ############### Generating API documentation with Doxygen ######################
 
