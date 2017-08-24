@@ -16,15 +16,10 @@ message(${PROJECT_BINARY_DIR})
 
 # set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
 
-############### dependencies ######################
+############### Dependencies or AddOns ######################
 
 # add cmake modules
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules )
-
-## Boost
-#set(Boost_USE_STATIC_LIBS  OFF)
-#set(Boost_USE_MULTITHREADED ON)
-#find_package(Boost COMPONENTS system thread REQUIRED)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
@@ -32,43 +27,15 @@ if(OPENGL_FOUND)
     link_libraries( ${OPENGL_LIBRARY} )
 endif()
 
-## GLUT
-#find_package(GLUT REQUIRED)
-#if(GLUT_FOUND)
-#    link_libraries( ${GLUT_LIBRARY} )
-#endif()
-
-## GLEW
-#find_package(GLEW REQUIRED)
-#if (GLEW_FOUND)
-#    include_directories(${GLEW_INCLUDE_DIRS})
-#    link_libraries(${GLEW_LIBRARIES})
-#endif()
-
-# Eigen
-find_package(Eigen3 REQUIRED)
-if(EIGEN3_FOUND)
-    include_directories( ${EIGEN3_INCLUDE_DIR} )
+# lapack
+find_package(LAPACK REQUIRED)
+if(LAPACK_FOUND)
+    message(STATUS "LAPACK Libraries: ")
+    foreach (lib ${LAPACK_LIBRARIES})
+        message(STATUS "  " ${lib})
+    endforeach()
+    link_libraries( ${LAPACK_LIBRARIES} )
 endif()
-
-## lapack
-link_libraries( lapack )
-#??????????????????????????????????????????????
-#find_package(LAPACK REQUIRED)
-#if(LAPACK_FOUND)
-#    link_libraries( ${LAPACK_LIBRARIES} )
-#    message(STATUS "    LAPACK Libraries: ")
-#    foreach (lib ${LAPACK_LIBRARIES})
-#        message(STATUS "        " ${lib})
-#    endforeach()
-#endif()
-
-## Sophus
-#find_package( Sophus REQUIRED )
-#if(Sophus_FOUND)
-#    include_directories( ${Sophus_INCLUDE_DIRS} )
-#    link_libraries( ${Sophus_LIBRARIES} )
-#endif()
 
 # TooN
 # Require linking the lapack library
@@ -79,42 +46,6 @@ link_libraries( cvd )
 # GVars3
 link_libraries( GVars3 )
 
-## Ceres
-#find_package( Ceres REQUIRED )
-#if(Ceres_FOUND)
-#    include_directories( ${CERES_INCLUDE_DIRS} )
-#    link_libraries( ${CERES_LIBRARIES} )
-#endif()
-
-## G2O
-#find_package( G2O REQUIRED )
-#if(G2O_FOUND)
-#    include_directories( ${G2O_INCLUDE_DIRS} )
-#    link_libraries( g2o_core g2o_stuff g2o_types_sba )
-#endif()
-
-## Pangolin
-#find_package( Pangolin )
-#if(Pangolin_FOUND)
-#    include_directories( ${Pangolin_INCLUDE_DIRS} )
-#    link_directories( ${Pangolin_LIBRARIES} )
-#endif()
-
-## OpenCV
-#find_package( OpenCV 3.1 REQUIRED )
-#if(OpenCV_FOUND)
-#    include_directories( ${OpenCV_INCLUDE_DIRS} )
-#    link_libraries( ${OpenCV_LIBS} )
-#endif()
-
-## pcl
-#set( PCL_DIR "/usr/local/share/pcl-1.7/" )
-#find_package( PCL REQUIRED COMPONENTS common io )
-#if(PCL_FOUND)
-#    include_directories( ${PCL_INCLUDE_DIRS} )
-#    add_definitions( ${PCL_DEFINITIONS} )
-#    link_libraries( ${PCL_LIBRARIES} )
-#endif()
 
 ############### Static Analysis of C/C++ using cppcheck ######################
 # generating compile_commands.json(JSON compilation database)
@@ -160,8 +91,7 @@ include_directories( "${PROJECT_SOURCE_DIR}/include" )
 # VideoSource_Linux_DataSet.cc --> VideoSource_Linux_DataSet.h
 set( VIDEOSOURCE ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_DataSet.cc )
 
-### PTAM
-add_executable( PTAM
+set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/main.cc
         ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
         ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
@@ -183,15 +113,18 @@ add_executable( PTAM
         ${PROJECT_SOURCE_DIR}/src/EyeGame.cc
         ${PROJECT_SOURCE_DIR}/src/Tracker.cc
         ${VIDEOSOURCE} )
-# target_link_libraries( PTAM ${THIRD_PARTY_LIBS} )
 
-#### CameraCalibrator
-#add_executable( CameraCalibrator
-#        ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
-#        ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
-#        ${PROJECT_SOURCE_DIR}/src/CalibImage.cc
-#        ${PROJECT_SOURCE_DIR}/src/CalibCornerPatch.cc
-#        ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
-#        ${PROJECT_SOURCE_DIR}/src/CameraCalibrator.cc
-#        ${VIDEOSOURCE} )
-## target_link_libraries( CameraCalibrator ${THIRD_PARTY_LIBS} )
+set( SRC_LIST_CameraCalibrator
+        ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
+        ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
+        ${PROJECT_SOURCE_DIR}/src/CalibImage.cc
+        ${PROJECT_SOURCE_DIR}/src/CalibCornerPatch.cc
+        ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
+        ${PROJECT_SOURCE_DIR}/src/CameraCalibrator.cc
+        ${VIDEOSOURCE} )
+
+### PTAM
+add_executable( PTAM ${SRC_LIST_PTAM} )
+
+### CameraCalibrator
+#add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
