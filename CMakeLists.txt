@@ -28,14 +28,15 @@ if(OPENGL_FOUND)
 endif()
 
 # lapack
-find_package(LAPACK REQUIRED)
-if(LAPACK_FOUND)
-    message(STATUS "LAPACK Libraries: ")
-    foreach (lib ${LAPACK_LIBRARIES})
-        message(STATUS "  " ${lib})
-    endforeach()
-    link_libraries( ${LAPACK_LIBRARIES} )
-endif()
+link_libraries( lapack )
+#find_package(LAPACK REQUIRED)
+#if(LAPACK_FOUND)
+#    message(STATUS "LAPACK Libraries: ")
+#    foreach (lib ${LAPACK_LIBRARIES})
+#        message(STATUS "  " ${lib})
+#    endforeach()
+#    link_libraries( ${LAPACK_LIBRARIES} )
+#endif()
 
 # TooN
 # Require linking the lapack library
