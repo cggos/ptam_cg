@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 3.2 )
 project ( PTAM_linux )
 
 set( CMAKE_BUILD_TYPE "Release" )
-set( CMAKE_CXX_COMPILER "g++5" )
+set( CMAKE_CXX_COMPILER "g++" )
 if(CMAKE_COMPILER_IS_GNUCXX)
     SET(CMAKE_CXX_FLAGS_DEBUG   "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -O0 -Wall -lpthread -lm -g -ggdb")
     SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -O3 -Wall -lpthread -lm")
