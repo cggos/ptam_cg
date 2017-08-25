@@ -20,6 +20,10 @@ matrix:
 before_install:
 - echo $LANG
 - echo $LC_ALL
+- sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+- sudo apt-get update -qq
+- if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-5.4; fi
+- if [ "$CXX" = "g++" ]; then export CXX="g++-5.4" CC="gcc-5.4"; fi
 - if [ $TRAVIS_OS_NAME == linux ]; then ./3rdParty_install.sh; fi
 
 before_script:
@@ -34,8 +38,9 @@ before_script:
     cmake ..
 
 script:
-    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+    # - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
     - gcc --version
+    - g++ --version
 
-# limit GCC builds to a reduced number of thread for the virtual machine
+    # limit GCC builds to a reduced number of thread for the virtual machine
     - time make all  -j 2
