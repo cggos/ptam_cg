@@ -1,0 +1,36 @@
+dist: trusty
+sudo: required
+
+language: cpp
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.8
+      env: COMPILER=g++-4.8
+
+before_install:
+- echo $LANG
+- echo $LC_ALL
+- if [ $TRAVIS_OS_NAME == linux ]; then ./3rdParty_install.sh; fi
+
+before_script:
+  # Display cmake version
+  - cmake --version
+  # Create build folder
+  - rm -rf build
+  - mkdir build
+  - cd build
+  # Classic release build
+  - >
+    cmake ..
+
+script:
+# limit GCC builds to a reduced number of thread for the virtual machine
+  - time make all  -j 2

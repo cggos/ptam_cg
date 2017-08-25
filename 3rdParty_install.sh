@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Project directory
+PTAMDir=`pwd`
+
 sudo apt-get update
 # Base tools
 sudo apt-get install libx11-dev libncurses5-dev libreadline6 libreadline-dev
@@ -43,7 +46,7 @@ echo -e "\n Installing TooN... \n"
 cd ${Path3rdParty}
 # sudo git clone git://github.com/edrosten/TooN.git
 wget https://www.edwardrosten.com/cvd/TooN-2.2.tar.xz
-tar xvJf TooN-2.2.tar.xz 
+tar xvJf TooN-2.2.tar.xz
 cd TooN-2.2
 ./configure && make && sudo make install
 
@@ -75,5 +78,7 @@ echo -e "\n Make the libs work \n"
 sudo ldconfig
 
 echo -e "\n Install 3rdParties successfully! \n"
+
+cd ${PTAMDir}
 
 exit 0
