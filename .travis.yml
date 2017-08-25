@@ -12,8 +12,8 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-4.8
-      env: COMPILER=g++-4.8
+            - g++-5.4
+      env: COMPILER=g++-5.4
 
 before_install:
 - echo $LANG
