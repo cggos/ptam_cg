@@ -24,9 +24,7 @@ before_install:
   # - sudo apt-get update -qq
   # - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-5.4; fi
   # - if [ "$CXX" = "g++" ]; then export CXX="g++-5.4" CC="gcc-5.4"; fi
-
-intall:
-  - if [ $TRAVIS_OS_NAME == linux ]; then ./3rdParty_install.sh; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then ./3rdParty_install.sh; fi  
 
 before_script:
   # use gcc-5 & g++-5
