@@ -11,9 +11,11 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - ubuntu-sdk-team/ppa
           packages:
-            - g++-5.4
-      env: COMPILER=g++-5.4
+            - gcc-5
+            - g++-5
+      env: COMPILER=g++-5
 
 before_install:
 - echo $LANG
@@ -32,5 +34,8 @@ before_script:
     cmake ..
 
 script:
+    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+    - gcc --version
+
 # limit GCC builds to a reduced number of thread for the virtual machine
-  - time make all  -j 2
+    - time make all  -j 2
