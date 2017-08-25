@@ -1,5 +1,6 @@
 #!/bin/sh
 
+cd ..
 # Project directory
 PTAMDir=`pwd`
 
