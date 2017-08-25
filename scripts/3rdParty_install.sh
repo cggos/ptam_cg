@@ -33,15 +33,6 @@ Path3rdParty=`pwd`
 
 ulimit -s unlimited
 
-## LAPACK
-#echo -e "\n Installing LAPACK... \n"
-#wget http://www.netlib.org/lapack/lapack-3.6.0.tgz
-#tar xvzf lapack-3.6.0.tgz
-#cd lapack-3.6.0
-#cp make.inc.example make.inc
-#make all -j $(nproc)
-#sudo cp *.a /usr/local/lib/
-
 # TooN
 echo -e "\n Installing TooN... \n"
 cd ${Path3rdParty}
@@ -68,12 +59,6 @@ wget https://www.edwardrosten.com/cvd/gvars-3.0.tar.xz
 tar xvJf gvars-3.0.tar.xz
 cd gvars-3.0
 ./configure && make && sudo make install
-
-## G2O
-#cd ${Path3rdParty}
-#git clone git@github.com:RainerKuemmerle/g2o.git
-#cd g2o
-#mkdir build && cd build && cmake ../ && make -j$(nproc) && sudo make install
 
 echo -e "\n Make the libs work \n"
 sudo ldconfig
