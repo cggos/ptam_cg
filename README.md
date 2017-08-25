@@ -1,5 +1,5 @@
-# PTAM-linux
-PTAM source code based on the one from Isis.
+# PTAM4AR
+PTAM source code for AR based on the one from Isis.
 
 ## General
 PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented reality.
@@ -12,11 +12,14 @@ PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented r
 * [【论文学习记录】PTAM:Parallel Tracking and Mapping for Small AR Workspaces](http://www.07net01.com/2015/08/902758.html)
 * [PTAM on ROS](http://wiki.ros.org/ptam)
 
-## Compiling & Installing
+## Compile & Install
 * Build 3rdParty on Linux: [3rdParty_install.sh](3rdParty_install.sh)
 * [PTAM Compilation on Linux](http://hustcalm.me/blog/2013/09/27/ptam-compilation-on-linux-howto/)
 * [Build PTAM on Ubuntu 11.10](http://irawiki.disco.unimib.it/irawiki/index.php/PTAM)
 * [Installation of PTAM in ROS](https://sites.google.com/site/zhilongliuwebsite/research/computer-vision-embedded-systems/ptam)
+
+## Build Project
+Execute the script: [build_project.sh](build_project.sh)
 
 ## Static Analysis of C/C++
 ### cppcheck
