@@ -18,7 +18,9 @@ matrix:
 before_install:
 - echo $LANG
 - echo $LC_ALL
-- if [ $TRAVIS_OS_NAME == linux ]; then ./3rdParty_install.sh; fi
+# - if [ $TRAVIS_OS_NAME == linux ]; then ./3rdParty_install.sh; fi
+
+install: true
 
 before_script:
   # Display cmake version

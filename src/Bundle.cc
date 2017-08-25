@@ -67,7 +67,7 @@ int Bundle::AddPoint(Vector<3> v3Pos)
 {
     int n = mvPoints.size();
     Point p;
-    if(isnan(v3Pos * v3Pos))
+    if(std::isnan(v3Pos * v3Pos))
     {
         cerr << " You sucker, tried to give me a nan " << v3Pos << endl;
         v3Pos = Zeros;
@@ -448,7 +448,7 @@ bool Bundle::Do_LM_Step(bool *pbAbortSignal)
             }
             Vector<3> v3 = mvPoints[i].v3EpsilonB - v3Sum;
             vMapUpdates.slice(i * 3, 3) = mvPoints[i].m3VStarInv * v3;
-            if(isnan(vMapUpdates.slice(i * 3, 3) * vMapUpdates.slice(i * 3, 3)))
+            if(std::isnan(vMapUpdates.slice(i * 3, 3) * vMapUpdates.slice(i * 3, 3)))
             {
                 cerr << "NANNERY! " << endl;
                 cerr << mvPoints[i].m3VStarInv << endl;
