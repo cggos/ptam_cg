@@ -15,12 +15,15 @@ matrix:
           packages:
             - gcc-5
             - g++-5
+            - git
       env: COMPILER=g++-5
 
 before_install:
   - echo $LANG
   - echo $LC_ALL
   - if [ $TRAVIS_OS_NAME == linux ]; then ./scripts/3rdParty_install.sh; fi
+  - git submodule update --init
+  - export COVERALLS_SERVICE_NAME=travis-ci
 
 before_script:
   # use gcc-5 & g++-5
@@ -37,6 +40,7 @@ script:
   - mkdir build
   - cd build
   # cmake
-  - cmake ..
+  - cmake -DCOVERALLS=ON -DCMAKE_BUILD_TYPE=Debug ..
   # limit GCC builds to a reduced number of thread for the virtual machine
   - time make all  -j 2
+  - make coveralls

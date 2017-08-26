@@ -27,7 +27,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(MY_OVERALL_CXX_FLAGS    "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -Wall -lpthread -lm")
     set(CMAKE_CXX_FLAGS_RELEASE "${MY_OVERALL_CXX_FLAGS} -O3")
     set(CMAKE_CXX_FLAGS_DEBUG   "${MY_OVERALL_CXX_FLAGS} -O0 -g -ggdb")# debug, no optimisation
-    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} --coverage") # enabling coverage
+#    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} --coverage") # enabling coverage
 endif()
 
 message(STATUS "CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
@@ -38,6 +38,19 @@ message(${CMAKE_BINARY_DIR})
 message(${PROJECT_BINARY_DIR})
 
 # set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
+
+
+############### coveralls-cmake: test code coverage ######################
+
+# Add coveralls-cmake project cmake modules to path.
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/coveralls-cmake/cmake)
+
+# We probably don't want this to run on every build.
+option(COVERALLS "Generate coveralls data" OFF)
+if (COVERALLS)
+    include(Coveralls)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage")
+endif()
 
 
 ############### Dependencies or AddOns ######################
@@ -65,10 +78,12 @@ link_libraries( GVars3 )
 
 
 ############### Static Analysis of C/C++ using cppcheck ######################
+
 # generating compile_commands.json(JSON compilation database)
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 # execute `make cppcheck` after `cmake`
 include(cmake_modules/cppcheck.cmake)
+
 
 ############### Generating API documentation with Doxygen ######################
 
@@ -145,3 +160,15 @@ add_executable( PTAM ${SRC_LIST_PTAM} )
 
 ### CameraCalibrator
 #add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
+
+
+############### coveralls-cmake: test code coverage ######################
+
+if (COVERALLS)
+    set(COVERAGE_SRCS ${SRC_LIST_PTAM})
+    # Create the coveralls target.
+    coveralls_setup(
+        "${COVERAGE_SRCS}" # The source files.
+        ON                 # If we should upload.
+        "${PROJECT_SOURCE_DIR}/cmake_modules/") # (Optional) Alternate project cmake module path.
+endif()
