@@ -31,6 +31,8 @@ before_script:
   - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
   - gcc --version
   - g++ --version
+  - export COVERALLS_SERVICE_NAME=travis-ci
+  - export COVERALLS_REPO_TOKEN=AozuIr30I43ZXIG5ddfoPejrK7KtkmltS
 
 script:
   # Display cmake version
