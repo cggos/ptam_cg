@@ -1,20 +1,44 @@
 cmake_minimum_required( VERSION 3.2 )
 project ( PTAM_linux )
 
-set( CMAKE_BUILD_TYPE "Release" )
-set( CMAKE_CXX_COMPILER "g++-5" )
-if(CMAKE_COMPILER_IS_GNUCXX)
-    SET(CMAKE_CXX_FLAGS_DEBUG   "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -O0 -Wall -lpthread -lm -g -ggdb")
-    SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -O3 -Wall -lpthread -lm")
+set( CMAKE_BUILD_TYPE "Release/Debug" )
+
+set( CMAKE_CXX_COMPILER "g++" )
+
+message(STATUS "CMAKE_CXX_COMPILER_VERSION: " ${CMAKE_CXX_COMPILER_VERSION})
+if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
+    message(FATAL_ERROR "Too low CXX Version, it must equal or great than 5.1")
+else()
+    set( CMAKE_CXX_COMPILER "g++-5" )
 endif()
 
-message(${CMAKE_CXX_FLAGS_RELEASE})
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+if(NOT COMPILER_SUPPORTS_CXX11)
+    message(FATAL_ERROR "CXX does not support -std=c++11")
+endif()
+
+message(STATUS "My C++ compiler supports these C++ features:")
+foreach(i ${CMAKE_CXX_COMPILE_FEATURES})
+    message(STATUS "  ${i}")
+endforeach()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(MY_OVERALL_CXX_FLAGS    "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -Wall -lpthread -lm")
+    set(CMAKE_CXX_FLAGS_RELEASE "${MY_OVERALL_CXX_FLAGS} -O3")
+    set(CMAKE_CXX_FLAGS_DEBUG   "${MY_OVERALL_CXX_FLAGS} -O0 -g -ggdb")# debug, no optimisation
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} --coverage") # enabling coverage
+endif()
+
+message(STATUS "CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
+message(STATUS "CMAKE_CXX_FLAGS_DEBUG  : " ${CMAKE_CXX_FLAGS_DEBUG})
 
 message(${CMAKE_CURRENT_BINARY_DIR})
 message(${CMAKE_BINARY_DIR})
 message(${PROJECT_BINARY_DIR})
 
 # set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
+
 
 ############### Dependencies or AddOns ######################
 
@@ -29,14 +53,6 @@ endif()
 
 # lapack
 link_libraries( lapack )
-#find_package(LAPACK REQUIRED)
-#if(LAPACK_FOUND)
-#    message(STATUS "LAPACK Libraries: ")
-#    foreach (lib ${LAPACK_LIBRARIES})
-#        message(STATUS "  " ${lib})
-#    endforeach()
-#    link_libraries( ${LAPACK_LIBRARIES} )
-#endif()
 
 # TooN
 # Require linking the lapack library
