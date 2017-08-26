@@ -40,30 +40,6 @@ message(${PROJECT_BINARY_DIR})
 # set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
 
 
-############### Dependencies or AddOns ######################
-
-# add cmake modules
-list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules )
-
-# OpenGL
-find_package(OpenGL REQUIRED)
-if(OPENGL_FOUND)
-    link_libraries( ${OPENGL_LIBRARY} )
-endif()
-
-# lapack
-link_libraries( lapack )
-
-# TooN
-# Require linking the lapack library
-
-# libCVD
-link_libraries( cvd )
-
-# GVars3
-link_libraries( GVars3 )
-
-
 ############### Static Analysis of C/C++ using cppcheck ######################
 
 # generating compile_commands.json(JSON compilation database)
@@ -78,16 +54,14 @@ include(cmake_modules/cppcheck.cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/coveralls-cmake/cmake)
 
 # We probably don't want this to run on every build.
-option(COVERALLS "Generate coveralls data" OFF)
+option(COVERALLS "Generate coveralls data" ON)
 if (COVERALLS)
     include(Coveralls)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage")
+    set(COVERAGE_SRCS ${SRC_LIST_PTAM})
+    # Create the coveralls target.
+    coveralls_setup( "${COVERAGE_SRCS}" ON )
 endif()
-
-
-foreach(i ${CMAKE_MODULE_PATH})
-    message(STATUS "  ${i}")
-endforeach()
 
 
 ############### Generating API documentation with Doxygen ######################
@@ -114,6 +88,30 @@ if(BUILD_DOCUMENTATION)
 
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc)
 endif()
+
+
+############### Dependencies or AddOns ######################
+
+# add cmake modules
+list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules )
+
+# OpenGL
+find_package(OpenGL REQUIRED)
+if(OPENGL_FOUND)
+    link_libraries( ${OPENGL_LIBRARY} )
+endif()
+
+# lapack
+link_libraries( lapack )
+
+# TooN
+# Require linking the lapack library
+
+# libCVD
+link_libraries( cvd )
+
+# GVars3
+link_libraries( GVars3 )
 
 
 ############### project: PTAM & CameraCalibrator ######################
@@ -165,15 +163,3 @@ add_executable( PTAM ${SRC_LIST_PTAM} )
 
 ### CameraCalibrator
 #add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
-
-
-############### coveralls-cmake: test code coverage ######################
-
-if (COVERALLS)
-    set(COVERAGE_SRCS ${SRC_LIST_PTAM})
-    # Create the coveralls target.
-    coveralls_setup(
-        "${COVERAGE_SRCS}" # The source files.
-        ON                 # If we should upload.
-        "${PROJECT_SOURCE_DIR}/cmake_modules/") # (Optional) Alternate project cmake module path.
-endif()
