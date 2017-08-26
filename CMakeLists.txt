@@ -40,19 +40,6 @@ message(${PROJECT_BINARY_DIR})
 # set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
 
 
-############### coveralls-cmake: test code coverage ######################
-
-# Add coveralls-cmake project cmake modules to path.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/coveralls-cmake/cmake)
-
-# We probably don't want this to run on every build.
-option(COVERALLS "Generate coveralls data" OFF)
-if (COVERALLS)
-    include(Coveralls)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage")
-endif()
-
-
 ############### Dependencies or AddOns ######################
 
 # add cmake modules
@@ -83,6 +70,24 @@ link_libraries( GVars3 )
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 # execute `make cppcheck` after `cmake`
 include(cmake_modules/cppcheck.cmake)
+
+
+############### coveralls-cmake: test code coverage ######################
+
+# Add coveralls-cmake project cmake modules to path.
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/coveralls-cmake/cmake)
+
+# We probably don't want this to run on every build.
+option(COVERALLS "Generate coveralls data" OFF)
+if (COVERALLS)
+    include(Coveralls)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage")
+endif()
+
+
+foreach(i ${CMAKE_MODULE_PATH})
+    message(STATUS "  ${i}")
+endforeach()
 
 
 ############### Generating API documentation with Doxygen ######################
