@@ -58,9 +58,6 @@ option(COVERALLS "Generate coveralls data" ON)
 if (COVERALLS)
     include(Coveralls)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage")
-    set(COVERAGE_SRCS ${SRC_LIST_PTAM})
-    # Create the coveralls target.
-    coveralls_setup( "${COVERAGE_SRCS}" ON )
 endif()
 
 
@@ -163,3 +160,11 @@ add_executable( PTAM ${SRC_LIST_PTAM} )
 
 ### CameraCalibrator
 #add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
+
+
+############### coveralls-cmake: test code coverage ######################
+
+if (COVERALLS)
+    # Create the coveralls target.
+    coveralls_setup( "${SRC_LIST_PTAM}" ON )
+endif()
