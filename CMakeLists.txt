@@ -8,8 +8,6 @@ set( CMAKE_CXX_COMPILER "g++" )
 message(STATUS "CMAKE_CXX_COMPILER_VERSION: " ${CMAKE_CXX_COMPILER_VERSION})
 if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
     message(FATAL_ERROR "Too low CXX Version, it must equal or great than 5.1")
-else()
-    set( CMAKE_CXX_COMPILER "g++-5" )
 endif()
 
 include(CheckCXXCompilerFlag)
