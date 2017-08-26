@@ -25,8 +25,7 @@ VideoSource::VideoSource():mDatasetPath(""),mIndexImg(0)
     cout << "VideoSource.Resolution: " << mirSize << endl;
 
     std::string rgb_txt = mDatasetPath + "/rgb.txt";
-//    mFileIn.open(rgb_txt,ios_base::in);
-    mFileIn = std::ifstream(rgb_txt);
+    mFileIn.open(rgb_txt.c_str(),ios_base::in);
     if (!mFileIn.is_open())
     {
         std::cerr<<"VideoSource_Linux: cann't find rgb.txt!"<<std::endl;
