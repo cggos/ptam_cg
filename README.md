@@ -7,7 +7,7 @@ PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented r
 # Building
 
 ## Build Status on CI
-* Linux (Ubuntu-14.04 64 bits, GCC-5) : [![Build Status](https://travis-ci.org/GaoHongchen/PTAM4AR.svg?branch=master)](https://travis-ci.org/GaoHongchen/PTAM4AR)
+* Linux (Ubuntu-14.04 64 bits, GCC-5) : [![Build Status](https://travis-ci.org/GaoHongchen/PTAM4AR.svg?branch=master)](https://travis-ci.org/GaoHongchen/PTAM4AR) [![Coverage Status](https://coveralls.io/repos/github/GaoHongchen/PTAM4AR/badge.svg?branch=master)](https://coveralls.io/github/GaoHongchen/PTAM4AR?branch=master)
 
 ## Build This Project locally
 
