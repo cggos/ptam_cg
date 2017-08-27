@@ -25,7 +25,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(MY_OVERALL_CXX_FLAGS    "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -Wall -lpthread -lm")
     set(CMAKE_CXX_FLAGS_RELEASE "${MY_OVERALL_CXX_FLAGS} -O3")
     set(CMAKE_CXX_FLAGS_DEBUG   "${MY_OVERALL_CXX_FLAGS} -O0 -g -ggdb")# debug, no optimisation
-#    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} --coverage") # enabling coverage
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} --coverage -lgcov") # enabling coverage
 endif()
 
 message(STATUS "CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
@@ -55,7 +55,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/coveralls-cmake
 option(COVERALLS "Generate coveralls data" ON)
 if (COVERALLS)
     include(Coveralls)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -g -O0 -fprofile-arcs -ftest-coverage")
 endif()
 
