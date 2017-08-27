@@ -46,3 +46,4 @@ script:
   # limit GCC builds to a reduced number of thread for the virtual machine
   - time make all  -j 2
   - make coveralls
+  - cat coveralls.json
