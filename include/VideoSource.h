@@ -3,7 +3,7 @@
 //
 // VideoSource.h
 // Declares the VideoSource class
-// 
+//
 // This is a very simple class to provide video input; this can be
 // replaced with whatever form of video input that is needed.  It
 // should open the video input on construction, and provide two
@@ -12,20 +12,25 @@
 // a new frame and then overwrite the passed-as-reference images with
 // GreyScale and Colour versions of the new frame.
 //
+#ifndef __VideoSource_H
+#define __VideoSource_H
 #include <cvd/image.h>
 #include <cvd/byte.h>
 #include <cvd/rgb.h>
+#include <gvars3/instances.h>
 
-struct VideoSourceData;
+using namespace CVD;
+using namespace GVars3;
+using namespace std;
 
 class VideoSource
 {
 public:
-    VideoSource();
-    void GetAndFillFrameBWandRGB(CVD::Image<CVD::byte> &imBW, CVD::Image<CVD::Rgb<CVD::byte> > &imRGB);
-    CVD::ImageRef Size();
-
-private:
-    void *mptr;
+    VideoSource():mirSize(GV3::get<ImageRef>("VideoSource.Resolution", ImageRef(640,480))){}
+    ~VideoSource(){}
+    virtual void GetAndFillFrameBWandRGB(CVD::Image<CVD::byte> &imBW, CVD::Image<CVD::Rgb<CVD::byte> > &imRGB)=0;
+    CVD::ImageRef Size() { return mirSize; }
+protected:
     CVD::ImageRef mirSize;
 };
+#endif

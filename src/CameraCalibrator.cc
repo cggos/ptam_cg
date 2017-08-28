@@ -43,7 +43,8 @@ int main()
 
 
 CameraCalibrator::CameraCalibrator()
-    :mGLWindow(mVideoSource.Size(), "Camera Calibrator"), mCamera("Camera")
+    : mpVideoSource(new VideoSourceDataSet())
+    , mGLWindow(mpVideoSource->Size(), "Camera Calibrator"), mCamera("Camera")
 {
     mbDone = false;
     GUI.RegisterCommand("CameraCalibrator.GrabNextFrame", GUICommandCallBack, this);
@@ -77,11 +78,11 @@ void CameraCalibrator::Run()
         // One black and white (for processing by the tracker etc)
         // and one RGB, for drawing.
 
-        Image<Rgb<byte> > imFrameRGB(mVideoSource.Size());
-        Image<byte>  imFrameBW(mVideoSource.Size());
+        Image<Rgb<byte> > imFrameRGB(mpVideoSource->Size());
+        Image<byte>  imFrameBW(mpVideoSource->Size());
 
         // Grab new video frame...
-        mVideoSource.GetAndFillFrameBWandRGB(imFrameBW, imFrameRGB);
+        mpVideoSource->GetAndFillFrameBWandRGB(imFrameBW, imFrameRGB);
 
         // Set up openGL
         mGLWindow.SetupViewport();
@@ -157,7 +158,7 @@ void CameraCalibrator::Reset()
     *mCamera.mgvvCameraParams = ATANCamera::mvDefaultParams;
     if(*mgvnDisableDistortion) mCamera.DisableRadialDistortion();
 
-    mCamera.SetImageSize(mVideoSource.Size());
+    mCamera.SetImageSize(mpVideoSource->Size());
     mbGrabNextFrame =false;
     *mgvnOptimizing = false;
     mvCalibImgs.clear();

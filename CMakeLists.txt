@@ -33,13 +33,10 @@ endif()
 
 ############### set SRC_LIST_PTAM & SRC_LIST_CameraCalibrator ######################
 
-# file( GLOB SRC_CC_LIST "${PROJECT_SOURCE_DIR}/src/*.cc")
-# aux_source_directory( ${PROJECT_SOURCE_DIR}/src SRC_LIST)
-
-# VideoSource_Linux_DV.cc      --> VideoSource.h
-# VideoSource_Linux_V4L.cc     --> VideoSource.h
-# VideoSource_Linux_DataSet.cc --> VideoSource_Linux_DataSet.h
-set( VIDEOSOURCE ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_DataSet.cc )
+set( VIDEOSOURCE
+        ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_DataSet.cc
+        ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_V4L.cc
+        ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_DV.cc )
 
 set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/main.cc
@@ -156,7 +153,7 @@ include_directories( "${PROJECT_SOURCE_DIR}/include" )
 add_executable( PTAM ${SRC_LIST_PTAM} )
 
 ### CameraCalibrator
-#add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
+add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
 
 
 ############### output some messages ######################

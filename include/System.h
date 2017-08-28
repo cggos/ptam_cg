@@ -11,6 +11,8 @@
 #ifndef __SYSTEM_H
 #define __SYSTEM_H
 #include "VideoSource_Linux_DataSet.h"
+#include "VideoSource_Linux_V4L.h"
+#include "VideoSource_Linux_DV.h"
 #include "GLWindow2.h"
 
 #include <cvd/image.h>
@@ -28,10 +30,12 @@ class System
 {
 public:
     System();
+    ~System();
     void Run();
+    void UpdateFrame();
 
 private:
-    VideoSource mVideoSource;
+    VideoSource *mpVideoSource;
     GLWindow2 mGLWindow;
     CVD::Image<CVD::Rgb<CVD::byte> > mimFrameRGB;
     CVD::Image<CVD::byte> mimFrameBW;

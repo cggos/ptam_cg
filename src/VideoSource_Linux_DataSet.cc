@@ -1,28 +1,21 @@
 // Copyright 2017 by GaoHongchen
-#include "VideoSource_Linux_DataSet.h"
 #include <cvd/colourspace_convert.h>
 #include <cvd/colourspaces.h>
 #include <cvd/image_io.h>
 #include <cvd/exceptions.h>
-#include <gvars3/instances.h>
 
 #include <unistd.h>
 #include <exception>
 #include <iomanip>
 
-using namespace CVD;
-using namespace std;
-using namespace GVars3;
+#include "VideoSource_Linux_DataSet.h"
 
-VideoSource::VideoSource():mDatasetPath(""),mIndexImg(0)
+VideoSourceDataSet::VideoSourceDataSet():mDatasetPath(""),mIndexImg(0)
 {
     cout << "VideoSource_Linux: Opening RGB Image DataSet..." << endl;
 
     mDatasetPath = GV3::get<string>("VideoSource.DataSet", "./data/rgbd_dataset_freiburg1_xyz");
     cout << "VideoSource.DataSet: " << mDatasetPath << endl;
-
-    mirSize = GV3::get<ImageRef>("VideoSource.Resolution", ImageRef(640,480));
-    cout << "VideoSource.Resolution: " << mirSize << endl;
 
     std::string rgb_txt = mDatasetPath + "/rgb.txt";
     mFileIn.open(rgb_txt.c_str(),ios_base::in);
@@ -35,12 +28,7 @@ VideoSource::VideoSource():mDatasetPath(""),mIndexImg(0)
     cout << "VideoSource_Linux: Got RGB Image DataSet." << endl;
 }
 
-ImageRef VideoSource::Size()
-{ 
-    return mirSize;
-}
-
-void VideoSource::GetAndFillFrameBWandRGB(Image<byte> &imBW, Image<Rgb<byte> > &imRGB)
+void VideoSourceDataSet::GetAndFillFrameBWandRGB(Image<byte> &imBW, Image<Rgb<byte> > &imRGB)
 {
     if (!mFileIn.is_open())
     {
@@ -118,7 +106,7 @@ FILE_END:
     }
 }
 
-VideoSource::~VideoSource()
+VideoSourceDataSet::~VideoSourceDataSet()
 {
     if (mFileIn.is_open())
     {
