@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 3.2 )
-project ( PTAM_linux )
+project ( PTAM4AR )
 
 set( CMAKE_BUILD_TYPE "Release/Debug" )
 
@@ -28,14 +28,50 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} --coverage -lgcov") # enabling coverage
 endif()
 
-message(STATUS "CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
-message(STATUS "CMAKE_CXX_FLAGS_DEBUG  : " ${CMAKE_CXX_FLAGS_DEBUG})
-
-message(${CMAKE_CURRENT_BINARY_DIR})
-message(${CMAKE_BINARY_DIR})
-message(${PROJECT_BINARY_DIR})
-
 # set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
+
+
+############### set SRC_LIST_PTAM & SRC_LIST_CameraCalibrator ######################
+
+# file( GLOB SRC_CC_LIST "${PROJECT_SOURCE_DIR}/src/*.cc")
+# aux_source_directory( ${PROJECT_SOURCE_DIR}/src SRC_LIST)
+
+# VideoSource_Linux_DV.cc      --> VideoSource.h
+# VideoSource_Linux_V4L.cc     --> VideoSource.h
+# VideoSource_Linux_DataSet.cc --> VideoSource_Linux_DataSet.h
+set( VIDEOSOURCE ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_DataSet.cc )
+
+set( SRC_LIST_PTAM
+        ${PROJECT_SOURCE_DIR}/src/main.cc
+        ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
+        ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
+        ${PROJECT_SOURCE_DIR}/src/System.cc
+        ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
+        ${PROJECT_SOURCE_DIR}/src/KeyFrame.cc
+        ${PROJECT_SOURCE_DIR}/src/MapPoint.cc
+        ${PROJECT_SOURCE_DIR}/src/Map.cc
+        ${PROJECT_SOURCE_DIR}/src/SmallBlurryImage.cc
+        ${PROJECT_SOURCE_DIR}/src/ShiTomasi.cc
+        ${PROJECT_SOURCE_DIR}/src/HomographyInit.cc
+        ${PROJECT_SOURCE_DIR}/src/MapMaker.cc
+        ${PROJECT_SOURCE_DIR}/src/Bundle.cc
+        ${PROJECT_SOURCE_DIR}/src/PatchFinder.cc
+        ${PROJECT_SOURCE_DIR}/src/Relocaliser.cc
+        ${PROJECT_SOURCE_DIR}/src/MiniPatch.cc
+        ${PROJECT_SOURCE_DIR}/src/MapViewer.cc
+        ${PROJECT_SOURCE_DIR}/src/ARDriver.cc
+        ${PROJECT_SOURCE_DIR}/src/EyeGame.cc
+        ${PROJECT_SOURCE_DIR}/src/Tracker.cc
+        ${VIDEOSOURCE} )
+
+set( SRC_LIST_CameraCalibrator
+        ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
+        ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
+        ${PROJECT_SOURCE_DIR}/src/CalibImage.cc
+        ${PROJECT_SOURCE_DIR}/src/CalibCornerPatch.cc
+        ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
+        ${PROJECT_SOURCE_DIR}/src/CameraCalibrator.cc
+        ${VIDEOSOURCE} )
 
 
 ############### Static Analysis of C/C++ using cppcheck ######################
@@ -52,11 +88,13 @@ include(cmake_modules/cppcheck.cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/coveralls-cmake/cmake)
 
 # We probably don't want this to run on every build.
-option(COVERALLS "Generate coveralls data" ON)
+option(COVERALLS "Generate coveralls data" OFF)
 if (COVERALLS)
     include(Coveralls)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fprofile-arcs -ftest-coverage")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -g -O0 -fprofile-arcs -ftest-coverage")
+    # Create the coveralls target.
+    coveralls_setup( "${SRC_LIST_PTAM}" ON )
 endif()
 
 
@@ -114,46 +152,6 @@ link_libraries( GVars3 )
 
 include_directories( "${PROJECT_SOURCE_DIR}/include" )
 
-# file( GLOB SRC_CC_LIST "${PROJECT_SOURCE_DIR}/src/*.cc")
-# aux_source_directory( ${PROJECT_SOURCE_DIR}/src SRC_LIST)
-
-# VideoSource_Linux_DV.cc      --> VideoSource.h
-# VideoSource_Linux_V4L.cc     --> VideoSource.h
-# VideoSource_Linux_DataSet.cc --> VideoSource_Linux_DataSet.h
-set( VIDEOSOURCE ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_DataSet.cc )
-
-set( SRC_LIST_PTAM
-        ${PROJECT_SOURCE_DIR}/src/main.cc
-        ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
-        ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
-        ${PROJECT_SOURCE_DIR}/src/System.cc
-        ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
-        ${PROJECT_SOURCE_DIR}/src/KeyFrame.cc
-        ${PROJECT_SOURCE_DIR}/src/MapPoint.cc
-        ${PROJECT_SOURCE_DIR}/src/Map.cc
-        ${PROJECT_SOURCE_DIR}/src/SmallBlurryImage.cc
-        ${PROJECT_SOURCE_DIR}/src/ShiTomasi.cc
-        ${PROJECT_SOURCE_DIR}/src/HomographyInit.cc
-        ${PROJECT_SOURCE_DIR}/src/MapMaker.cc
-        ${PROJECT_SOURCE_DIR}/src/Bundle.cc
-        ${PROJECT_SOURCE_DIR}/src/PatchFinder.cc
-        ${PROJECT_SOURCE_DIR}/src/Relocaliser.cc
-        ${PROJECT_SOURCE_DIR}/src/MiniPatch.cc
-        ${PROJECT_SOURCE_DIR}/src/MapViewer.cc
-        ${PROJECT_SOURCE_DIR}/src/ARDriver.cc
-        ${PROJECT_SOURCE_DIR}/src/EyeGame.cc
-        ${PROJECT_SOURCE_DIR}/src/Tracker.cc
-        ${VIDEOSOURCE} )
-
-set( SRC_LIST_CameraCalibrator
-        ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
-        ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
-        ${PROJECT_SOURCE_DIR}/src/CalibImage.cc
-        ${PROJECT_SOURCE_DIR}/src/CalibCornerPatch.cc
-        ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
-        ${PROJECT_SOURCE_DIR}/src/CameraCalibrator.cc
-        ${VIDEOSOURCE} )
-
 ### PTAM
 add_executable( PTAM ${SRC_LIST_PTAM} )
 
@@ -161,9 +159,11 @@ add_executable( PTAM ${SRC_LIST_PTAM} )
 #add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
 
 
-############### coveralls-cmake: test code coverage ######################
+############### output some messages ######################
 
-if (COVERALLS)
-    # Create the coveralls target.
-    coveralls_setup( "${SRC_LIST_PTAM}" ON )
-endif()
+message("CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
+message("CMAKE_CXX_FLAGS_DEBUG  : " ${CMAKE_CXX_FLAGS_DEBUG})
+
+message(${CMAKE_CURRENT_BINARY_DIR})
+message(${CMAKE_BINARY_DIR})
+message(${PROJECT_BINARY_DIR})
