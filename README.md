@@ -33,6 +33,8 @@ PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented r
 ## Android
 * [APTAM-GPL](https://github.com/ICGJKU/APTAM-GPL)
 * [android-ptam](https://github.com/damienfir/android-ptam)
+## Windows
+* [PTAM-Windows](https://github.com/LucRyan/PTAM-Windows)
 
 # PTAM Tutorials
 * [PTAM Official Site](http://www.robots.ox.ac.uk/~gk/PTAM/)
