@@ -21,8 +21,6 @@ System::System()
     GUI.RegisterCommand("exit", GUICommandCallBack, this);
     GUI.RegisterCommand("quit", GUICommandCallBack, this);
 
-    mimFrameBW.resize(mpVideoSource->Size());
-    mimFrameRGB.resize(mpVideoSource->Size());
     // First, check if the camera is calibrated.
     // If not, we need to run the calibration widget.
     Vector<NUMTRACKERCAMPARAMETERS> vTest;
@@ -60,19 +58,22 @@ System::System()
 void System::Run()
 {
     while(!mbDone)
-    {
-        UpdateFrame();//update every frame or image
+    {       
+        // We use two versions of each video frame:
+        // One black and white (for processing by the tracker etc)
+        // and one RGB, for drawing.
+        CVD::Image<CVD::Rgb<CVD::byte> > imFrameRGB(mpVideoSource->Size());
+        CVD::Image<CVD::byte> imFrameBW(mpVideoSource->Size());
+
+        // Grab new video frame...
+        mpVideoSource->GetAndFillFrameBWandRGB(imFrameBW, imFrameRGB);
+
+        UpdateFrame(imFrameBW, imFrameRGB);//update every frame or image
     }
 }
 
-void System::UpdateFrame()
+void System::UpdateFrame(Image<byte> imBW, Image<Rgb<byte> > imRGB)
 {
-    // We use two versions of each video frame:
-    // One black and white (for processing by the tracker etc)
-    // and one RGB, for drawing.
-
-    // Grab new video frame...
-    mpVideoSource->GetAndFillFrameBWandRGB(mimFrameBW, mimFrameRGB);
     static bool bFirstFrame = true;
     if(bFirstFrame)
     {
@@ -93,12 +94,12 @@ void System::UpdateFrame()
     bool bDrawMap = mpMap->IsGood() && *gvnDrawMap;
     bool bDrawAR = mpMap->IsGood() && *gvnDrawAR;
 
-    mpTracker->TrackFrame(mimFrameBW, !bDrawAR && !bDrawMap);
+    mpTracker->TrackFrame(imBW, !bDrawAR && !bDrawMap);
 
     if(bDrawMap)
         mpMapViewer->DrawMap(mpTracker->GetCurrentPose());
     else if(bDrawAR)
-        mpARDriver->Render(mimFrameRGB, mpTracker->GetCurrentPose());
+        mpARDriver->Render(imRGB, mpTracker->GetCurrentPose());
 
     // mGLWindow.GetMousePoseUpdate();
     string sCaption;

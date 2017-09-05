@@ -32,13 +32,11 @@ public:
     System();
     ~System();
     void Run();
-    void UpdateFrame();
+    void UpdateFrame(Image<byte> imBW, Image<Rgb<byte> > imRGB);
 
 private:
     VideoSource *mpVideoSource;
     GLWindow2 mGLWindow;
-    CVD::Image<CVD::Rgb<CVD::byte> > mimFrameRGB;
-    CVD::Image<CVD::byte> mimFrameBW;
 
     Map *mpMap;
     MapMaker *mpMapMaker;
