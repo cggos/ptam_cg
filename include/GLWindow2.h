@@ -13,7 +13,6 @@
 
 class GLWindowMenu;
 
-
 class GLWindow2 : public CVD::GLWindow, public CVD::GLWindow::EventHandler
 {
 public:
@@ -40,7 +39,6 @@ public:
     // Map viewer mouse interface:
     std::pair<TooN::Vector<6>, TooN::Vector<6> > GetMousePoseUpdate();
 
-
 protected:
     void GUICommandHandler(std::string sCommand, std::string sParams);
     static void GUICommandCallBack(void* ptr, std::string sCommand, std::string sParams);
@@ -61,15 +59,6 @@ protected:
     // Storage for map viewer updates:
     TooN::Vector<6> mvMCPoseUpdate;
     TooN::Vector<6> mvLeftPoseUpdate;
-
-
 };
-
-
-
-
-
-
-
 
 #endif

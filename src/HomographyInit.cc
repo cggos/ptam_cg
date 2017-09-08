@@ -269,8 +269,8 @@ void HomographyInit::DecomposeHomography()
         x3_PM = sqrt((d2*d2 - d3*d3) / (d1*d1 - d3*d3));
     };
 
-    double e1[4] = {1.0,-1.0,1.0,-1.0};
-    double e3[4] = {1.0, 1.0, -1.0,-1.0};
+    double e1[4] = {1.0, -1.0,  1.0, -1.0};
+    double e3[4] = {1.0,  1.0, -1.0, -1.0};
     
     Vector<3> v3np;
     HomographyDecomposition decomposition;

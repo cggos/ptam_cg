@@ -24,11 +24,7 @@ System::System()
     // First, check if the camera is calibrated.
     // If not, we need to run the calibration widget.
     Vector<NUMTRACKERCAMPARAMETERS> vTest;
-
     vTest = GV3::get<Vector<NUMTRACKERCAMPARAMETERS> >("Camera.Parameters", ATANCamera::mvDefaultParams, HIDDEN);
-    mpCamera = new ATANCamera("Camera");
-    Vector<2> v2;
-    if(v2==v2) ;
     if(vTest == ATANCamera::mvDefaultParams)
     {
         cout << endl;
@@ -37,6 +33,7 @@ System::System()
         exit(1);
     }
 
+    mpCamera = new ATANCamera("Camera");
     mpMap = new Map;
     mpMapMaker = new MapMaker(*mpMap, *mpCamera);
     mpTracker = new Tracker(mpVideoSource->Size(), *mpCamera, *mpMap, *mpMapMaker);

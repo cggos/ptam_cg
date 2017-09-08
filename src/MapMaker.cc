@@ -202,7 +202,6 @@ bool MapMaker::InitFromStereo(KeyFrame &kF,
 
     mCamera.SetImageSize(kF.aLevels[0].im.size());
 
-
     vector<HomographyMatch> vMatches;
     for(unsigned int i=0; i<vTrailMatches.size(); i++)
     {
@@ -232,7 +231,6 @@ bool MapMaker::InitFromStereo(KeyFrame &kF,
     }
     // change the scale of the map so the second camera is wiggleScale away from the first
     se3.get_translation() *= mdWiggleScale/dTransMagn;
-
 
     KeyFrame *pkFirst = new KeyFrame();
     KeyFrame *pkSecond = new KeyFrame();
@@ -318,7 +316,6 @@ bool MapMaker::InitFromStereo(KeyFrame &kF,
     RefreshSceneDepth(pkFirst);
     RefreshSceneDepth(pkSecond);
     mdWiggleScaleDepthNormalized = mdWiggleScale / pkFirst->dSceneDepthMean;
-
 
     AddSomeMapPoints(0);
     AddSomeMapPoints(3);

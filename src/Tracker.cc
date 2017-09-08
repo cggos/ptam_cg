@@ -138,15 +138,15 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
             UpdateMotionModel();      //
 
             AssessTrackingQuality();  //  Check if we're lost or if tracking is poor.
-
-            { // Provide some feedback for the user:
+            {
+                // Provide some feedback for the user:
                 mMessageForUser << "Tracking Map, quality ";
                 if(mTrackingQuality == GOOD)  mMessageForUser << "good.";
                 if(mTrackingQuality == DODGY) mMessageForUser << "poor.";
                 if(mTrackingQuality == BAD)   mMessageForUser << "bad.";
                 mMessageForUser << " Found:";
-                for(int i=0; i<LEVELS; i++) mMessageForUser << " " << manMeasFound[i] << "/" << manMeasAttempted[i];
-                //	    mMessageForUser << " Found " << mnMeasFound << " of " << mnMeasAttempted <<". (";
+                for(int i=0; i<LEVELS; i++)
+                    mMessageForUser << " " << manMeasFound[i] << "/" << manMeasAttempted[i];
                 mMessageForUser << " Map: " << mMap.vpPoints.size() << "P, " << mMap.vpKeyFrames.size() << "KF";
             }
 
