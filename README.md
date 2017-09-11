@@ -27,14 +27,43 @@ PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented r
 * cppcheck: [Add cppcheck and clang-format for a cmake project](https://arcanis.me/en/2015/10/17/cppcheck-and-clang-format)
 
 # Relate Source Code
+
 ## Linux
 * [PTAM-GPL (GitHub)](https://github.com/Oxford-PTAM/PTAM-GPL)
 * [PTAM-linux-cv2.3 (GitHub)](https://github.com/nttputus/PTAM-linux-cv2.3)
+
 ## Android
 * [APTAM-GPL](https://github.com/ICGJKU/APTAM-GPL)
 * [android-ptam](https://github.com/damienfir/android-ptam)
+
 ## Windows
 * [PTAM-Windows](https://github.com/LucRyan/PTAM-Windows)
+
+# Related Mathematical Theory
+
+## Matrix
+* Matrix: Jacobian Matrix, Hessian Matrix, Covariance Matrix
+* Matrix Decomposition: EVD, SVD, LU, QR, Cholesky
+
+## RigidBody Transform
+* Rotation: Rotation Matrix, Rotation Vector, Euler Angle, Quarternion
+* Translate
+* Scale
+
+## Lie Algebra and Lie Group
+* SE2, SE3, SO3
+* Exponential Map
+
+## Probability Theory & Mathematical Statistics
+* M-Estimator
+* MLE(Maximum Likelihood Estimate)
+* OLS(Ordinary Least Squares)
+* RANSAC(RANdom SAmple Consensus)
+
+## Optimization Theory
+* Gauss-Newton
+* Levenberg-Marquardt
+* Bundle Adjustment
 
 # PTAM Tutorials
 * [PTAM Official Site](http://www.robots.ox.ac.uk/~gk/PTAM/)
