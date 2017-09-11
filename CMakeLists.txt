@@ -153,7 +153,7 @@ include_directories( "${PROJECT_SOURCE_DIR}/include" )
 add_executable( PTAM ${SRC_LIST_PTAM} )
 
 ### CameraCalibrator
-#add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
+add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
 
 
 ############### output some messages ######################

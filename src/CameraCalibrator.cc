@@ -43,7 +43,7 @@ int main()
 
 
 CameraCalibrator::CameraCalibrator()
-    : mpVideoSource(new VideoSourceDataSet())
+    : mpVideoSource(new VideoSourceV4L())
     , mGLWindow(mpVideoSource->Size(), "Camera Calibrator"), mCamera("Camera")
 {
     mbDone = false;
