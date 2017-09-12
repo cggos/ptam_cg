@@ -270,15 +270,18 @@ bool MapMaker::InitFromStereo(KeyFrame &kF,
         bool bGood = finder.IterateSubPixToConvergence(*pkSecond,10);
         if(!bGood)
         {
-            delete p; continue;
+            delete p;
+            continue;
         }
 
         // Triangulate point:
         Vector<2> v2SecondPos = finder.GetSubPixPos();
-        p->v3WorldPos = ReprojectPoint(se3, mCamera.UnProject(v2SecondPos), vMatches[i].v2CamPlaneFirst);
+        Vector<2> v2CamPlaneSecond = mCamera.UnProject(v2SecondPos);
+        p->v3WorldPos = pkFirst->se3CfromW.inverse() * ReprojectPoint(se3, v2CamPlaneSecond, vMatches[i].v2CamPlaneFirst);
         if(p->v3WorldPos[2] < 0.0)
         {
-            delete p; continue;
+            delete p;
+            continue;
         }
 
         // Not behind map? Good, then add to map.
@@ -685,8 +688,7 @@ double MapMaker::DistToNearestKeyFrame(KeyFrame &kCurrent)
 
 bool MapMaker::NeedNewKeyFrame(KeyFrame &kCurrent)
 {
-    KeyFrame *pClosest = ClosestKeyFrame(kCurrent);
-    double dDist = KeyFrameLinearDist(kCurrent, *pClosest);
+    double dDist = DistToNearestKeyFrame(kCurrent);
     dDist *= (1.0 / kCurrent.dSceneDepthMean);
 
     if(dDist > GV2.GetDouble("MapMaker.MaxKFDistWiggleMult",1.0,SILENT) * mdWiggleScaleDepthNormalized)
