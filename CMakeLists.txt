@@ -59,6 +59,7 @@ set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/ARDriver.cc
         ${PROJECT_SOURCE_DIR}/src/EyeGame.cc
         ${PROJECT_SOURCE_DIR}/src/Tracker.cc
+        ${PROJECT_SOURCE_DIR}/src/Tools.cc
         ${VIDEOSOURCE} )
 
 set( SRC_LIST_CameraCalibrator
