@@ -11,6 +11,7 @@ using namespace TooN;
 class Tools
 {
 public:
+    static void GetCenterOfMass3D(const std::vector<Vector<3> > &vvPts, Vector<3> &center);
     static void ICP_SVD(const std::vector<Vector<3> > &ptsA, const std::vector<Vector<3> > &ptsB, SE3<> &se3AfromB);
     static void ICP_QD(const std::vector<Vector<3> > &ptsA, const std::vector<Vector<3> > &ptsB, SE3<> &se3AfromB);
 };

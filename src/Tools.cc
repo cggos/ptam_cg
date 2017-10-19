@@ -1,6 +1,18 @@
 #include "Tools.h"
 #include <iostream>
 
+void Tools::GetCenterOfMass3D(const std::vector<Vector<3> > &vvPts, Vector<3> &center)
+{
+    unsigned int nSize = vvPts.size();
+    if(nSize < 1)
+        return;
+    for(unsigned int i=0; i<nSize; i++)
+    {
+        center += vvPts[i];
+    }
+    center /= nSize;
+}
+
 //ICP using Sigular Values Decomposition
 void Tools::ICP_SVD(const std::vector<Vector<3> > &ptsA, const std::vector<Vector<3> > &ptsB, SE3<> &se3AfromB)
 {
@@ -10,15 +22,11 @@ void Tools::ICP_SVD(const std::vector<Vector<3> > &ptsA, const std::vector<Vecto
     if(nSizeA==0 || nSizeA != nSizeB)
         return;
 
-    //center of mass
-    Vector<3> ptCenterA, ptCenterB;
-    for(unsigned int i=0; i<nSizeA; i++)
-    {
-        ptCenterA += ptsA[i];
-        ptCenterB += ptsB[i];
-    }
-    ptCenterA /= nSizeA;
-    ptCenterB /= nSizeB;
+    // center of mass
+    Vector<3> ptCenterA = TooN::Zeros;
+    Vector<3> ptCenterB = TooN::Zeros;
+    GetCenterOfMass3D(ptsA,ptCenterA);
+    GetCenterOfMass3D(ptsB,ptCenterB);
 
     //compute W
     Matrix<3> W;
@@ -53,13 +61,8 @@ void Tools::ICP_QD(const std::vector<Vector<3> > &ptsA, const std::vector<Vector
     // center of mass
     Vector<3> ptCenterA = TooN::Zeros;
     Vector<3> ptCenterB = TooN::Zeros;
-    for(unsigned int i=0; i<nSizeA; i++)
-    {
-        ptCenterA += ptsA[i];
-        ptCenterB += ptsB[i];
-    }
-    ptCenterA /= nSizeA;
-    ptCenterB /= nSizeB;
+    GetCenterOfMass3D(ptsA,ptCenterA);
+    GetCenterOfMass3D(ptsB,ptCenterB);
 
     // remove center
     std::vector<Vector<3> > ptsANew;
