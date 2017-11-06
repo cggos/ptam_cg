@@ -60,6 +60,7 @@ set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/EyeGame.cc
         ${PROJECT_SOURCE_DIR}/src/Tracker.cc
         ${PROJECT_SOURCE_DIR}/src/Tools.cc
+        ${PROJECT_SOURCE_DIR}/src/MathTools.cc
         ${VIDEOSOURCE} )
 
 set( SRC_LIST_CameraCalibrator
