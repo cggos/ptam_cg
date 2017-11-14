@@ -189,7 +189,49 @@ Vector<3> MapMaker::ReprojectPoint(SE3<> se3AfromB, const Vector<2> &v2A, const 
     return project(v4Smallest);
 }
 
+Vector<3> MapMaker::ReprojectPointNew(SE3<> se3AfromB, const Vector<2> &v2A, const Vector<2> &v2B)
+{
+    Vector<3> v3A = unproject(v2A);
+    Vector<3> v3B = unproject(v2B);
 
+    Matrix<3> m3A = TooN::Zeros;
+    m3A[0][1] = -v3A[2];
+    m3A[0][2] =  v3A[1];
+    m3A[1][2] = -v3A[0];
+    m3A[1][0] = -m3A[0][1];
+    m3A[2][0] = -m3A[0][2];
+    m3A[2][1] = -m3A[1][2];
+    Matrix<3> m3B = TooN::Zeros;
+    m3B[0][1] = -v3B[2];
+    m3B[0][2] =  v3B[1];
+    m3B[1][2] = -v3B[0];
+    m3B[1][0] = -m3B[0][1];
+    m3B[2][0] = -m3B[0][2];
+    m3B[2][1] = -m3B[1][2];
+
+    Matrix<3,4> m34AB;
+    m34AB.slice<0,0,3,3>() = se3AfromB.get_rotation().get_matrix();
+    m34AB.slice<0,3,3,1>() = se3AfromB.get_translation().as_col();
+
+    SE3<> se3I;
+    Matrix<3,4> m34I;
+    m34I.slice<0,0,3,3>() = se3I.get_rotation().get_matrix();
+    m34I.slice<0,3,3,1>() = se3I.get_translation().as_col();
+
+    Matrix<3,4> PDashA = m3A * m34AB;
+    Matrix<3,4> PDashB = m3B * m34I;
+
+    Matrix<6,4> A;
+    A.slice<0,0,3,4>() = PDashA;
+    A.slice<3,0,3,4>() = PDashB;
+
+    SVD<6,4> svd(A);
+    Vector<4> v4Smallest = svd.get_VT()[3];
+    if(v4Smallest[3] == 0.0)
+        v4Smallest[3] = 0.00001;
+
+    return project(v4Smallest);
+}
 
 // InitFromStereo() generates the initial match from two keyframes
 // and a vector of image correspondences. Uses the 
