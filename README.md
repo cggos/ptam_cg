@@ -1,4 +1,6 @@
 # PTAM4AR
+
+[![Join the chat at https://gitter.im/PTAM4AR/Lobby](https://badges.gitter.im/PTAM4AR/Lobby.svg)](https://gitter.im/PTAM4AR/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 PTAM source code for AR based on the one from Isis.
 
 # Introduction
