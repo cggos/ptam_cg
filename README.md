@@ -1,6 +1,6 @@
 # PTAM4AR
 
-[![Join the chat at https://gitter.im/PTAM4AR/Lobby](https://badges.gitter.im/PTAM4AR/Lobby.svg)](https://gitter.im/PTAM4AR/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/PTAM4AR/Lobby](https://badges.gitter.im/PTAM4AR/Lobby.svg)](https://gitter.im/PTAM4AR/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Documentation](https://codedocs.xyz/GaoHongchen/PTAM4AR.svg)](https://codedocs.xyz/GaoHongchen/PTAM4AR/)  
 PTAM source code for AR based on the one from Isis.
 
 # Introduction
@@ -9,7 +9,7 @@ PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented r
 # Building
 
 ## Build Status on CI
-* Linux (Ubuntu-14.04 64 bits, GCC-5) : [![Build Status](https://travis-ci.org/GaoHongchen/PTAM4AR.svg?branch=master)](https://travis-ci.org/GaoHongchen/PTAM4AR) [![Coverage Status](https://coveralls.io/repos/github/GaoHongchen/PTAM4AR/badge.svg?branch=master)](https://coveralls.io/github/GaoHongchen/PTAM4AR?branch=master) [![Documentation](https://codedocs.xyz/GaoHongchen/PTAM4AR.svg)](https://codedocs.xyz/GaoHongchen/PTAM4AR/)
+* Linux (Ubuntu-14.04 64 bits, GCC-5) : [![Build Status](https://travis-ci.org/GaoHongchen/PTAM4AR.svg?branch=master)](https://travis-ci.org/GaoHongchen/PTAM4AR) [![Coverage Status](https://coveralls.io/repos/github/GaoHongchen/PTAM4AR/badge.svg?branch=master)](https://coveralls.io/github/GaoHongchen/PTAM4AR?branch=master)
 
 ## Build This Project locally
 
@@ -40,32 +40,6 @@ PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented r
 
 ## Windows
 * [PTAM-Windows](https://github.com/LucRyan/PTAM-Windows)
-
-# Related Mathematical Theory
-
-## Matrix
-* Matrix: Jacobian Matrix, Hessian Matrix, Covariance Matrix
-* Matrix Decomposition: EVD, SVD, LU, QR, Cholesky
-
-## RigidBody Transform
-* Rotation: Rotation Matrix, Rotation Vector, Euler Angle, Quarternion
-* Translate
-* Scale
-
-## Lie Algebra and Lie Group
-* SE2, SE3, SO3
-* Exponential Map
-
-## Probability Theory & Mathematical Statistics
-* M-Estimator
-* MLE(Maximum Likelihood Estimate)
-* OLS(Ordinary Least Squares)
-* RANSAC(RANdom SAmple Consensus)
-
-## Optimization Theory
-* Gauss-Newton
-* Levenberg-Marquardt
-* Bundle Adjustment
 
 # PTAM Tutorials
 * [PTAM Official Site](http://www.robots.ox.ac.uk/~gk/PTAM/)
