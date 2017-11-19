@@ -47,3 +47,7 @@ PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented r
 * [PTAM-Monocular SLAM](http://www.doc.ic.ac.uk/~gj414/monocular_slam/ptam.html)
 * [implementing-ptam-stereo-tracking-and-pose-estimation-for-ar-with-opencv-w-code](http://www.morethantechnical.com/2010/03/06/implementing-ptam-stereo-tracking-and-pose-estimation-for-ar-with-opencv-w-code/)
 * [PTAM on ROS](http://wiki.ros.org/ptam)
+
+# SLAM Resources
+* [SLAM学习与开发经验分享(Lee-SLAM-source)](https://github.com/AlbertSlam/Lee-SLAM-source)
+* [高翔 slambook code](https://github.com/gaoxiang12/slambook)
