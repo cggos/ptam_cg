@@ -1,10 +1,10 @@
 // Copyright 2008 Isis Innovation Limited
-#include "OpenGL.h"
+
 #include "Tracker.h"
-#include "MEstimator.h"
-#include "SmallMatrixOpts.h"
-#include "PatchFinder.h"
-#include "TrackerData.h"
+
+#include <fstream>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include <cvd/utility.h>
 #include <cvd/gl_helpers.h>
@@ -14,9 +14,9 @@
 #include <gvars3/instances.h>
 #include <gvars3/GStringUtil.h>
 
-#include <fstream>
-#include <fcntl.h>
-#include <unistd.h>
+#include "OpenGL.h"
+#include "MEstimator.h"
+#include "SmallMatrixOpts.h"
 
 using namespace CVD;
 using namespace std;
