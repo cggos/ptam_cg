@@ -17,7 +17,7 @@ public:
     ImageProcess() {}
     CVD::Image<CVD::byte> GetImageROI(BasicImage<byte> &im, ImageRef irPos, CVD::ImageRef irSize);
     static double ShiTomasiScoreAtPoint(CVD::BasicImage<CVD::byte> &image, int nHalfBoxSize, CVD::ImageRef irCenter);
-    inline int SSDAtPoint(CVD::BasicImage<byte> &im, const CVD::ImageRef &ir, CVD::Image<byte> &imTemplate); // Score function
+    inline int SSDAtPoint(CVD::BasicImage<byte> &im, const CVD::ImageRef &ir, CVD::Image<byte> &imTemplate, int nMaxSSD); // Score function
 };
 
 class MiniPatch : public ImageProcess
@@ -29,8 +29,8 @@ public:
                    CVD::BasicImage<CVD::byte> &im,
                    int nRange,
                    std::vector<CVD::ImageRef> &vCorners,
-                   std::vector<int> *pvRowLUT = NULL,
-                   int nMaxSSD = 9999);
+                   int nMaxSSD = 100000,//be important for tracking
+                   std::vector<int> *pvRowLUT = NULL);
 
 private:
     CVD::ImageRef mirPatchSize;

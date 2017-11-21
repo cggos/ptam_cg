@@ -43,9 +43,8 @@ double ImageProcess::ShiTomasiScoreAtPoint(BasicImage<byte> &image, int nHalfBox
 }
 
 // Scoring function
-inline int ImageProcess::SSDAtPoint(CVD::BasicImage<CVD::byte> &im, const CVD::ImageRef &ir, CVD::Image<CVD::byte> &imTemplate)
+inline int ImageProcess::SSDAtPoint(CVD::BasicImage<CVD::byte> &im, const CVD::ImageRef &ir, CVD::Image<CVD::byte> &imTemplate, int nMaxSSD)
 {
-    int nMaxSSD = 9999;
     if(!im.in_image_with_border(ir, imTemplate.size().x/2) || !im.in_image_with_border(ir, imTemplate.size().y/2))
         return nMaxSSD + 1;
     ImageRef irImgBase = ir - imTemplate.size()/2;
@@ -81,7 +80,8 @@ bool MiniPatch::FindPatch(CVD::ImageRef &irPos,
                           CVD::BasicImage<CVD::byte> &im,
                           int nRange,
                           vector<ImageRef> &vCorners,
-                          std::vector<int> *pvRowLUT, int nMaxSSD)
+                          int nMaxSSD,
+                          std::vector<int> *pvRowLUT)
 {
     ImageRef irCenter = irPos;
     ImageRef irBest;
@@ -110,7 +110,7 @@ bool MiniPatch::FindPatch(CVD::ImageRef &irPos,
             continue;
         if(i->y > irBBoxBR.y)
             break;
-        int nSSD = SSDAtPoint(im, *i, mimOrigPatch);
+        int nSSD = SSDAtPoint(im, *i, mimOrigPatch, nMaxSSD);
 
         if(nSSD < nBestSSD)
         {
