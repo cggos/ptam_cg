@@ -4,9 +4,7 @@
 #ifndef __CAMERACALIBRATOR_H
 #define __CAMERACALIBRATOR_H
 #include "CalibImage.h"
-#include "VideoSource_Linux_DataSet.h"
-#include "VideoSource_Linux_V4L.h"
-#include "VideoSource_Linux_DV.h"
+#include "VideoSource.h"
 #include <gvars3/gvars3.h>
 #include <vector>
 #include "GLWindow2.h"

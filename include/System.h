@@ -10,14 +10,9 @@
 //
 #ifndef __SYSTEM_H
 #define __SYSTEM_H
-#include "VideoSource_Linux_DataSet.h"
-#include "VideoSource_Linux_V4L.h"
-#include "VideoSource_Linux_DV.h"
-#include "GLWindow2.h"
 
-#include <cvd/image.h>
-#include <cvd/rgb.h>
-#include <cvd/byte.h>
+#include "VideoSource.h"
+#include "GLWindow2.h"
 
 class ATANCamera;
 class Map;
@@ -32,7 +27,7 @@ public:
     System();
     ~System();
     void Run();
-    void UpdateFrame(Image<byte> imBW, Image<Rgb<byte> > imRGB);
+    void UpdateFrame(CVD::Image<CVD::byte> imBW, CVD::Image<CVD::Rgb<CVD::byte> > imRGB);
 
 private:
     VideoSource *mpVideoSource;

@@ -1,10 +1,10 @@
 // Copyright 2008 Isis Innovation Limited
 // This is the main extry point for PTAM
+
 #include <stdlib.h>
 #include <iostream>
-#include <gvars3/instances.h>
-#include "System.h"
 
+#include "System.h"
 
 using namespace std;
 using namespace GVars3;

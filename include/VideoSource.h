@@ -14,23 +14,62 @@
 //
 #ifndef __VideoSource_H
 #define __VideoSource_H
+
+#include <string>
+#include <fstream>
+
 #include <cvd/image.h>
 #include <cvd/byte.h>
 #include <cvd/rgb.h>
 #include <gvars3/instances.h>
 
-using namespace CVD;
-using namespace GVars3;
-using namespace std;
-
 class VideoSource
 {
 public:
-    VideoSource():mirSize(GV3::get<ImageRef>("VideoSource.Resolution", ImageRef(640,480))){}
+    VideoSource():mirSize(GVars3::GV3::get<CVD::ImageRef>("VideoSource.Resolution", CVD::ImageRef(640,480))){}
     ~VideoSource(){}
     virtual void GetAndFillFrameBWandRGB(CVD::Image<CVD::byte> &imBW, CVD::Image<CVD::Rgb<CVD::byte> > &imRGB)=0;
     CVD::ImageRef Size() { return mirSize; }
 protected:
     CVD::ImageRef mirSize;
 };
+
+
+class VideoSourceDV : public VideoSource
+{
+public:
+    VideoSourceDV();
+    ~VideoSourceDV(){}
+    void GetAndFillFrameBWandRGB(CVD::Image<CVD::byte> &imBW, CVD::Image<CVD::Rgb<CVD::byte> > &imRGB);
+
+private:
+    void *mptr;
+};
+
+
+class VideoSourceV4L : public VideoSource
+{
+public:
+    VideoSourceV4L();
+    ~VideoSourceV4L(){}
+    void GetAndFillFrameBWandRGB(CVD::Image<CVD::byte> &imBW, CVD::Image<CVD::Rgb<CVD::byte> > &imRGB);
+
+private:
+    void *mptr;
+};
+
+
+class VideoSourceDataSet : public VideoSource
+{
+public:
+    VideoSourceDataSet();
+    ~VideoSourceDataSet();
+    void GetAndFillFrameBWandRGB(CVD::Image<CVD::byte> &imBW, CVD::Image<CVD::Rgb<CVD::byte> > &imRGB);
+
+private:
+    std::string mDatasetPath;
+    std::ifstream mFileIn;
+    unsigned int mIndexImg;
+};
+
 #endif

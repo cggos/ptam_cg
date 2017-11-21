@@ -1,8 +1,10 @@
 // Copyright 2008 Isis Innovation Limited
+
 #include "System.h"
-#include "OpenGL.h"
-#include <gvars3/instances.h>
+
 #include <stdlib.h>
+
+#include "OpenGL.h"
 #include "ATANCamera.h"
 #include "MapMaker.h"
 #include "Tracker.h"
@@ -12,7 +14,6 @@
 using namespace CVD;
 using namespace std;
 using namespace GVars3;
-
 
 System::System()
     : mpVideoSource(new VideoSourceDataSet())

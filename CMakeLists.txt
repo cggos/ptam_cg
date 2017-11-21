@@ -33,11 +33,6 @@ endif()
 
 ############### set SRC_LIST_PTAM & SRC_LIST_CameraCalibrator ######################
 
-set( VIDEOSOURCE
-        ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_DataSet.cc
-        ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_V4L.cc
-        ${PROJECT_SOURCE_DIR}/src/VideoSource_Linux_DV.cc )
-
 set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/main.cc
         ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
@@ -61,7 +56,7 @@ set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/Tracker.cc
         ${PROJECT_SOURCE_DIR}/src/Tools.cc
         ${PROJECT_SOURCE_DIR}/src/MathTools.cc
-        ${VIDEOSOURCE} )
+        ${PROJECT_SOURCE_DIR}/src/VideoSource.cc )
 
 set( SRC_LIST_CameraCalibrator
         ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
@@ -70,7 +65,7 @@ set( SRC_LIST_CameraCalibrator
         ${PROJECT_SOURCE_DIR}/src/CalibCornerPatch.cc
         ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
         ${PROJECT_SOURCE_DIR}/src/CameraCalibrator.cc
-        ${VIDEOSOURCE} )
+        ${PROJECT_SOURCE_DIR}/src/VideoSource.cc )
 
 
 ############### Static Analysis of C/C++ using cppcheck ######################
