@@ -1,5 +1,5 @@
 #include "MapViewer.h"
-#include "MapPoint.h"
+#include "Map.h"
 #include "KeyFrame.h"
 #include "LevelHelpers.h"
 #include <iomanip>

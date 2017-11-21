@@ -1,6 +1,5 @@
 // Copyright 2008 Isis Innovation Limited
 #include "MapMaker.h"
-#include "MapPoint.h"
 #include "Bundle.h"
 #include "PatchFinder.h"
 #include "SmallMatrixOpts.h"

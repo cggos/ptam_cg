@@ -37,13 +37,15 @@
 #ifndef __PATCHFINDER_H
 #define __PATCHFINDER_H
 
-#include <TooN/TooN.h>
-using namespace TooN;
 #include <TooN/se3.h>
 #include <cvd/image.h>
 #include <cvd/byte.h>
-#include "MapPoint.h"
+#include <TooN/TooN.h>
+
+#include "Map.h"
 #include "LevelHelpers.h"
+
+using namespace TooN;
 
 class PatchFinder
 {
