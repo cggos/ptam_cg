@@ -1,6 +1,6 @@
 // Copyright 2008 Isis Innovation Limited
 #include "KeyFrame.h"
-#include "ShiTomasi.h"
+#include "ImageProcess.h"
 #include "SmallBlurryImage.h"
 #include <cvd/vision.h>
 #include <cvd/fast_corner.h>
@@ -78,7 +78,7 @@ void KeyFrame::MakeKeyFrame_Rest()
         {
             if(!lev.im.in_image_with_border(*i, 10))
                 continue;
-            double dSTScore = FindShiTomasiScoreAtPoint(lev.im, 3, *i);
+            double dSTScore = ImageProcess::FindShiTomasiScoreAtPoint(lev.im, 3, *i);
             if(dSTScore > *gvdCandidateMinSTScore)
             {
                 Candidate c;

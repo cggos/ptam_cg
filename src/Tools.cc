@@ -1,6 +1,112 @@
 #include "Tools.h"
 #include <iostream>
 
+namespace cg
+{
+
+void Tools::LHFromRH(SE3<> rhm,SE3<> &lhm)
+{
+    Matrix<3,3,float> rot = rhm.get_rotation().get_matrix();
+    Vector<3,float> trans = rhm.get_translation();
+
+    Matrix<3,3,float> rotation = rot;
+    Vector<3,float> translation = trans;
+    rotation[2][0] *= -1;
+    rotation[2][1] *= -1;
+    rotation[0][2] *= -1;
+    rotation[1][2] *= -1;
+    translation[2] *= -1;
+    //compose SE3
+    lhm.get_rotation() = rotation;
+    lhm.get_translation() = translation;
+}
+
+void Tools::SE32Array(SE3<> se3, float* array)
+{
+    Matrix<3,3,double> rot = se3.get_rotation().get_matrix();
+    Vector<3,double> trans = se3.get_translation();
+
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            array[i*4+j] = (float)rot(i,j); // to row-major matrix
+
+    array[3]  = (float)trans[0];
+    array[7]  = (float)trans[1];
+    array[11] = (float)trans[2];
+}
+
+void Tools::SO32RM(SO3<> so3, float* rm)
+{
+    Matrix<3,3,double> rot = so3.get_matrix();
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            rm[i*3+j] = (float)rot(i,j); // to row-major matrix
+}
+
+void Tools::RM2SO3(float* rm, SO3<> &so3)
+{
+    Matrix<3,3,double> rot;
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            rot[i][j] = rm[i*3+j];
+    so3 = rot;
+}
+
+/*
+ * Ref        : http://www.cnblogs.com/wqj1212/archive/2010/11/21/1883033.html
+ * Constraint : Cartesion Coordinate System
+ * quater[4]  : x, y, z, w
+ * *euler[3]  : theta_x, theta_y, theta_z
+ */
+void Tools::Quaternion2Euler(float *quater, float **euler)
+{
+    float x = quater[0];
+    float y = quater[1];
+    float z = quater[2];
+    float w = quater[3];
+    (*euler)[0] = atan2 ( 2*(w*x+y*z), 1-2*(x*x+y*y) );
+    (*euler)[1] = asin  ( 2*(w*y-z*x) );
+    (*euler)[2] = atan2 ( 2*(w*z+x*y), 1-2*(y*y+z*z) );
+}
+
+void Tools::Euler2Quaternion(float *euler, float **quater)
+{
+    // Abbreviations for the various angular functions
+    float cy = cos(euler[2] * 0.5);
+    float sy = sin(euler[2] * 0.5);
+    float cr = cos(euler[0] * 0.5);
+    float sr = sin(euler[0] * 0.5);
+    float cp = cos(euler[1] * 0.5);
+    float sp = sin(euler[1] * 0.5);
+
+    (*quater)[3] = cy * cr * cp + sy * sr * sp;
+    (*quater)[0] = cy * sr * cp - sy * cr * sp;
+    (*quater)[1] = cy * cr * sp + sy * sr * cp;
+    (*quater)[2] = sy * cr * cp - cy * sr * sp;
+}
+
+ /*
+  * Ref       : https://stackoverflow.com/questions/15022630/how-to-calculate-the-angle-from-roational-matrix
+  *     rm[9] : x, y, z, w
+  * *euler[3] : theta_x, theta_y, theta_z
+  * R = Rz(φ)Ry(θ)Rx(ψ)
+  */
+void Tools::RotationMatrix2Euler(float *rm, float **euler)
+{
+    float rm11 = rm[0];
+    float rm21 = rm[3];
+    float rm31 = rm[6];
+    float rm32 = rm[7];
+    float rm33 = rm[8];
+    (*euler)[0] = atan2( rm32 , rm33 );
+    (*euler)[1] = atan2(-rm31 , sqrt(rm32*rm32+rm33*rm33) );
+    (*euler)[2] = atan2( rm21 , rm11 );
+
+    (*euler)[0] = (*euler)[0] ;//* 180.0 / 3.1415926;
+    (*euler)[1] = (*euler)[1] ;//* 180.0 / 3.1415926;
+    (*euler)[2] = (*euler)[2] ;//* 180.0 / 3.1415926;
+}
+
 void Tools::GetCenterOfMass3D(const std::vector<Vector<3> > &vvPts, Vector<3> &center)
 {
     unsigned int nSize = vvPts.size();
@@ -133,3 +239,6 @@ void Tools::ICP_QD(const std::vector<Vector<3> > &ptsA, const std::vector<Vector
 
 //    std::cout << "as:\n" << as << " " << as1 << std::endl;
 }
+
+}
+

@@ -1,12 +1,10 @@
-// Copyright 2008 Isis Innovation Limited
-#include "ShiTomasi.h"
+#include "ImageProcess.h"
+
 #include <math.h>
 
 using namespace CVD;
 
-double FindShiTomasiScoreAtPoint(BasicImage<byte> &image,
-                                 int nHalfBoxSize,
-                                 ImageRef irCenter)
+double ImageProcess::FindShiTomasiScoreAtPoint(BasicImage<byte> &image, int nHalfBoxSize, ImageRef irCenter)
 {
     double dXX = 0;
     double dYY = 0;
@@ -33,5 +31,4 @@ double FindShiTomasiScoreAtPoint(BasicImage<byte> &image,
 
     // Find and return smaller eigenvalue:
     return 0.5 * (dXX + dYY - sqrt( (dXX + dYY) * (dXX + dYY) - 4 * (dXX * dYY - dXY * dXY) ));
-};
-
+}

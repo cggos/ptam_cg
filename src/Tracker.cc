@@ -2,7 +2,6 @@
 #include "OpenGL.h"
 #include "Tracker.h"
 #include "MEstimator.h"
-#include "ShiTomasi.h"
 #include "SmallMatrixOpts.h"
 #include "PatchFinder.h"
 #include "TrackerData.h"

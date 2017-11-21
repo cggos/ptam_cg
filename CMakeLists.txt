@@ -43,7 +43,6 @@ set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/MapPoint.cc
         ${PROJECT_SOURCE_DIR}/src/Map.cc
         ${PROJECT_SOURCE_DIR}/src/SmallBlurryImage.cc
-        ${PROJECT_SOURCE_DIR}/src/ShiTomasi.cc
         ${PROJECT_SOURCE_DIR}/src/HomographyInit.cc
         ${PROJECT_SOURCE_DIR}/src/MapMaker.cc
         ${PROJECT_SOURCE_DIR}/src/Bundle.cc
@@ -55,8 +54,8 @@ set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/EyeGame.cc
         ${PROJECT_SOURCE_DIR}/src/Tracker.cc
         ${PROJECT_SOURCE_DIR}/src/Tools.cc
-        ${PROJECT_SOURCE_DIR}/src/MathTools.cc
-        ${PROJECT_SOURCE_DIR}/src/VideoSource.cc )
+        ${PROJECT_SOURCE_DIR}/src/VideoSource.cc
+        ${PROJECT_SOURCE_DIR}/src/ImageProcess.cc )
 
 set( SRC_LIST_CameraCalibrator
         ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
