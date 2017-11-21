@@ -48,7 +48,6 @@ set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/Bundle.cc
         ${PROJECT_SOURCE_DIR}/src/PatchFinder.cc
         ${PROJECT_SOURCE_DIR}/src/Relocaliser.cc
-        ${PROJECT_SOURCE_DIR}/src/MiniPatch.cc
         ${PROJECT_SOURCE_DIR}/src/MapViewer.cc
         ${PROJECT_SOURCE_DIR}/src/ARDriver.cc
         ${PROJECT_SOURCE_DIR}/src/EyeGame.cc

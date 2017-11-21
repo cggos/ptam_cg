@@ -78,7 +78,7 @@ void KeyFrame::MakeKeyFrame_Rest()
         {
             if(!lev.im.in_image_with_border(*i, 10))
                 continue;
-            double dSTScore = ImageProcess::FindShiTomasiScoreAtPoint(lev.im, 3, *i);
+            double dSTScore = ImageProcess::ShiTomasiScoreAtPoint(lev.im, 3, *i);
             if(dSTScore > *gvdCandidateMinSTScore)
             {
                 Candidate c;

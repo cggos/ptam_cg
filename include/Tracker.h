@@ -23,7 +23,7 @@
 
 #include "MapMaker.h"
 #include "ATANCamera.h"
-#include "MiniPatch.h"
+#include "ImageProcess.h"
 #include "Relocaliser.h"
 
 #include <sstream>

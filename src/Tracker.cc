@@ -303,10 +303,6 @@ void Tracker::GUICommandHandler(string sCommand, string sParams)  // Called by t
 // What action TrackForInitialMap() takes depends on the mnInitialStage enum variable..
 void Tracker::TrackForInitialMap()
 {
-    // MiniPatch tracking threshhold.
-    static gvar3<int> gvnMaxSSD("Tracker.MiniPatchMaxSSD", 100000, SILENT);
-    MiniPatch::mnMaxSSD = *gvnMaxSSD;
-
     // What stage of initial tracking are we at?
     if(mnInitialStage == TRAIL_TRACKING_NOT_STARTED)
     {
@@ -354,16 +350,12 @@ void Tracker::TrailTracking_Start()
     for(unsigned int i=0; i<mCurrentKF.aLevels[0].vCandidates.size(); i++)  // Copy candidates into a trivially sortable vector
     {                                                                     // so that we can choose the image corners with max ST score
         Candidate &c = mCurrentKF.aLevels[0].vCandidates[i];
-        if(!mCurrentKF.aLevels[0].im.in_image_with_border(c.irLevelPos, MiniPatch::mnHalfPatchSize))
-            continue;
         vCornersAndSTScores.push_back(pair<double,ImageRef>(-1.0 * c.dSTScore, c.irLevelPos)); // negative so highest score first in sorted list
     };
     sort(vCornersAndSTScores.begin(), vCornersAndSTScores.end());  // Sort according to Shi-Tomasi score
     int nToAdd = GV2.GetInt("MaxInitialTrails", 1000, SILENT);
     for(unsigned int i = 0; i<vCornersAndSTScores.size() && nToAdd > 0; i++)
     {
-        if(!mCurrentKF.aLevels[0].im.in_image_with_border(vCornersAndSTScores[i].second, MiniPatch::mnHalfPatchSize))
-            continue;
         Trail t;
         t.mPatch.SampleFromImage(vCornersAndSTScores[i].second, mCurrentKF.aLevels[0].im);
         t.irInitialPos = vCornersAndSTScores[i].second;

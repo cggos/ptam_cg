@@ -2,9 +2,18 @@
 
 #include <math.h>
 
-using namespace CVD;
+using namespace std;
 
-double ImageProcess::FindShiTomasiScoreAtPoint(BasicImage<byte> &image, int nHalfBoxSize, ImageRef irCenter)
+CVD::Image<CVD::byte> ImageProcess::GetImageROI(BasicImage<byte> &im, ImageRef irPos, CVD::ImageRef irSize)
+{
+    CVD::Image<CVD::byte> imSample;
+    assert(im.in_image_with_border(irPos, irSize.x/2) || im.in_image_with_border(irPos, irSize.y/2));
+    imSample.resize(irSize);
+    copy(im, imSample, irSize, irPos-irSize/2);
+    return imSample;
+}
+
+double ImageProcess::ShiTomasiScoreAtPoint(BasicImage<byte> &image, int nHalfBoxSize, ImageRef irCenter)
 {
     double dXX = 0;
     double dYY = 0;
@@ -31,4 +40,89 @@ double ImageProcess::FindShiTomasiScoreAtPoint(BasicImage<byte> &image, int nHal
 
     // Find and return smaller eigenvalue:
     return 0.5 * (dXX + dYY - sqrt( (dXX + dYY) * (dXX + dYY) - 4 * (dXX * dYY - dXY * dXY) ));
+}
+
+// Scoring function
+inline int ImageProcess::SSDAtPoint(CVD::BasicImage<CVD::byte> &im, const CVD::ImageRef &ir, CVD::Image<CVD::byte> &imTemplate)
+{
+    int nMaxSSD = 9999;
+    if(!im.in_image_with_border(ir, imTemplate.size().x/2) || !im.in_image_with_border(ir, imTemplate.size().y/2))
+        return nMaxSSD + 1;
+    ImageRef irImgBase = ir - imTemplate.size()/2;
+    int nRows = imTemplate.size().y;
+    int nCols = imTemplate.size().x;
+    byte *pImg;
+    byte *pTem;
+    int nDiff;
+    int nSumSqDiff = 0;
+    for(int nRow = 0; nRow < nRows; nRow++)
+    {
+        pImg = &im[irImgBase+ImageRef(0,nRow)];
+        pTem = &imTemplate[ImageRef(0,nRow)];
+        for(int nCol = 0; nCol < nCols; nCol++)
+        {
+            nDiff = pImg[nCol] - pTem[nCol];
+            nSumSqDiff += nDiff * nDiff;
+        };
+    };
+    return nSumSqDiff;
+}
+
+// Define the patch from an input image
+void MiniPatch::SampleFromImage(ImageRef irPos, BasicImage<byte> &im)
+{
+    mimOrigPatch = GetImageROI(im, irPos, mirPatchSize);
+}
+
+// Find a patch by searching at FAST corners in an input image
+// If available, a row-corner LUT is used to speed up search through the
+// FAST corners
+bool MiniPatch::FindPatch(CVD::ImageRef &irPos,
+                          CVD::BasicImage<CVD::byte> &im,
+                          int nRange,
+                          vector<ImageRef> &vCorners,
+                          std::vector<int> *pvRowLUT, int nMaxSSD)
+{
+    ImageRef irCenter = irPos;
+    ImageRef irBest;
+    int nBestSSD = nMaxSSD + 1;
+    ImageRef irBBoxTL = irPos - ImageRef(nRange, nRange);
+    ImageRef irBBoxBR = irPos + ImageRef(nRange, nRange);
+    vector<ImageRef>::iterator i;
+    if(!pvRowLUT)
+    {
+        for(i = vCorners.begin(); i!=vCorners.end(); i++)
+            if(i->y >= irBBoxTL.y) break;
+    }
+    else
+    {
+        int nTopRow = irBBoxTL.y;
+        if(nTopRow < 0)
+            nTopRow = 0;
+        if(nTopRow >= (int) pvRowLUT->size())
+            nTopRow = (int) pvRowLUT->size() - 1;
+        i = vCorners.begin() + (*pvRowLUT)[nTopRow];
+    }
+
+    for(; i!=vCorners.end(); i++)
+    {
+        if(i->x < irBBoxTL.x  || i->x > irBBoxBR.x)
+            continue;
+        if(i->y > irBBoxBR.y)
+            break;
+        int nSSD = SSDAtPoint(im, *i, mimOrigPatch);
+
+        if(nSSD < nBestSSD)
+        {
+            irBest = *i;
+            nBestSSD = nSSD;
+        }
+    }
+    if(nBestSSD < nMaxSSD)
+    {
+        irPos = irBest;
+        return true;
+    }
+    else
+        return false;
 }
