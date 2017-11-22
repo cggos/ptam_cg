@@ -53,7 +53,7 @@ void Relocaliser::ScoreKFs(KeyFrame &kCurrent)
 
     for(unsigned int i=0; i<mMap.vpKeyFrames.size(); i++)
     {
-        double dSSD = kCurrent.pSBI->ZMSSD(*mMap.vpKeyFrames[i]->pSBI);
+        double dSSD = kCurrent.pSBI->ZMSSD(kCurrent.pSBI->mimTemplate, mMap.vpKeyFrames[i]->pSBI->mimTemplate);
         if(dSSD < mdBestScore)
         {
             mdBestScore = dSSD;

@@ -2,10 +2,8 @@
 
 #include <math.h>
 
-#include <cvd/utility.h>
 #include <cvd/convolution.h>
 #include <cvd/vision.h>
-#include <TooN/se2.h>
 #include <TooN/Cholesky.h>
 #include <TooN/wls.h>
 
@@ -74,6 +72,54 @@ inline int ImageProcess::SSDAtPoint(CVD::BasicImage<CVD::byte> &im, const CVD::I
     };
     return nSumSqDiff;
 }
+
+// Calculate the zero-mean SSD between one image and the next.
+// Since both are zero mean already, just calculate the SSD...
+double ImageProcess::ZMSSD(CVD::Image<float> im1, CVD::Image<float> im2)
+{
+    double dSSD = 0.0;
+
+    CVD::ImageRef irSize = im1.size();
+    if(irSize != im2.size())
+        return dSSD;
+
+    ImageRef ir;
+    do
+    {
+        double dDiff = im1[ir] - im2[ir];
+        dSSD += dDiff * dDiff;
+    }
+    while(ir.next(irSize));
+
+    return dSSD;
+}
+
+// Make the jacobians (actually, no more than a gradient image)
+// of the blurred template
+void ImageProcess::MakeJacs(CVD::Image<float> imTemplate, CVD::Image<Vector<2> > &imImageJacs)
+{
+    CVD::ImageRef irSize = imTemplate.size();
+    imImageJacs.resize(irSize);
+    // Fill in the gradient image
+    ImageRef ir;
+    do
+    {
+        Vector<2> &v2Grad = imImageJacs[ir];
+        if(imTemplate.in_image_with_border(ir,1))
+        {
+            v2Grad[0] = imTemplate[ir + ImageRef(1,0)] - imTemplate[ir - ImageRef(1,0)];
+            v2Grad[1] = imTemplate[ir + ImageRef(0,1)] - imTemplate[ir - ImageRef(0,1)];
+            // N.b. missing 0.5 factor in above, this will be added later.
+        }
+        else
+            v2Grad = Zeros;
+    }
+    while(ir.next(irSize));
+
+    mbMadeJacs = true;
+}
+
+
 
 // Define the patch from an input image
 void MiniPatch::SampleFromImage(ImageRef irPos, BasicImage<byte> &im)
@@ -162,8 +208,8 @@ void SmallBlurryImage::MakeFromKF(KeyFrame &kf, double dBlur)
     mimSmall.resize(mirSize);
     mimTemplate.resize(mirSize);
 
-    mbMadeJacs = false;
     halfSample(kf.aLevels[3].im, mimSmall);
+
     ImageRef ir;
     unsigned int nSum = 0;
     do
@@ -178,44 +224,6 @@ void SmallBlurryImage::MakeFromKF(KeyFrame &kf, double dBlur)
     while(ir.next(mirSize));
 
     CVD::convolveGaussian(mimTemplate, dBlur);
-}
-
-// Make the jacobians (actually, no more than a gradient image)
-// of the blurred template
-void SmallBlurryImage::MakeJacs()
-{
-    mimImageJacs.resize(mirSize);
-    // Fill in the gradient image
-    ImageRef ir;
-    do
-    {
-        Vector<2> &v2Grad = mimImageJacs[ir];
-        if(mimTemplate.in_image_with_border(ir,1))
-        {
-            v2Grad[0] = mimTemplate[ir + ImageRef(1,0)] - mimTemplate[ir - ImageRef(1,0)];
-            v2Grad[1] = mimTemplate[ir + ImageRef(0,1)] - mimTemplate[ir - ImageRef(0,1)];
-            // N.b. missing 0.5 factor in above, this will be added later.
-        }
-        else
-            v2Grad = Zeros;
-    }
-    while(ir.next(mirSize));
-    mbMadeJacs = true;
-};
-
-// Calculate the zero-mean SSD between one image and the next.
-// Since both are zero mean already, just calculate the SSD...
-double SmallBlurryImage::ZMSSD(SmallBlurryImage &other)
-{
-    double dSSD = 0.0;
-    ImageRef ir;
-    do
-    {
-        double dDiff = mimTemplate[ir] - other.mimTemplate[ir];
-        dSSD += dDiff * dDiff;
-    }
-    while(ir.next(mirSize));
-    return dSSD;
 }
 
 
@@ -372,15 +380,15 @@ SE3<> SmallBlurryImage::SE3fromSE2(SE2<> se2, ATANCamera camera)
                 v2CamFrameMotion[0] = (v3Motion[0] - v3Cam[0] * v3Motion[2] * dOneOverCameraZ) * dOneOverCameraZ;
                 v2CamFrameMotion[1] = (v3Motion[1] - v3Cam[1] * v3Motion[2] * dOneOverCameraZ) * dOneOverCameraZ;
                 m23Jacobian.T()[m] = m2CamDerivs * v2CamFrameMotion;
-            };
+            }
             wls.add_mJ(v2Error[0], m23Jacobian[0], 1.0);
             wls.add_mJ(v2Error[1], m23Jacobian[1], 1.0);
-        };
+        }
 
         wls.compute();
         Vector<3> v3Res = wls.get_mu();
         so3 = SO3<>::exp(v3Res) * so3;
-    };
+    }
 
     SE3<> se3Result;
     se3Result.get_rotation() = so3;

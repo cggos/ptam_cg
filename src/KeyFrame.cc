@@ -91,7 +91,7 @@ void KeyFrame::MakeKeyFrame_Rest()
     // Also, make a SmallBlurryImage of the keyframe: The relocaliser uses these.
     pSBI = new SmallBlurryImage(*this);
     // Relocaliser also wants the jacobians..
-    pSBI->MakeJacs();
+    pSBI->MakeJacs(pSBI->mimTemplate, pSBI->mimImageJacs);
 }
 
 // The keyframe struct is quite happy with default operator=, but Level needs its own

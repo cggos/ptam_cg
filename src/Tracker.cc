@@ -996,7 +996,7 @@ string Tracker::GetMessageForUser()
 
 void Tracker::CalcSBIRotation()
 {
-    mpSBILastFrame->MakeJacs();
+    mpSBILastFrame->MakeJacs(mpSBILastFrame->mimTemplate, mpSBILastFrame->mimImageJacs);
     pair<SE2<>, double> result_pair;
     result_pair = mpSBIThisFrame->IteratePosRelToTarget(*mpSBILastFrame, 6);
     SE3<> se3Adjust = SmallBlurryImage::SE3fromSE2(result_pair.first, mCamera);
