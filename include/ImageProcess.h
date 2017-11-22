@@ -7,6 +7,11 @@
 #include <cvd/byte.h>
 #include <cvd/utility.h>
 #include <TooN/TooN.h>
+#include <TooN/se2.h>
+#include <TooN/se3.h>
+
+#include "KeyFrame.h"
+#include "ATANCamera.h"
 
 using namespace CVD;
 using namespace TooN;
@@ -19,6 +24,7 @@ public:
     static double ShiTomasiScoreAtPoint(CVD::BasicImage<CVD::byte> &image, int nHalfBoxSize, CVD::ImageRef irCenter);
     inline int SSDAtPoint(CVD::BasicImage<byte> &im, const CVD::ImageRef &ir, CVD::Image<byte> &imTemplate, int nMaxSSD); // Score function
 };
+
 
 class MiniPatch : public ImageProcess
 {
@@ -35,6 +41,26 @@ public:
 private:
     CVD::ImageRef mirPatchSize;
     CVD::Image<CVD::byte> mimOrigPatch;  // Original pixels
+};
+
+
+class SmallBlurryImage
+{
+public:
+    SmallBlurryImage();
+    SmallBlurryImage(KeyFrame &kf, double dBlur = 2.5);
+    void MakeFromKF(KeyFrame &kf, double dBlur = 2.5);
+    void MakeJacs();
+    double ZMSSD(SmallBlurryImage &other);
+    std::pair<SE2<>,double> IteratePosRelToTarget(SmallBlurryImage &other, int nIterations = 10);
+    static SE3<> SE3fromSE2(SE2<> se2, ATANCamera camera);
+
+protected:
+    CVD::Image<CVD::byte> mimSmall;
+    CVD::Image<float> mimTemplate;
+    CVD::Image<Vector<2> > mimImageJacs;
+    bool mbMadeJacs;
+    static CVD::ImageRef mirSize;
 };
 
 #endif

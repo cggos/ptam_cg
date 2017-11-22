@@ -1,6 +1,6 @@
 // Copyright 2008 Isis Innovation Limited
 #include "Relocaliser.h"
-#include "SmallBlurryImage.h"
+#include "ImageProcess.h"
 #include <cvd/utility.h>
 #include <gvars3/instances.h>
 
@@ -42,7 +42,7 @@ bool Relocaliser::AttemptRecovery(KeyFrame &kCurrent)
         return true;
     else
         return false;
-};
+}
 
 // Compare current KF to all KFs stored in map by
 // Zero-mean SSD

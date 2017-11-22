@@ -41,7 +41,6 @@ set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
         ${PROJECT_SOURCE_DIR}/src/KeyFrame.cc
         ${PROJECT_SOURCE_DIR}/src/Map.cc
-        ${PROJECT_SOURCE_DIR}/src/SmallBlurryImage.cc
         ${PROJECT_SOURCE_DIR}/src/HomographyInit.cc
         ${PROJECT_SOURCE_DIR}/src/MapMaker.cc
         ${PROJECT_SOURCE_DIR}/src/Bundle.cc

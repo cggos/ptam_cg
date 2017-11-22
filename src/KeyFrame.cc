@@ -1,7 +1,6 @@
 // Copyright 2008 Isis Innovation Limited
 #include "KeyFrame.h"
 #include "ImageProcess.h"
-#include "SmallBlurryImage.h"
 #include <cvd/vision.h>
 #include <cvd/fast_corner.h>
 
