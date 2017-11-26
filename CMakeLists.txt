@@ -1,6 +1,10 @@
 cmake_minimum_required( VERSION 3.2 )
 project ( PTAM4AR )
 
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 3)
+set(VERSION_PATCH 0)
+
 set( CMAKE_BUILD_TYPE "Release/Debug" )
 
 set( CMAKE_CXX_COMPILER "g++" )
@@ -99,7 +103,7 @@ if(BUILD_DOCUMENTATION)
         message(FATAL_ERROR "Doxygen is needed to build the documentation.")
     endif()
 
-    set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+    set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.config)
     set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
     configure_file(${doxyfile_in} ${doxyfile} @ONLY)
