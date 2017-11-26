@@ -2,17 +2,72 @@
 // Copyright 2008 Isis Innovation Limited
 #ifndef __GL_WINDOW_2_H
 #define __GL_WINDOW_2_H
-//
+
+#include <vector>
+#include <map>
+#include <cvd/glwindow.h>
+#include <TooN/TooN.h>
+#include <gvars3/gvars3.h>
+
+class GLWindow2;
+
+// A simple gvars-driven menu system for GLWindow2
+// N.b. each GLWindowMenu class internally contains sub-menus
+class GLWindowMenu
+{
+public:
+    GLWindowMenu(std::string sName, std::string sTitle);
+    ~GLWindowMenu();
+    void Render(int nTop, int nHeight, int nWidth, GLWindow2 &glw);
+    void FillBox(int l, int r, int t, int b);
+    void LineBox(int l, int r, int t, int b);
+
+    void GUICommandHandler(std::string sCommand, std::string sParams);
+    static void GUICommandCallBack(void* ptr, std::string sCommand, std::string sParams);
+
+    bool HandleClick(int button, int state, int x, int y);
+
+private:
+    enum MenuItemType { Button, Toggle, Monitor, Slider };
+
+    struct MenuItem
+    {
+        MenuItemType type;
+        std::string sName;
+        std::string sParam;
+        std::string sNextMenu;
+        GVars3::gvar2_int gvnIntValue;  // Not used by all, but used by some
+        int min;
+        int max;
+    };
+
+    struct SubMenu
+    {
+        std::vector<MenuItem> mvItems;
+    };
+
+    std::map<std::string, SubMenu> mmSubMenus;
+    std::string msCurrentSubMenu;
+    std::string msName;
+    std::string msTitle;
+
+
+    int mnWidth;
+    int mnMenuTop;
+    int mnMenuHeight;
+    int mnTextOffset;
+
+    GVars3::gvar2_int mgvnEnabled;
+    GVars3::gvar2_int mgvnMenuItemWidth;
+    GVars3::gvar2_int mgvnMenuTextOffset;
+
+    int mnLeftMostCoord;
+};
+
 //  A class which wraps a CVD::GLWindow and provides some basic
 //  user-interface funtionality: A gvars-driven clickable menu, and a
 //  caption line for text display. Also provides some handy GL helpers
 //  and a wrapper for CVD's text display routines.
-
-#include <cvd/glwindow.h>
-#include <TooN/TooN.h>
-
-class GLWindowMenu;
-
 class GLWindow2 : public CVD::GLWindow, public CVD::GLWindow::EventHandler
 {
 public:

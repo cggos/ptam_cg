@@ -40,7 +40,6 @@ endif()
 set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/main.cc
         ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
-        ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
         ${PROJECT_SOURCE_DIR}/src/System.cc
         ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
         ${PROJECT_SOURCE_DIR}/src/KeyFrame.cc
@@ -60,7 +59,6 @@ set( SRC_LIST_PTAM
 
 set( SRC_LIST_CameraCalibrator
         ${PROJECT_SOURCE_DIR}/src/GLWindow2.cc
-        ${PROJECT_SOURCE_DIR}/src/GLWindowMenu.cc
         ${PROJECT_SOURCE_DIR}/src/CalibImage.cc
         ${PROJECT_SOURCE_DIR}/src/CalibCornerPatch.cc
         ${PROJECT_SOURCE_DIR}/src/ATANCamera.cc
