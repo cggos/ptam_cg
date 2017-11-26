@@ -1,25 +1,22 @@
 // Copyright 2008 Isis Innovation Limited
 #include "MapMaker.h"
-#include "Bundle.h"
-#include "PatchFinder.h"
-#include "SmallMatrixOpts.h"
-#include "HomographyInit.h"
-
-#include <cvd/vector_image_ref.h>
-#include <cvd/vision.h>
-#include <cvd/image_interpolate.h>
-
-#include <TooN/SVD.h>
-#include <TooN/SymEigen.h>
-
-#include <gvars3/instances.h>
-#include <fstream>
-#include <algorithm>
 
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
+#include <fstream>
+#include <algorithm>
+#include <cvd/vector_image_ref.h>
+#include <cvd/vision.h>
+#include <cvd/image_interpolate.h>
+#include <TooN/SVD.h>
+#include <TooN/SymEigen.h>
+#include <gvars3/instances.h>
+
+#include "Bundle.h"
+#include "PatchFinder.h"
+#include "HomographyInit.h"
 
 using namespace CVD;
 using namespace std;
@@ -35,7 +32,7 @@ MapMaker::MapMaker(Map& m, const ATANCamera &cam)
     start(); // This CVD::thread func starts the map-maker thread with function run()
     GUI.RegisterCommand("SaveMap", GUICommandCallBack, this);
     GV3::Register(mgvdWiggleScale, "MapMaker.WiggleScale", 0.1, SILENT); // Default to 10cm between keyframes
-};
+}
 
 void MapMaker::Reset()
 {

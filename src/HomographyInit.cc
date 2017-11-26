@@ -1,14 +1,19 @@
 // Copyright 2008 Isis Innovation Limited
+
 #include "HomographyInit.h"
-#include "SmallMatrixOpts.h"
+
 #include <utility>
 #include <TooN/se3.h>
 #include <TooN/SVD.h>
 #include <TooN/SymEigen.h>
 #include <TooN/wls.h>
+
+#include "Tools.h"
 #include "MEstimator.h"
 
 using namespace std;
+using namespace cg;
+
 bool HomographyInit::IsHomographyInlier(Matrix<3> m3Homography, HomographyMatch match)
 {
     Vector<2> v2Projected = project(m3Homography * unproject(match.v2CamPlaneFirst));
@@ -239,7 +244,7 @@ void HomographyInit::DecomposeHomography()
     Matrix<3> U = svd.get_U();
     Matrix<3> V = svd.get_VT().T();
 
-    double s = M3Det(U) * M3Det(V);
+    double s = Tools::M3Det(U) * Tools::M3Det(V);
 
     double dPrime_PM = d2;
 

@@ -1,14 +1,17 @@
 // Copyright 2008 Isis Innovation Limited
-#include "CalibCornerPatch.h"
+
 #include "OpenGL.h"
+#include "CalibCornerPatch.h"
+
 #include <TooN/helpers.h>
+#include <TooN/Cholesky.h>
 #include <cvd/vector_image_ref.h>
 #include <cvd/vision.h>
 #include <cvd/utility.h>
 #include <cvd/convolution.h>
 #include <cvd/image_interpolate.h>
-#include <TooN/Cholesky.h>
-#include "SmallMatrixOpts.h"
+
+#include "Tools.h"
 
 using namespace std;
 using namespace CVD;
@@ -39,7 +42,7 @@ void CalibCornerPatch::MakeTemplateWithCurrentParams()
     {
         Matrix<2> m2Warp = mParams.m2Warp();
         CVD::transform(mimSharedSourceTemplate, imTwiceToBlur,
-                       M2Inverse(m2Warp),
+                       cg::Tools::M2Inverse(m2Warp),
                        vec(mimSharedSourceTemplate.size() - ImageRef(1,1)) * 0.5,
                        vec(imTwiceToBlur.size() - ImageRef(1,1)) * 0.5);
         halfSample(imTwiceToBlur, imToBlur);
@@ -63,7 +66,7 @@ void CalibCornerPatch::MakeTemplateWithCurrentParams()
         };
 
         CVD::transform(mimSharedSourceTemplate, imTwiceToBlur,
-                       M2Inverse(m2Warp),
+                       cg::Tools::M2Inverse(m2Warp),
                        vec(mimSharedSourceTemplate.size() - ImageRef(1,1)) * 0.5,
                        vec(imTwiceToBlur.size() - ImageRef(1,1)) * 0.5);
         halfSample(imTwiceToBlur, imToBlur);

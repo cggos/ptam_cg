@@ -1,17 +1,19 @@
 // Copyright 2008 Isis Innovation Limited
 #include "PatchFinder.h"
-#include "SmallMatrixOpts.h"
-#include "KeyFrame.h"
 
-#include <cvd/vision.h>
-#include <cvd/vector_image_ref.h>
-#include <cvd/image_interpolate.h>
-#include <TooN/Cholesky.h>
 // tmmintrin.h contains SSE3<> instrinsics, used for the ZMSSD search at the bottom..
 // If this causes problems, just do #define CVD_HAVE_XMMINTRIN 0
 #if CVD_HAVE_XMMINTRIN
 #include <tmmintrin.h>
 #endif
+
+#include <cvd/vision.h>
+#include <cvd/vector_image_ref.h>
+#include <cvd/image_interpolate.h>
+#include <TooN/Cholesky.h>
+
+#include "Tools.h"
+#include "KeyFrame.h"
 
 using namespace CVD;
 using namespace std;
@@ -81,7 +83,7 @@ void PatchFinder::MakeTemplateCoarse(MapPoint &p,
 void PatchFinder::MakeTemplateCoarseCont(MapPoint &p)
 {
     // Get the warping matrix appropriate for use with CVD::transform...
-    Matrix<2> m2 = M2Inverse(mm2WarpInverse) * LevelScale(mnSearchLevel);
+    Matrix<2> m2 = cg::Tools::M2Inverse(mm2WarpInverse) * LevelScale(mnSearchLevel);
     // m2 now represents the number of pixels in the source image for one
     // pixel of template image
 

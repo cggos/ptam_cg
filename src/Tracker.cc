@@ -16,7 +16,6 @@
 
 #include "OpenGL.h"
 #include "MEstimator.h"
-#include "SmallMatrixOpts.h"
 
 using namespace CVD;
 using namespace std;
