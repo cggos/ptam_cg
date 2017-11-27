@@ -126,7 +126,7 @@ bool MapMaker::ResetDone()
     return mbResetDone;
 }
 
-// HandleBadPoints() Does some heuristic checks on all points in the map to see if 
+// Does some heuristic checks on all points in the map to see if
 // they should be flagged as bad, based on tracker feedback.
 void MapMaker::HandleBadPoints()
 {
@@ -140,17 +140,16 @@ void MapMaker::HandleBadPoints()
 
     // All points marked as bad will be erased - erase all records of them
     // from keyframes in which they might have been measured.
-    for(unsigned int i=0; i<mMap.vpPoints.size(); i++)
-        if(mMap.vpPoints[i]->bBad)
-        {
+    for(unsigned int i=0; i<mMap.vpPoints.size(); i++) {
+        if (mMap.vpPoints[i]->bBad) {
             MapPoint *p = mMap.vpPoints[i];
-            for(unsigned int j=0; j<mMap.vpKeyFrames.size(); j++)
-            {
+            for (unsigned int j = 0; j < mMap.vpKeyFrames.size(); j++) {
                 KeyFrame &k = *mMap.vpKeyFrames[j];
-                if(k.mMeasurements.count(p))
+                if (k.mMeasurements.count(p))
                     k.mMeasurements.erase(p);
             }
         }
+    }
     // Move bad points to the trash list.
     mMap.MoveBadPointsToTrash();
 }
@@ -435,7 +434,7 @@ void MapMaker::AddSomeMapPoints(int nLevel)
 
     for(unsigned int i = 0; i<l.vCandidates.size(); i++)
         AddPointEpipolar(kSrc, kTarget, nLevel, i);
-};
+}
 
 // Rotates/translates the whole map and all keyframes
 void MapMaker::ApplyGlobalTransformationToMap(SE3<> se3NewFromOld)
@@ -443,7 +442,6 @@ void MapMaker::ApplyGlobalTransformationToMap(SE3<> se3NewFromOld)
     for(unsigned int i=0; i<mMap.vpKeyFrames.size(); i++)
         mMap.vpKeyFrames[i]->se3CfromW = mMap.vpKeyFrames[i]->se3CfromW * se3NewFromOld.inverse();
 
-    SO3<> so3Rot = se3NewFromOld.get_rotation();
     for(unsigned int i=0; i<mMap.vpPoints.size(); i++)
     {
         mMap.vpPoints[i]->v3WorldPos =
@@ -484,7 +482,7 @@ void MapMaker::AddKeyFrame(KeyFrame &k)
 // Mapmaker's code to handle incoming key-frames.
 void MapMaker::AddKeyFrameFromTopOfQueue()
 {
-    if(mvpKeyFrameQueue.size() == 0)
+    if(mvpKeyFrameQueue.empty())
         return;
 
     KeyFrame *pK = mvpKeyFrameQueue[0];
@@ -492,10 +490,7 @@ void MapMaker::AddKeyFrameFromTopOfQueue()
     pK->MakeKeyFrame_Rest();
     mMap.vpKeyFrames.push_back(pK);
     // Any measurements? Update the relevant point's measurement counter status map
-    for(meas_it it = pK->mMeasurements.begin();
-        it!=pK->mMeasurements.end();
-        it++)
-    {
+    for(meas_it it = pK->mMeasurements.begin(); it!=pK->mMeasurements.end(); it++) {
         it->first->pMMData->sMeasurementKFs.insert(pK);
         it->second.Source = Measurement::SRC_TRACKER;
     }
@@ -654,6 +649,7 @@ bool MapMaker::AddPointEpipolar(KeyFrame &kSrc,
     
     mMap.vpPoints.push_back(pNew);
     mqNewQueue.push(pNew);
+
     Measurement m;
     m.Source = Measurement::SRC_ROOT;
     m.v2RootPos = v2RootPos;
@@ -664,8 +660,10 @@ bool MapMaker::AddPointEpipolar(KeyFrame &kSrc,
     m.Source = Measurement::SRC_EPIPOLAR;
     m.v2RootPos = Finder.GetSubPixPos();
     kTarget.mMeasurements[pNew] = m;
+
     pNew->pMMData->sMeasurementKFs.insert(&kSrc);
     pNew->pMMData->sMeasurementKFs.insert(&kTarget);
+
     return true;
 }
 
@@ -729,9 +727,7 @@ bool MapMaker::NeedNewKeyFrame(KeyFrame &kCurrent)
     double dDist = DistToNearestKeyFrame(kCurrent);
     dDist *= (1.0 / kCurrent.dSceneDepthMean);
 
-    if(dDist > GV2.GetDouble("MapMaker.MaxKFDistWiggleMult",1.0,SILENT) * mdWiggleScaleDepthNormalized)
-        return true;
-    return false;
+    return dDist > GV2.GetDouble("MapMaker.MaxKFDistWiggleMult", 1.0, SILENT) * mdWiggleScaleDepthNormalized;
 }
 
 // Perform bundle adjustment on all keyframes, all map points
@@ -927,13 +923,12 @@ void MapMaker::BundleAdjust(set<KeyFrame*> sAdjustSet, set<KeyFrame*> sFixedSet,
 // data association if a bad measurement was detected, or if a point
 // was never searched for in a keyframe in the first place. This operates
 // much like the tracker! So most of the code looks just like in 
-// TrackerData.h.
+// TrackerData class
 bool MapMaker::ReFind_Common(KeyFrame &k, MapPoint &p)
 {
     // abort if either a measurement is already in the map, or we've
     // decided that this point-kf combo is beyond redemption
-    if(p.pMMData->sMeasurementKFs.count(&k)
-            || p.pMMData->sNeverRetryKFs.count(&k))
+    if(p.pMMData->sMeasurementKFs.count(&k) || p.pMMData->sNeverRetryKFs.count(&k))
         return false;
 
     static PatchFinder Finder;
@@ -996,11 +991,11 @@ bool MapMaker::ReFind_Common(KeyFrame &k, MapPoint &p)
     {
         m.v2RootPos = Finder.GetCoarsePosAsVector();
         m.bSubPix = false;
-    };
+    }
 
     if(k.mMeasurements.count(&p))
     {
-        assert(0); // This should never happen, we checked for this at the start.
+        assert(false); // This should never happen, we checked for this at the start.
     }
     k.mMeasurements[&p] = m;
     p.pMMData->sMeasurementKFs.insert(&k);
@@ -1021,7 +1016,7 @@ int MapMaker::ReFindInSingleKeyFrame(KeyFrame &k)
             nFoundNow++;
 
     return nFoundNow;
-};
+}
 
 // When new map points are generated, they're only created from a stereo pair
 // this tries to make additional measurements in other KFs which they might
@@ -1030,22 +1025,22 @@ void MapMaker::ReFindNewlyMade()
 {
     if(mqNewQueue.empty())
         return;
+
     int nFound = 0;
     int nBad = 0;
-    while(!mqNewQueue.empty() && mvpKeyFrameQueue.size() == 0)
-    {
-        MapPoint* pNew = mqNewQueue.front();
+    while(!mqNewQueue.empty() && mvpKeyFrameQueue.size() == 0) {
+        MapPoint *pNew = mqNewQueue.front();
         mqNewQueue.pop();
-        if(pNew->bBad)
-        {
+        if (pNew->bBad) {
             nBad++;
             continue;
         }
-        for(unsigned int i=0; i<mMap.vpKeyFrames.size(); i++)
-            if(ReFind_Common(*mMap.vpKeyFrames[i], *pNew))
+        for (unsigned int i = 0; i < mMap.vpKeyFrames.size(); i++) {
+            if (ReFind_Common(*mMap.vpKeyFrames[i], *pNew))
                 nFound++;
+        }
     }
-};
+}
 
 // Dud measurements get a second chance.
 void MapMaker::ReFindFromFailureQueue()
@@ -1060,7 +1055,7 @@ void MapMaker::ReFindFromFailureQueue()
             nFound++;
 
     mvFailureQueue.erase(mvFailureQueue.begin(), it);
-};
+}
 
 // Is the tracker's camera pose in cloud-cuckoo land?
 bool MapMaker::IsDistanceToNearestKeyFrameExcessive(KeyFrame &kCurrent)

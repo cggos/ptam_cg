@@ -27,7 +27,7 @@ class VideoSource
 {
 public:
     VideoSource():mirSize(GVars3::GV3::get<CVD::ImageRef>("VideoSource.Resolution", CVD::ImageRef(640,480))){}
-    ~VideoSource(){}
+    virtual ~VideoSource(){}
     virtual void GetAndFillFrameBWandRGB(CVD::Image<CVD::byte> &imBW, CVD::Image<CVD::Rgb<CVD::byte> > &imRGB)=0;
     CVD::ImageRef Size() { return mirSize; }
 protected:

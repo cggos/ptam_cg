@@ -73,15 +73,17 @@ struct Point
 // computation intermediates.
 struct Meas
 {
-    inline Meas()
-    {bBad = false;}
+    inline Meas() {
+        bBad = false;
+    }
 
     // Which camera/point did this measurement come from?
     int p; // The point  - called i in MVG
     int c; // The camera - called j in MVG
 
-    inline bool operator<(const Meas &rhs) const
-    {  return(c<rhs.c ||(c==rhs.c && p < rhs.p)); }
+    inline bool operator<(const Meas &rhs) const {
+        return (c < rhs.c || (c == rhs.c && p < rhs.p));
+    }
 
     bool bBad;
 
@@ -116,7 +118,6 @@ public:
     std::set<int> GetOutliers();                                // Points flagged as outliers
 
 protected:
-
     inline void ProjectAndFindSquaredError(Meas &meas); // Project a single point in a single view, compare to measurement
     template<class MEstimator> bool Do_LM_Step(bool *pbAbortSignal);
     template<class MEstimator> double FindNewError();

@@ -195,7 +195,7 @@ bool Bundle::Do_LM_Step(bool *pbAbortSignal)
         ProjectAndFindSquaredError(meas);
         if(!meas.bBad)
             vdErrorSquared.push_back(meas.dErrorSquared);
-    };
+    }
 
     // Projected all points and got vector of errors; find the median,
     // And work out robust estimate of sigma, then scale this for the tukey
@@ -498,26 +498,26 @@ bool Bundle::Do_LM_Step(bool *pbAbortSignal)
         cout << " WINNER            ------------ " << endl;
         // Woo! got somewhere. Update lambda and make changes permanent.
         ModifyLambda_GoodStep();
-        for(unsigned int j=0; j<mvCameras.size(); j++)
-            mvCameras[j].se3CfW = mvCameras[j].se3CfWNew;
-        for(unsigned int i=0; i<mvPoints.size(); i++)
-            mvPoints[i].v3Pos = mvPoints[i].v3PosNew;
+        for (auto &mvCamera : mvCameras)
+            mvCamera.se3CfW = mvCamera.se3CfWNew;
+        for (auto &mvPoint : mvPoints)
+            mvPoint.v3Pos = mvPoint.v3PosNew;
         mnAccepted++;
     }
 
     // Finally, ditch all the outliers.
     vector<list<Meas>::iterator> vit;
-    for(list<Meas>::iterator itr = mMeasList.begin(); itr!=mMeasList.end(); itr++)
-        if(itr->bBad)
-        {
+    for(list<Meas>::iterator itr = mMeasList.begin(); itr!=mMeasList.end(); itr++) {
+        if (itr->bBad) {
             vit.push_back(itr);
             mvOutlierMeasurementIdx.push_back(make_pair(itr->p, itr->c));
             mvPoints[itr->p].nOutliers++;
-            mvMeasLUTs[itr->c][itr->p] = NULL;
-        };
+            mvMeasLUTs[itr->c][itr->p] = nullptr;
+        }
+    }
 
-    for(unsigned int i=0; i<vit.size(); i++)
-        mMeasList.erase(vit[i]);
+    for (auto i : vit)
+        mMeasList.erase(i);
 
     cout << "Nuked " << vit.size() << " measurements." << endl;
     return true;
@@ -636,7 +636,6 @@ set<int> Bundle::GetOutliers()
     }
     return sOutliers;
 };
-
 
 vector<pair<int, int> > Bundle::GetOutlierMeasurements()
 {

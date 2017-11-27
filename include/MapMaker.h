@@ -13,6 +13,8 @@
 
 #ifndef __MAPMAKER_H
 #define __MAPMAKER_H
+
+#include <queue>
 #include <cvd/image.h>
 #include <cvd/byte.h>
 #include <cvd/thread.h>
@@ -20,18 +22,16 @@
 #include "Map.h"
 #include "KeyFrame.h"
 #include "ATANCamera.h"
-#include <queue>
-
 
 // Each MapPoint has an associated MapMakerData class
 // Where the mapmaker can store extra information
-
 struct MapMakerData
 {
     std::set<KeyFrame*> sMeasurementKFs;   // Which keyframes has this map point got measurements in?
     std::set<KeyFrame*> sNeverRetryKFs;    // Which keyframes have measurements failed enough so I should never retry?
-    inline int GoodMeasCount()
-    {  return sMeasurementKFs.size(); }
+    inline int GoodMeasCount() {
+        return sMeasurementKFs.size();
+    }
 };
 
 // MapMaker dervives from CVD::Thread, so everything in void run() is its own thread.
@@ -46,11 +46,6 @@ public:
                         std::vector<std::pair<CVD::ImageRef, CVD::ImageRef> > &vMatches,
                         SE3<> &se3CameraPos);
 
-    bool InitFromStereo_OLD(KeyFrame &kFirst, KeyFrame &kSecond,  // EXPERIMENTAL HACK
-                            std::vector<std::pair<CVD::ImageRef, CVD::ImageRef> > &vMatches,
-                            SE3<> &se3CameraPos);
-
-
     void AddKeyFrame(KeyFrame &k);   // Add a key-frame to the map. Called by the tracker.
     void RequestReset();   // Request that the we reset. Called by the tracker.
     bool ResetDone();      // Returns true if the has been done.
@@ -59,7 +54,6 @@ public:
     bool IsDistanceToNearestKeyFrameExcessive(KeyFrame &kCurrent);  // Is the camera far away from the nearest KeyFrame (i.e. maybe lost?)
 
 protected:
-
     Map &mMap;               // The map
     ATANCamera mCamera;      // Same as the tracker's camera: N.B. not a reference variable!
     virtual void run();      // The MapMaker thread code lives here
@@ -100,13 +94,11 @@ protected:
     std::vector<KeyFrame*> NClosestKeyFrames(KeyFrame &k, unsigned int N);
     void RefreshSceneDepth(KeyFrame *pKF);
 
-
     // GUI Interface:
     void GUICommandHandler(std::string sCommand, std::string sParams);
     static void GUICommandCallBack(void* ptr, std::string sCommand, std::string sParams);
     struct Command {std::string sCommand; std::string sParams; };
     std::vector<Command> mvQueuedCommands;
-
 
     // Member variables:
     std::vector<KeyFrame*> mvpKeyFrameQueue;  // Queue of keyframes from the tracker waiting to be processed
@@ -128,8 +120,6 @@ protected:
     bool mbBundleAbortRequested;      // We should stop bundle adjustment
     bool mbBundleRunning;             // Bundle adjustment is running
     bool mbBundleRunningIsRecent;     //    ... and it's a local bundle adjustment.
-
-
 };
 
 #endif

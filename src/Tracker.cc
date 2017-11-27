@@ -94,7 +94,7 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
     // Update the small images for the rotation estimator
     static gvar3<double> gvdSBIBlur("Tracker.RotationEstimatorBlur", 0.75, SILENT);
     static gvar3<int> gvnUseSBI("Tracker.UseRotationEstimator", 1, SILENT);
-    mbUseSBIInit = *gvnUseSBI;
+    mbUseSBIInit = (bool)*gvnUseSBI;
     if(!mpSBIThisFrame)
     {
         mpSBIThisFrame = new SmallBlurryImage(mCurrentKF, *gvdSBIBlur);
@@ -118,8 +118,8 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
             glColor3f(1,0,1);
             glPointSize(1);
             glBegin(GL_POINTS);
-            for(unsigned int i=0; i<mCurrentKF.aLevels[0].vCorners.size(); i++)
-                glVertex(mCurrentKF.aLevels[0].vCorners[i]);
+            for (const auto &vCorner : mCurrentKF.aLevels[0].vCorners)
+                glVertex(vCorner);
             glEnd();
         }
     }
@@ -156,7 +156,7 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
             {
                 mMessageForUser << " Adding key-frame.";
                 AddNewKeyFrame();
-            };
+            }
         }
         else  // what if there is a map, but tracking has been lost?
         {
@@ -350,9 +350,9 @@ void Tracker::TrailTracking_Start()
     {                                                                     // so that we can choose the image corners with max ST score
         Candidate &c = mCurrentKF.aLevels[0].vCandidates[i];
         vCornersAndSTScores.push_back(pair<double,ImageRef>(-1.0 * c.dSTScore, c.irLevelPos)); // negative so highest score first in sorted list
-    };
+    }
     sort(vCornersAndSTScores.begin(), vCornersAndSTScores.end());  // Sort according to Shi-Tomasi score
-    int nToAdd = GV2.GetInt("MaxInitialTrails", 1000, SILENT);
+    int nToAdd = GV2.GetInt("Tracker.MaxInitialTrails", 1000, SILENT);
     for(unsigned int i = 0; i<vCornersAndSTScores.size() && nToAdd > 0; i++)
     {
         Trail t;
@@ -445,8 +445,8 @@ void Tracker::TrackMap()
 
     // The Potentially-Visible-Set (PVS) is split into pyramid levels.
     vector<TrackerData*> avPVS[LEVELS];
-    for(int i=0; i<LEVELS; i++)
-        avPVS[i].reserve(500);
+    for (auto &i : avPVS)
+        i.reserve(500);
 
     // For all points in the map..
     for(unsigned int i=0; i<mMap.vpPoints.size(); i++)
@@ -679,11 +679,8 @@ void Tracker::TrackMap()
         glEnable(GL_POINT_SMOOTH);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glBegin(GL_POINTS);
-        for(vector<TrackerData*>::reverse_iterator it = vIterationSet.rbegin();
-            it!= vIterationSet.rend();
-            it++)
-        {
-            if(! (*it)->bFound)
+        for(vector<TrackerData*>::reverse_iterator it = vIterationSet.rbegin(); it!= vIterationSet.rend(); it++) {
+            if (!(*it)->bFound)
                 continue;
             glColor(gavLevelColors[(*it)->nSearchLevel]);
             glVertex((*it)->v2Image);
@@ -700,17 +697,14 @@ void Tracker::TrackMap()
 
     // Record successful measurements. Use the KeyFrame-Measurement struct for this.
     mCurrentKF.mMeasurements.clear();
-    for(vector<TrackerData*>::iterator it = vIterationSet.begin();
-        it!= vIterationSet.end();
-        it++)
-    {
-        if(! (*it)->bFound)
+    for(vector<TrackerData*>::iterator it = vIterationSet.begin(); it!= vIterationSet.end(); it++) {
+        if (!(*it)->bFound)
             continue;
         Measurement m;
         m.v2RootPos = (*it)->v2Found;
         m.nLevel = (*it)->nSearchLevel;
         m.bSubPix = (*it)->bDidSubPix;
-        mCurrentKF.mMeasurements[& ((*it)->Point)] = m;
+        mCurrentKF.mMeasurements[&((*it)->Point)] = m;
     }
 
     // Finally, find the mean scene depth from tracked features
@@ -718,16 +712,14 @@ void Tracker::TrackMap()
         double dSum = 0;
         double dSumSq = 0;
         int nNum = 0;
-        for(vector<TrackerData*>::iterator it = vIterationSet.begin();
-            it!= vIterationSet.end();
-            it++)
-            if((*it)->bFound)
-            {
+        for(vector<TrackerData*>::iterator it = vIterationSet.begin(); it!= vIterationSet.end(); it++) {
+            if ((*it)->bFound) {
                 double z = (*it)->v3Cam[2];
-                dSum+= z;
-                dSumSq+= z*z;
+                dSum += z;
+                dSumSq += z * z;
                 nNum++;
-            };
+            }
+        }
         if(nNum > 20)
         {
             mCurrentKF.dSceneDepthMean = dSum/nNum;

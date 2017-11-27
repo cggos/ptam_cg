@@ -5,7 +5,7 @@ set(VERSION_MAJOR 1)
 set(VERSION_MINOR 3)
 set(VERSION_PATCH 0)
 
-set( CMAKE_BUILD_TYPE "Release/Debug" )
+set( CMAKE_BUILD_TYPE "Debug" )
 
 set( CMAKE_CXX_COMPILER "g++" )
 
