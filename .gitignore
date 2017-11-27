@@ -42,3 +42,5 @@ rgbd_dataset_freiburg1_xyz/
 3rdParty/
 
 CMakeLists.txt.user
+
+.idea/
