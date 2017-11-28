@@ -5,32 +5,50 @@ set(VERSION_MAJOR 1)
 set(VERSION_MINOR 3)
 set(VERSION_PATCH 0)
 
-set( CMAKE_BUILD_TYPE "Debug" )
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE Release)
+ENDIF()
+
+message("CMake Build Type: " ${CMAKE_BUILD_TYPE})
+
+
+############### set CMake Compiler ######################
 
 set( CMAKE_CXX_COMPILER "g++" )
 
+# check compiler version > 5.1
 message(STATUS "CMAKE_CXX_COMPILER_VERSION: " ${CMAKE_CXX_COMPILER_VERSION})
 if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
     message(FATAL_ERROR "Too low CXX Version, it must equal or great than 5.1")
 endif()
 
+# check and set C++11
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 if(NOT COMPILER_SUPPORTS_CXX11)
     message(FATAL_ERROR "CXX does not support -std=c++11")
 endif()
+add_definitions(-DCOMPILEDWITHC11)
 
+# output C++ features
 message(STATUS "My C++ compiler supports these C++ features:")
 foreach(i ${CMAKE_CXX_COMPILE_FEATURES})
     message(STATUS "  ${i}")
 endforeach()
 
+# set CMAKE_CXX_FLAGS
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(MY_OVERALL_CXX_FLAGS    "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -Wall -lpthread -lm")
-    set(CMAKE_CXX_FLAGS_RELEASE "${MY_OVERALL_CXX_FLAGS} -O3")
-    set(CMAKE_CXX_FLAGS_DEBUG   "${MY_OVERALL_CXX_FLAGS} -O0 -g -ggdb")# debug, no optimisation
-    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} --coverage -lgcov") # enabling coverage
+    set(MY_OVERALL_CXX_FLAGS    "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -Wall -Wno-deprecated-declarations -lpthread -lm")
+    if(CMAKE_BUILD_TYPE MATCHES "Release")
+        set(CMAKE_CXX_FLAGS_RELEASE "${MY_OVERALL_CXX_FLAGS} -O3")
+        set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_RELEASE})
+    else(CMAKE_BUILD_TYPE MATCHES "Debug")
+        set(CMAKE_CXX_FLAGS_DEBUG   "${MY_OVERALL_CXX_FLAGS} -O0 -g -ggdb")# debug, no optimisation
+        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} --coverage -lgcov") # enabling coverage
+        set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
+    endif(CMAKE_BUILD_TYPE MATCHES "Release")
 endif()
+
 
 # set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
 
@@ -153,9 +171,8 @@ add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
 
 ############### output some messages ######################
 
-message("CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
-message("CMAKE_CXX_FLAGS_DEBUG  : " ${CMAKE_CXX_FLAGS_DEBUG})
+message("CMAKE_CXX_FLAGS  : " ${CMAKE_CXX_FLAGS_DEBUG})
 
-message(${CMAKE_CURRENT_BINARY_DIR})
-message(${CMAKE_BINARY_DIR})
-message(${PROJECT_BINARY_DIR})
+message("CMAKE_CURRENT_BINARY_DIR: " ${CMAKE_CURRENT_BINARY_DIR})
+message("CMAKE_BINARY_DIR:         " ${CMAKE_BINARY_DIR})
+message("PROJECT_BINARY_DIR:       " ${PROJECT_BINARY_DIR})
