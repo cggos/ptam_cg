@@ -124,18 +124,16 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
         }
     }
 
-    // Decide what to do - if there is a map, try to track the map ...
     if(mMap.IsGood())
     {
-        if(mnLostFrames < 3)  // .. but only if we're not lost!
+        if(mnLostFrames < 3)
         {
-            if(mbUseSBIInit)
-                CalcSBIRotation();
-            ApplyMotionModel();       //
-            TrackMap();               //  These three lines do the main tracking work.
-            UpdateMotionModel();      //
+            // These three lines do the main tracking work.
+            PredictPoseWithMotionModel();
+            TrackMap();
+            UpdateMotionModel();
 
-            AssessTrackingQuality();  //  Check if we're lost or if tracking is poor.
+            AssessTrackingQuality();
             {
                 // Provide some feedback for the user:
                 mMessageForUser << "Tracking Map, quality ";
@@ -149,10 +147,7 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
             }
 
             // Heuristics to check if a key-frame should be added to the map:
-            if(mTrackingQuality == GOOD &&
-                    mMapMaker.NeedNewKeyFrame(mCurrentKF) &&
-                    mnFrame - mnLastKeyFrameDropped > 20  &&
-                    mMapMaker.QueueSize() < 3)
+            if(mTrackingQuality==GOOD && mMapMaker.NeedNewKeyFrame(mCurrentKF) && mnFrame-mnLastKeyFrameDropped>20 && mMapMaker.QueueSize()<3)
             {
                 mMessageForUser << " Adding key-frame.";
                 AddNewKeyFrame();
@@ -170,7 +165,7 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
         if(mbDraw)
             RenderGrid();
     }
-    else // If there is no map, try to make one.
+    else
         TrackForInitialMap();
 
     // GUI interface
@@ -500,17 +495,15 @@ void Tracker::TrackMap()
 
     // Set of heuristics to check if we should do a coarse tracking stage.
     bool bTryCoarse = true;
-    if(*gvnCoarseDisabled ||
-            mdMSDScaledVelocityMagnitude < *gvdCoarseMinVel  ||
-            nCoarseMax == 0)
+    if(*gvnCoarseDisabled || mdMSDScaledVelocityMagnitude<*gvdCoarseMinVel || nCoarseMax==0) {
         bTryCoarse = false;
-    if(mbJustRecoveredSoUseCoarse)
-    {
+    }
+    if(mbJustRecoveredSoUseCoarse) {
         bTryCoarse = true;
-        nCoarseMax *=2;
-        nCoarseRange *=2;
+        nCoarseMax *= 2;
+        nCoarseRange *= 2;
         mbJustRecoveredSoUseCoarse = false;
-    };
+    }
 
     // If we do want to do a coarse stage, also check that there's enough high-level
     // PV map points. We use the lowest-res two pyramid levels (LEVELS-1 and LEVELS-2),
@@ -880,35 +873,49 @@ Vector<6> Tracker::CalcPoseUpdate(vector<TrackerData*> vTD, double dOverrideSigm
     return wls.get_mu();
 }
 
-
-// Just add the current velocity to the current pose.
-// N.b. this doesn't actually use time in any way, i.e. it assumes
-// a one-frame-per-second camera. Skipped frames etc
-// are not handled properly here.
-void Tracker::ApplyMotionModel()
+/**
+ * @brief Just add the current velocity to the current pose.
+ *        N.b. this doesn't actually use time in any way,i.e. it assumes a one-frame-per-second camera.
+ *        Skipped frames etc are not handled properly here.
+ */
+void Tracker::PredictPoseWithMotionModel()
 {
     mse3StartPos = mse3CamFromWorld;
     Vector<6> v6Velocity = mv6CameraVelocity;
     if(mbUseSBIInit)
     {
-        v6Velocity.slice<3,3>() = mv6SBIRot.slice<3,3>();
+        //CalcSBIRotation
+        mpSBILastFrame->MakeJacs(mpSBILastFrame->mimTemplate, mpSBILastFrame->mimImageJacs);
+        pair<SE2<>, double> result_pair;
+        result_pair = mpSBIThisFrame->IteratePosRelToTarget(*mpSBILastFrame, 6);
+        SE3<> se3Adjust = SmallBlurryImage::SE3fromSE2(result_pair.first, mCamera);
+        Vector<6> v6SBIRot = se3Adjust.ln();
+
+        v6Velocity.slice<3,3>() = v6SBIRot.slice<3,3>();
         v6Velocity[0] = 0.0;
         v6Velocity[1] = 0.0;
     }
     mse3CamFromWorld = SE3<>::exp(v6Velocity) * mse3StartPos;
-};
+}
 
-
-// The motion model is entirely the tracker's, and is kept as a decaying
-// constant velocity model.
+/**
+ * @brief The motion model is entirely the tracker's, and is kept as
+ *        a decaying constant velocity model.
+ */
 void Tracker::UpdateMotionModel()
 {
     SE3<> se3NewFromOld = mse3CamFromWorld * mse3StartPos.inverse();
     Vector<6> v6Motion = SE3<>::ln(se3NewFromOld);
-    Vector<6> v6OldVel = mv6CameraVelocity;
 
-    mv6CameraVelocity = 0.9 * (0.5 * v6Motion + 0.5 * v6OldVel);
-    mdVelocityMagnitude = sqrt(mv6CameraVelocity * mv6CameraVelocity);
+    static gvar3<int> gvnConstVel("Tracker.UseConstantVelocity", 1, SILENT);
+    bool bConstVel = (bool)*gvnConstVel;
+    if(bConstVel) {
+        mv6CameraVelocity = v6Motion;
+    }
+    else {
+        Vector<6> v6OldVel = mv6CameraVelocity;
+        mv6CameraVelocity = 0.9 * (0.5 * v6Motion + 0.5 * v6OldVel);
+    }
 
     // Also make an estimate of this which has been scaled by the mean scene depth.
     // This is used to decide if we should use a coarse tracking stage.
@@ -983,15 +990,6 @@ void Tracker::AssessTrackingQuality()
 string Tracker::GetMessageForUser()
 {
     return mMessageForUser.str();
-}
-
-void Tracker::CalcSBIRotation()
-{
-    mpSBILastFrame->MakeJacs(mpSBILastFrame->mimTemplate, mpSBILastFrame->mimImageJacs);
-    pair<SE2<>, double> result_pair;
-    result_pair = mpSBIThisFrame->IteratePosRelToTarget(*mpSBILastFrame, 6);
-    SE3<> se3Adjust = SmallBlurryImage::SE3fromSE2(result_pair.first, mCamera);
-    mv6SBIRot = se3Adjust.ln();
 }
 
 ImageRef TrackerData::irImageSize;  // Static member of TrackerData lives here

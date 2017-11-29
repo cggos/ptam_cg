@@ -177,7 +177,7 @@ protected:
     // Methods for tracking the map once it has been made:
     void TrackMap();                // Called by TrackFrame if there is a map.
     void AssessTrackingQuality();   // Heuristics to choose between good, poor, bad.
-    void ApplyMotionModel();        // Decaying velocity motion model applied prior to TrackMap
+    void PredictPoseWithMotionModel();        // Decaying velocity motion model applied prior to TrackMap
     void UpdateMotionModel();       // Motion model is updated after TrackMap
     int SearchForPoints(std::vector<TrackerData*> &vTD,
                         int nRange,
@@ -188,7 +188,6 @@ protected:
     SE3<> mse3CamFromWorld;           // Camera pose: this is what the tracker updates every frame.
     SE3<> mse3StartPos;               // What the camera pose was at the start of the frame.
     Vector<6> mv6CameraVelocity;    // Motion model
-    double mdVelocityMagnitude;     // Used to decide on coarse tracking
     double mdMSDScaledVelocityMagnitude; // Velocity magnitude scaled by relative scene depth.
     bool mbDidCoarse;               // Did tracking use the coarse tracking stage?
 
@@ -212,8 +211,6 @@ protected:
     // Frame-to-frame motion init:
     SmallBlurryImage *mpSBILastFrame;
     SmallBlurryImage *mpSBIThisFrame;
-    void CalcSBIRotation();
-    Vector<6> mv6SBIRot;
     bool mbUseSBIInit;
 
     // User interaction for initial tracking:
