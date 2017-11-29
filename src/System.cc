@@ -2,8 +2,6 @@
 
 #include "System.h"
 
-#include <stdlib.h>
-
 #include "OpenGL.h"
 #include "ATANCamera.h"
 #include "MapMaker.h"

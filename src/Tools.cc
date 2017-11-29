@@ -1,5 +1,4 @@
 #include "Tools.h"
-#include <iostream>
 
 namespace cg
 {
