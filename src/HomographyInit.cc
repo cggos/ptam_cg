@@ -2,14 +2,11 @@
 
 #include "HomographyInit.h"
 
-#include <utility>
-#include <TooN/se3.h>
 #include <TooN/SVD.h>
 #include <TooN/SymEigen.h>
 #include <TooN/wls.h>
 
 #include "Tools.h"
-#include "MEstimator.h"
 
 using namespace std;
 using namespace cg;
@@ -161,12 +158,12 @@ void HomographyInit::RefineHomographyWithInliers()
 
     // Calculate robust sigma:
     vector<double> vdd = vdErrorSquared;
-    double dSigmaSquared = Tukey::FindSigmaSquared(vdd);
+    double dSigmaSquared = cg::Tukey::FindSigmaSquared(vdd);
 
     // Add re-weighted measurements to WLS:
     for(unsigned int i=0; i<mvHomographyInliers.size(); i++)
     {
-        double dWeight = Tukey::Weight(vdErrorSquared[i], dSigmaSquared);
+        double dWeight = cg::Tukey::Weight(vdErrorSquared[i], dSigmaSquared);
         wls.add_mJ(vvErrors[i][0], vmJacobians[i][0], dWeight);
         wls.add_mJ(vvErrors[i][1], vmJacobians[i][1], dWeight);
     }

@@ -1,6 +1,6 @@
 // Copyright 2008 Isis Innovation Limited
 #include "Bundle.h"
-#include "MEstimator.h"
+#include "Tools.h"
 #include <TooN/helpers.h>
 #include <TooN/Cholesky.h>
 #include <fstream>
@@ -135,17 +135,17 @@ int Bundle::Compute(bool *pbAbortSignal)
     {
         bool bNoError;
         if(*gvsMEstimator == "Cauchy")
-            bNoError = Do_LM_Step<Cauchy>(pbAbortSignal);
+            bNoError = Do_LM_Step<cg::Cauchy>(pbAbortSignal);
         else if(*gvsMEstimator == "Tukey")
-            bNoError = Do_LM_Step<Tukey>(pbAbortSignal);
+            bNoError = Do_LM_Step<cg::Tukey>(pbAbortSignal);
         else if(*gvsMEstimator == "Huber")
-            bNoError = Do_LM_Step<Huber>(pbAbortSignal);
+            bNoError = Do_LM_Step<cg::Huber>(pbAbortSignal);
         else
         {
             cout << "Invalid BundleMEstimator selected !! " << endl;
             cout << "Defaulting to Tukey." << endl;
             *gvsMEstimator = "Tukey";
-            bNoError = Do_LM_Step<Tukey>(pbAbortSignal);
+            bNoError = Do_LM_Step<cg::Tukey>(pbAbortSignal);
         };
 
         if(!bNoError)

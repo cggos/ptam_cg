@@ -12,10 +12,11 @@
 
 #ifndef __HOMOGRAPHY_INIT_H
 #define __HOMOGRAPHY_INIT_H
-#include <TooN/TooN.h>
-using namespace TooN;
-#include <TooN/se3.h>
+
 #include <vector>
+#include <TooN/TooN.h>
+#include <TooN/se3.h>
+using namespace TooN;
 
 // Homography matches are 2D-2D matches in a stereo pair, unprojected
 // to the Z=1 plane.

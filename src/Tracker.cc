@@ -15,7 +15,7 @@
 #include <gvars3/GStringUtil.h>
 
 #include "OpenGL.h"
-#include "MEstimator.h"
+#include "Tools.h"
 
 using namespace CVD;
 using namespace std;
@@ -826,11 +826,11 @@ Vector<6> Tracker::CalcPoseUpdate(vector<TrackerData*> vTD, double dOverrideSigm
     else
     {
         if (nEstimator == 0)
-            dSigmaSquared = Tukey::FindSigmaSquared(vdErrorSquared);
+            dSigmaSquared = cg::Tukey::FindSigmaSquared(vdErrorSquared);
         else if(nEstimator == 1)
-            dSigmaSquared = Cauchy::FindSigmaSquared(vdErrorSquared);
+            dSigmaSquared = cg::Cauchy::FindSigmaSquared(vdErrorSquared);
         else
-            dSigmaSquared = Huber::FindSigmaSquared(vdErrorSquared);
+            dSigmaSquared = cg::Huber::FindSigmaSquared(vdErrorSquared);
     }
 
     // The TooN WLSCholesky class handles reweighted least squares.
@@ -847,11 +847,11 @@ Vector<6> Tracker::CalcPoseUpdate(vector<TrackerData*> vTD, double dOverrideSigm
         double dWeight;
 
         if(nEstimator == 0)
-            dWeight= Tukey::Weight(dErrorSq, dSigmaSquared);
+            dWeight= cg::Tukey::Weight(dErrorSq, dSigmaSquared);
         else if(nEstimator == 1)
-            dWeight= Cauchy::Weight(dErrorSq, dSigmaSquared);
+            dWeight= cg::Cauchy::Weight(dErrorSq, dSigmaSquared);
         else
-            dWeight= Huber::Weight(dErrorSq, dSigmaSquared);
+            dWeight= cg::Huber::Weight(dErrorSq, dSigmaSquared);
 
         // Inlier/outlier accounting, only really works for cut-off estimators such as Tukey.
         if(dWeight == 0.0)
