@@ -196,6 +196,24 @@ Vector<3> MapMaker::Triangulate(SE3<> se3AfromB, const Vector<2> &v2A, const Vec
  * @param v2A coordinates in z=1 plane from A
  * @param v2B coordinates in z=1 plane from B
  * @return 3D coordinate of point in reference frame B
+ * @details the algorithm:\n
+ *          (1) With \f$ O_B, P_B, P_W \f$ and \f$ O_A, P_A, P_W \f$ collinear respectively,we get
+ *              \f[
+ *                 \begin{cases}
+ *                    O_BP_B \times P_W = 0 \\
+ *                    O_AP_A \times T_{AB}P_W = 0
+ *                 \end{cases}
+ *              \f]
+ *          (2) Transform above equations set to Matrixs
+ *              \f[
+ *                 A = \begin{bmatrix} P_B \times I \\ P_A \times T_{AB} \end{bmatrix},
+ *                 A \cdot P_W = 0
+ *              \f]
+ *          (3) Get the result from the sigular column vector respond to the smallest singular value of SVD(A)
+ *              \f[
+ *                 SVD(A) = U \Sigma V^T,
+ *                 P_W = V[3]
+ *              \f]
  */
 Vector<3> MapMaker::TriangulateNew(SE3<> se3AfromB, const Vector<2> &v2A, const Vector<2> &v2B)
 {
