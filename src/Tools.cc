@@ -34,6 +34,27 @@ namespace cg
         array[11] = (float)trans[2];
     }
 
+    void Tools::Array2SE3(float *array, SE3<> &se3)
+    {
+        Matrix<3,3> m3Rotation;
+        for(int i=0;i<3;i++)
+        {
+            for(int j=0;j<3;j++)
+            {
+                m3Rotation[i][j] = array[i*4+j];
+            }
+        }
+        SO3<> so3 = SO3<>(m3Rotation);
+
+        Vector<3> v3Translation;
+        v3Translation[0] = array[ 3];
+        v3Translation[1] = array[ 7];
+        v3Translation[2] = array[11];
+
+        se3.get_rotation()    = so3;
+        se3.get_translation() = v3Translation;
+    }
+
     void Tools::SO32RM(SO3<> so3, float* rm)
     {
         Matrix<3,3,double> rot = so3.get_matrix();
@@ -49,6 +70,82 @@ namespace cg
             for (int j = 0; j < 3; ++j)
                 rot[i][j] = rm[i*3+j];
         so3 = rot;
+    }
+
+    void Tools::Quaternion2SO3(Quat4d q, SO3<> &so3)
+    {
+        double norm2QInv = 1.0 / std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
+        q.x *= norm2QInv;
+        q.y *= norm2QInv;
+        q.z *= norm2QInv;
+        q.w *= norm2QInv;
+
+        double xx  = q.x * q.x;
+        double xy  = q.x * q.y;
+        double xz  = q.x * q.z;
+        double xw  = q.x * q.w;
+
+        double yy  = q.y * q.y;
+        double yz  = q.y * q.z;
+        double yw  = q.y * q.w;
+
+        double zz  = q.z * q.z;
+        double zw  = q.z * q.w;
+
+        Matrix<3,3,double> m3R;
+        m3R[0][0]  = 1 - 2 * ( yy + zz );
+        m3R[0][1]  =     2 * ( xy - zw );
+        m3R[0][2]  =     2 * ( xz + yw );
+
+        m3R[1][0]  =     2 * ( xy + zw );
+        m3R[1][1]  = 1 - 2 * ( xx + zz );
+        m3R[1][2]  =     2 * ( yz - xw );
+
+        m3R[2][0]  =     2 * ( xz - yw );
+        m3R[2][1]  =     2 * ( yz + xw );
+        m3R[2][2]  = 1 - 2 * ( xx + yy );
+
+        so3 = SO3<>(m3R);
+    }
+
+    void Tools::Quaternion2SO3_matlab(Quat4d q, SO3<> &so3)
+    {
+        //normalize Q
+        double norm2QInv = 1.0 / std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
+        q.x *= norm2QInv;
+        q.y *= norm2QInv;
+        q.z *= norm2QInv;
+        q.w *= norm2QInv;
+
+        double xx  = q.x * q.x;
+        double xy  = q.x * q.y;
+        double xz  = q.x * q.z;
+        double xw  = q.x * q.w;
+
+        double yy  = q.y * q.y;
+        double yz  = q.y * q.z;
+        double yw  = q.y * q.w;
+
+        double zz  = q.z * q.z;
+        double zw  = q.z * q.w;
+
+        double ww  = q.w * q.w;
+
+        Matrix<3,3,double> m3R;
+
+        m3R[0][0] = ww + xx - yy - zz;
+        m3R[0][1] = 2 * (xy + zw);
+        m3R[0][2] = 2 * (xz - yw);
+
+        m3R[1][0] = 2 * (xy - zw);
+        m3R[1][1] = ww - xx + yy - zz;
+        m3R[1][2] = 2 * (yz + xw);
+
+        m3R[2][0] = 2 * (xz + yw);
+        m3R[2][1] = 2 * (yz - xw);
+        m3R[2][2] = ww - xx - yy + zz;
+
+        so3 = SO3<>(m3R);
     }
 
 /*

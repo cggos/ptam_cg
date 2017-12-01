@@ -22,7 +22,7 @@ bool Relocaliser::AttemptRecovery(KeyFrame &kCurrent)
     mnBest = -1;
     for(unsigned int i=0; i<mMap.vpKeyFrames.size(); i++)
     {
-        double dSSD = kCurrent.pSBI->ZMSSD(kCurrent.pSBI->mimTemplate, mMap.vpKeyFrames[i]->pSBI->mimTemplate);
+        double dSSD = kCurrent.pSBI->SSDofImgs(kCurrent.pSBI->mimTemplate, mMap.vpKeyFrames[i]->pSBI->mimTemplate);
         if(dSSD < mdBestScore)
         {
             mdBestScore = dSSD;

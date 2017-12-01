@@ -1,7 +1,5 @@
 #include "ImageProcess.h"
 
-#include <math.h>
-
 #include <cvd/convolution.h>
 #include <cvd/vision.h>
 #include <TooN/Cholesky.h>
@@ -73,9 +71,13 @@ inline int ImageProcess::SSDAtPoint(CVD::BasicImage<CVD::byte> &im, const CVD::I
     return nSumSqDiff;
 }
 
-// Calculate the zero-mean SSD between one image and the next.
-// Since both are zero mean already, just calculate the SSD...
-double ImageProcess::ZMSSD(CVD::Image<float> im1, CVD::Image<float> im2)
+/**
+ * @brief Calculate the SSD between one image and the next
+ * @param im1
+ * @param im2
+ * @return the SSD between im1 and im2
+ */
+double ImageProcess::SSDofImgs(CVD::Image<float> im1, CVD::Image<float> im2)
 {
     double dSSD = 0.0;
 
@@ -194,10 +196,17 @@ SmallBlurryImage::SmallBlurryImage(KeyFrame &kf, double dBlur)
     MakeFromKF(kf, dBlur);
 }
 
-// Make a SmallBlurryImage from a KeyFrame This fills in the mimSmall
-// image (Which is just a small un-blurred version of the KF) and
-// mimTemplate (which is a floating-point, zero-mean blurred version
-// of the above)
+/**
+ * @brief Make a SmallBlurryImage from a KeyFrame
+ * @param kf
+ * @param dBlur
+ * @details
+ * @verbatim
+ * Output mimSmall and mimTemplate:
+ *   mimSmall: a small un-blurred version of the KF
+ *   mimTemplate: a floating-point, zero-mean blurred version of mimSmall
+ * @endverbatim
+ */
 void SmallBlurryImage::MakeFromKF(KeyFrame &kf, double dBlur)
 {
     if(mirSize[0] == -1)
@@ -225,9 +234,13 @@ void SmallBlurryImage::MakeFromKF(KeyFrame &kf, double dBlur)
     CVD::convolveGaussian(mimTemplate, dBlur);
 }
 
-
-// Find an SE2 which best aligns an SBI to a target
-// Do this by ESM-tracking a la Benhimane & Malis
+/**
+ * @brief Find an SE2 which best aligns an SBI to a target
+ * @param other
+ * @param nIterations
+ * @return
+ * @details Do this by ESM-tracking a la Benhimane & Malis
+ */
 pair<SE2<>,double> SmallBlurryImage::IteratePosRelToTarget(SmallBlurryImage &other, int nIterations)
 {
     SE2<> se2CtoC;
