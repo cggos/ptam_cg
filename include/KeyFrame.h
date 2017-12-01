@@ -18,13 +18,15 @@
 #ifndef __KEYFRAME_H
 #define __KEYFRAME_H
 #include <TooN/TooN.h>
-using namespace TooN;
 #include <TooN/se3.h>
 #include <cvd/image.h>
 #include <cvd/byte.h>
+#include <cvd/utility.h>
 #include <vector>
 #include <set>
 #include <map>
+
+using namespace TooN;
 
 class MapPoint;
 class SmallBlurryImage;
@@ -52,21 +54,74 @@ struct Measurement
 // This contains image data and corner points.
 struct Level
 {
-    inline Level()
-    {
+    inline Level() {
         bImplaneCornersCached = false;
-    };
+    }
 
     CVD::Image<CVD::byte> im;                // The pyramid level pixels
     std::vector<CVD::ImageRef> vCorners;     // All FAST corners on this level
     std::vector<int> vCornerRowLUT;          // Row-index into the FAST corners, speeds up access
     std::vector<CVD::ImageRef> vMaxCorners;  // The maximal FAST corners
-    Level& operator=(const Level &rhs);
+    // The keyframe struct is quite happy with default operator=, but Level needs its own to override CVD's reference-counting behaviour.
+    Level& operator=(const Level &rhs) {
+        // Operator= should physically copy pixels, not use CVD's reference-counting image copy.
+        im.resize(rhs.im.size());
+        copy(rhs.im, im);
+
+        vCorners = rhs.vCorners;
+        vMaxCorners = rhs.vMaxCorners;
+        vCornerRowLUT = rhs.vCornerRowLUT;
+        return *this;
+    }
 
     std::vector<Candidate> vCandidates;   // Potential locations of new map points
 
     bool bImplaneCornersCached;           // Also keep image-plane (z=1) positions of FAST corners to speed up epipolar search
     std::vector<Vector<2> > vImplaneCorners; // Corner points un-projected into z=1-plane coordinates
+
+    static Vector<3> mvLevelColors[];
+
+    // What is the scale of a level?
+    inline static int LevelScale(int nLevel) {
+        return 1 << nLevel;
+    }
+
+    // 1-D transform to level zero:
+    inline static double LevelZeroPos(double dLevelPos, int nLevel)
+    {
+        return (dLevelPos + 0.5) * LevelScale(nLevel) - 0.5;
+    }
+
+    // 2-D transforms to level zero:
+    inline static Vector<2> LevelZeroPos(Vector<2> v2LevelPos, int nLevel)
+    {
+        Vector<2> v2Ans;
+        v2Ans[0] = LevelZeroPos(v2LevelPos[0], nLevel);
+        v2Ans[1] = LevelZeroPos(v2LevelPos[1], nLevel);
+        return v2Ans;
+    }
+    inline static Vector<2> LevelZeroPos(CVD::ImageRef irLevelPos, int nLevel)
+    {
+        Vector<2> v2Ans;
+        v2Ans[0] = LevelZeroPos(irLevelPos.x, nLevel);
+        v2Ans[1] = LevelZeroPos(irLevelPos.y, nLevel);
+        return v2Ans;
+    }
+
+    // 1-D transform from level zero to level N:
+    inline static double LevelNPos(double dRootPos, int nLevel)
+    {
+        return (dRootPos + 0.5) / LevelScale(nLevel) - 0.5;
+    }
+
+    // 2-D transform from level zero to level N:
+    inline static Vector<2> LevelNPos(Vector<2> v2RootPos, int nLevel)
+    {
+        Vector<2> v2Ans;
+        v2Ans[0] = LevelNPos(v2RootPos[0], nLevel);
+        v2Ans[1] = LevelNPos(v2RootPos[1], nLevel);
+        return v2Ans;
+    }
 };
 
 // The actual KeyFrame struct. The map contains of a bunch of these. However, the tracker uses this
@@ -92,9 +147,6 @@ struct KeyFrame
 
     SmallBlurryImage *pSBI; // The relocaliser uses this
 };
-
-typedef std::map<MapPoint*, Measurement>::iterator meas_it;  // For convenience, and to work around an emacs paren-matching bug
-
 
 #endif
 

@@ -1,7 +1,6 @@
 #include "MapViewer.h"
 #include "Map.h"
 #include "KeyFrame.h"
-#include "LevelHelpers.h"
 #include <iomanip>
 
 #include <cvd/gl_helpers.h>
@@ -30,7 +29,7 @@ void MapViewer::DrawMapDots()
     for(size_t i=0; i<mMap.vpPoints.size(); i++)
     {
         Vector<3> v3Pos = mMap.vpPoints[i]->v3WorldPos;
-        glColor(gavLevelColors[mMap.vpPoints[i]->nSourceLevel]);
+        glColor(Level::mvLevelColors[mMap.vpPoints[i]->nSourceLevel]);
         if(v3Pos * v3Pos < 10000)
         {
             nForMass++;

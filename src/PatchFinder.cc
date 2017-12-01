@@ -83,7 +83,7 @@ void PatchFinder::MakeTemplateCoarse(MapPoint &p,
 void PatchFinder::MakeTemplateCoarseCont(MapPoint &p)
 {
     // Get the warping matrix appropriate for use with CVD::transform...
-    Matrix<2> m2 = cg::Tools::M2Inverse(mm2WarpInverse) * LevelScale(mnSearchLevel);
+    Matrix<2> m2 = cg::Tools::M2Inverse(mm2WarpInverse) * Level::LevelScale(mnSearchLevel);
     // m2 now represents the number of pixels in the source image for one
     // pixel of template image
 
@@ -183,7 +183,7 @@ bool PatchFinder::FindPatchCoarse(ImageRef irPos, KeyFrame &kf, unsigned int nRa
     mbFound = false;
 
     // Convert from L0 coords to search level quantities
-    int nLevelScale = LevelScale(mnSearchLevel);
+    int nLevelScale = Level::LevelScale(mnSearchLevel);
     mirPredictedPos = irPos;
     irPos = irPos / nLevelScale;
     nRange = (nRange + nLevelScale - 1) / nLevelScale;
@@ -240,7 +240,7 @@ bool PatchFinder::FindPatchCoarse(ImageRef irPos, KeyFrame &kf, unsigned int nRa
 
     if(nBestSSD < mnMaxSSD)      // Found a valid match?
     {
-        mv2CoarsePos= LevelZeroPos(irBest, mnSearchLevel);
+        mv2CoarsePos= Level::LevelZeroPos(irBest, mnSearchLevel);
         mbFound = true;
     }
     else
@@ -308,7 +308,7 @@ bool PatchFinder::IterateSubPixToConvergence(KeyFrame &kf, int nMaxIts)
 double PatchFinder::IterateSubPix(KeyFrame &kf)
 {
     // Search level pos of patch center
-    Vector<2> v2Center = LevelNPos(mv2SubPixPos, mnSearchLevel);
+    Vector<2> v2Center = Level::LevelNPos(mv2SubPixPos, mnSearchLevel);
     BasicImage<byte> &im = kf.aLevels[mnSearchLevel].im;
     if(!im.in_image_with_border(ir_rounded(v2Center), mnPatchSize / 2 + 1))
         return -1.0;       // Negative return value indicates off edge of image
@@ -353,7 +353,7 @@ double PatchFinder::IterateSubPix(KeyFrame &kf)
 
     // All done looping over image - find JTJ^-1 * JTd:
     Vector<3> v3Update = mm3HInv * v3Accum;
-    mv2SubPixPos -= v3Update.slice<0,2>() * LevelScale(mnSearchLevel);
+    mv2SubPixPos -= v3Update.slice<0,2>() * Level::LevelScale(mnSearchLevel);
     mdMeanDiff -= v3Update[2];
 
     double dPixelUpdateSquared = v3Update.slice<0,2>() * v3Update.slice<0,2>();

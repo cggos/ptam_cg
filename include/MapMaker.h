@@ -61,7 +61,6 @@ protected:
     // Functions for starting the map from scratch:
     SE3<> CalcPlaneAligner();
     void ApplyGlobalTransformationToMap(SE3<> se3NewFromOld);
-    void ApplyGlobalScaleToMap(double dScale);
 
     // Map expansion functions:
     void AddKeyFrameFromTopOfQueue();
@@ -69,8 +68,8 @@ protected:
     void AddSomeMapPoints(int nLevel);
     bool AddPointEpipolar(KeyFrame &kSrc, KeyFrame &kTarget, int nLevel, int nCandidate);
     // Returns point in ref frame B
-    Vector<3> ReprojectPoint(SE3<> se3AfromB, const Vector<2> &v2A, const Vector<2> &v2B);
-    Vector<3> ReprojectPointNew(SE3<> se3AfromB, const Vector<2> &v2A, const Vector<2> &v2B);
+    Vector<3> Triangulate(SE3<> se3AfromB, const Vector<2> &v2A, const Vector<2> &v2B);
+    Vector<3> TriangulateNew(SE3<> se3AfromB, const Vector<2> &v2A, const Vector<2> &v2B);
 
     // Bundle adjustment functions:
     void BundleAdjust(std::set<KeyFrame*>, std::set<KeyFrame*>, std::set<MapPoint*>, bool);

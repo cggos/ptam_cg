@@ -43,7 +43,7 @@
 #include <TooN/TooN.h>
 
 #include "Map.h"
-#include "LevelHelpers.h"
+#include "KeyFrame.h"
 
 using namespace TooN;
 
@@ -62,7 +62,7 @@ public:
     // transformation.
     int CalcSearchLevelAndWarpMatrix(MapPoint &p, SE3<> se3CFromW, Matrix<2> &m2CamDerivs);
     inline int GetLevel() { return mnSearchLevel; }
-    inline int GetLevelScale() { return LevelScale(mnSearchLevel); }
+    inline int GetLevelScale() { return Level::LevelScale(mnSearchLevel); }
 
     // Step 2 Functions
     // Generates the NxN search template either from the pre-calculated warping matrix,
@@ -100,7 +100,7 @@ public:
     // This for just returns an appropriately-scaled identity!
     inline Matrix<2> GetCov()
     {
-        return LevelScale(mnSearchLevel) * Identity;
+        return Level::LevelScale(mnSearchLevel) * Identity;
     };
 
     int mnMaxSSD; // This is the max ZMSSD for a valid match. It's set in the constructor.

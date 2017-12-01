@@ -77,19 +77,19 @@ void Tracker::Reset()
 #endif
 }
 
-// TrackFrame is called by System.cc with each incoming video frame.
-// It figures out what state the tracker is in, and calls appropriate internal tracking
-// functions. bDraw tells the tracker wether it should output any GL graphics
-// or not (it should not draw, for example, when AR stuff is being shown.)
+/**
+ * @brief TrackFrame is called by System.cc with each incoming video frame.
+ *        It figures out what state the tracker is in, and calls appropriate internal tracking functions.
+ * @param imFrame gray image or frame
+ * @param bDraw bDraw tells the tracker wether it should output any GL graphics or not
+ */
 void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
 {
     mbDraw = bDraw;
-    mMessageForUser.str("");   // Wipe the user message clean
+    mMessageForUser.str("");
 
-    // Take the input video image, and convert it into the tracker's keyframe struct
-    // This does things like generate the image pyramid and find FAST corners
     mCurrentKF.mMeasurements.clear();
-    mCurrentKF.MakeKeyFrame_Lite(imFrame);
+    mCurrentKF.MakeKeyFrame_Lite(imFrame);// This does things like generate the image pyramid and find FAST corners
 
     // Update the small images for the rotation estimator
     static gvar3<double> gvdSBIBlur("Tracker.RotationEstimatorBlur", 0.75, SILENT);
@@ -128,14 +128,12 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
     {
         if(mnLostFrames < 3)
         {
-            // These three lines do the main tracking work.
             PredictPoseWithMotionModel();
             TrackMap();
             UpdateMotionModel();
 
             AssessTrackingQuality();
             {
-                // Provide some feedback for the user:
                 mMessageForUser << "Tracking Map, quality ";
                 if(mTrackingQuality == GOOD)  mMessageForUser << "good.";
                 if(mTrackingQuality == DODGY) mMessageForUser << "poor.";
@@ -168,7 +166,6 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
     else
         TrackForInitialMap();
 
-    // GUI interface
     while(!mvQueuedCommands.empty())
     {
         GUICommandHandler(mvQueuedCommands.begin()->sCommand, mvQueuedCommands.begin()->sParams);
@@ -290,14 +287,15 @@ void Tracker::GUICommandHandler(string sCommand, string sParams)  // Called by t
     exit(1);
 }
 
-// Routine for establishing the initial map. This requires two spacebar presses from the user
-// to define the first two key-frames. Salient points are tracked between the two keyframes
-// using cheap frame-to-frame tracking (which is very brittle - quick camera motion will
-// break it.) The salient points are stored in a list of `Trail' data structures.
-// What action TrackForInitialMap() takes depends on the mnInitialStage enum variable..
+/**
+ * @brief Routine for establishing the initial map. This requires two spacebar presses from the user
+ *        to define the first two key-frames. Salient points are tracked between the two keyframes
+ *        using cheap frame-to-frame tracking (which is very brittle - quick camera motion will
+ *        break it.) The salient points are stored in a list of `Trail' data structures.
+ *        What action TrackForInitialMap() takes depends on the mnInitialStage enum variable..
+ */
 void Tracker::TrackForInitialMap()
 {
-    // What stage of initial tracking are we at?
     if(mnInitialStage == TRAIL_TRACKING_NOT_STARTED)
     {
         if(mbUserPressedSpacebar)  // First spacebar = this is the first keyframe
@@ -314,8 +312,7 @@ void Tracker::TrackForInitialMap()
     if(mnInitialStage == TRAIL_TRACKING_STARTED)
     {
         int nGoodTrails = TrailTracking_Advance();  // This call actually tracks the trails
-        if(nGoodTrails < 10) // if most trails have been wiped out, no point continuing.
-        {
+        if(nGoodTrails < 10) {
             Reset();
             return;
         }
@@ -335,7 +332,9 @@ void Tracker::TrackForInitialMap()
     }
 }
 
-// The current frame is to be the first keyframe!
+/**
+ * @brief The current frame is to be the first keyframe!
+ */
 void Tracker::TrailTracking_Start()
 {
     mCurrentKF.MakeKeyFrame_Rest();  // This populates the Candidates list, which is Shi-Tomasi thresholded.
@@ -675,7 +674,7 @@ void Tracker::TrackMap()
         for(vector<TrackerData*>::reverse_iterator it = vIterationSet.rbegin(); it!= vIterationSet.rend(); it++) {
             if (!(*it)->bFound)
                 continue;
-            glColor(gavLevelColors[(*it)->nSearchLevel]);
+            glColor(Level::mvLevelColors[(*it)->nSearchLevel]);
             glVertex((*it)->v2Image);
         }
         glEnd();

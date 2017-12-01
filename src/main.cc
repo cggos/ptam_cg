@@ -16,9 +16,9 @@ int main()
     cout << "  Parallel tracking and mapping for Small AR workspaces" << endl;
     cout << "  Copyright (C) Isis Innovation Limited 2008 " << endl;
     cout << endl;
+
     cout << "  Parsing settings.cfg ...." << endl;
     GUI.LoadFile("../config/settings.cfg");
-
     GUI.StartParserThread(); // Start parsing of the console input
     atexit(GUI.StopParserThread);
 

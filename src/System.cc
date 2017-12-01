@@ -54,20 +54,21 @@ System::System()
 void System::Run()
 {
     while(!mbDone)
-    {       
-        // We use two versions of each video frame:
-        // One black and white (for processing by the tracker etc)
-        // and one RGB, for drawing.
+    {
         CVD::Image<CVD::Rgb<CVD::byte> > imFrameRGB(mpVideoSource->Size());
         CVD::Image<CVD::byte> imFrameBW(mpVideoSource->Size());
 
-        // Grab new video frame...
         mpVideoSource->GetAndFillFrameBWandRGB(imFrameBW, imFrameRGB);
 
-        UpdateFrame(imFrameBW, imFrameRGB);//update every frame or image
+        UpdateFrame(imFrameBW, imFrameRGB);
     }
 }
 
+/**
+ * @brief update System with every frame or image
+ * @param imBW   gray image
+ * @param imRGB  color image
+ */
 void System::UpdateFrame(Image<byte> imBW, Image<Rgb<byte> > imRGB)
 {
     static bool bFirstFrame = true;
@@ -97,7 +98,6 @@ void System::UpdateFrame(Image<byte> imBW, Image<Rgb<byte> > imRGB)
     else if(bDrawAR)
         mpARDriver->Render(imRGB, mpTracker->GetCurrentPose());
 
-    // mGLWindow.GetMousePoseUpdate();
     string sCaption;
     if(bDrawMap)
         sCaption = mpMapViewer->GetMessageForUser();
