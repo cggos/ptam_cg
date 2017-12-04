@@ -20,6 +20,11 @@ namespace cg
         lhm.get_translation() = translation;
     }
 
+    /**
+     * @brief transform TooN::SE3 to array
+     * @param se3 TooN::SE3 object
+     * @param array array of 3x4 row-major matrix of RT
+     */
     void Tools::SE32Array(SE3<> se3, float* array)
     {
         Matrix<3,3,double> rot = se3.get_rotation().get_matrix();
@@ -34,7 +39,12 @@ namespace cg
         array[11] = (float)trans[2];
     }
 
-    void Tools::Array2SE3(float *array, SE3<> &se3)
+    /**
+     * @brief transform array to TooN::SE3
+     * @param array array of 3x4 row-major matrix of RT
+     * @param se3 TooN::SE3 object
+     */
+    void Tools::Array2SE3(const float *array, SE3<> &se3)
     {
         Matrix<3,3> m3Rotation;
         for(int i=0;i<3;i++)
@@ -55,44 +65,59 @@ namespace cg
         se3.get_translation() = v3Translation;
     }
 
-    void Tools::SO32RM(SO3<> so3, float* rm)
+    /**
+     * @brief transform TooN::SO3 to array
+     * @param so3 TooN::SO3 object
+     * @param array array of 3x3 row-major rotation matrix
+     */
+    void Tools::SO32Array(SO3<> so3, float* array)
     {
         Matrix<3,3,double> rot = so3.get_matrix();
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
-                rm[i*3+j] = (float)rot(i,j); // to row-major matrix
+                array[i*3+j] = (float)rot(i,j);
     }
 
-    void Tools::RM2SO3(float* rm, SO3<> &so3)
+    /**
+     * @brief transform array to TooN::SO3
+     * @param array array of 3x3 row-major rotation matrix
+     * @param so3 TooN::SO3 object
+     */
+    void Tools::Array2SO3(const float* array, SO3<> &so3)
     {
         Matrix<3,3,double> rot;
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
-                rot[i][j] = rm[i*3+j];
+                rot[i][j] = array[i*3+j];
         so3 = rot;
     }
 
+    /**
+     * @brief transform Quaternion of Quat4d struct to TooN::SO3
+     * @param q a Quaternion object
+     * @param so3 TooN::SO3 object
+     */
     void Tools::Quaternion2SO3(Quat4d q, SO3<> &so3)
     {
-        double norm2QInv = 1.0 / std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
+        float norm2QInv = 1.f / std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
         q.x *= norm2QInv;
         q.y *= norm2QInv;
         q.z *= norm2QInv;
         q.w *= norm2QInv;
 
-        double xx  = q.x * q.x;
-        double xy  = q.x * q.y;
-        double xz  = q.x * q.z;
-        double xw  = q.x * q.w;
+        float xx  = q.x * q.x;
+        float xy  = q.x * q.y;
+        float xz  = q.x * q.z;
+        float xw  = q.x * q.w;
 
-        double yy  = q.y * q.y;
-        double yz  = q.y * q.z;
-        double yw  = q.y * q.w;
+        float yy  = q.y * q.y;
+        float yz  = q.y * q.z;
+        float yw  = q.y * q.w;
 
-        double zz  = q.z * q.z;
-        double zw  = q.z * q.w;
+        float zz  = q.z * q.z;
+        float zw  = q.z * q.w;
 
-        Matrix<3,3,double> m3R;
+        Matrix<3,3,float> m3R;
         m3R[0][0]  = 1 - 2 * ( yy + zz );
         m3R[0][1]  =     2 * ( xy - zw );
         m3R[0][2]  =     2 * ( xz + yw );
@@ -108,30 +133,35 @@ namespace cg
         so3 = SO3<>(m3R);
     }
 
+    /**
+     * @brief transform Quaternion of Quat4d struct to TooN::SO3
+     * @param q a Quaternion object
+     * @param so3 TooN::SO3 object
+     */
     void Tools::Quaternion2SO3_matlab(Quat4d q, SO3<> &so3)
     {
         //normalize Q
-        double norm2QInv = 1.0 / std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
+        float norm2QInv = 1.f / std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
         q.x *= norm2QInv;
         q.y *= norm2QInv;
         q.z *= norm2QInv;
         q.w *= norm2QInv;
 
-        double xx  = q.x * q.x;
-        double xy  = q.x * q.y;
-        double xz  = q.x * q.z;
-        double xw  = q.x * q.w;
+        float xx  = q.x * q.x;
+        float xy  = q.x * q.y;
+        float xz  = q.x * q.z;
+        float xw  = q.x * q.w;
 
-        double yy  = q.y * q.y;
-        double yz  = q.y * q.z;
-        double yw  = q.y * q.w;
+        float yy  = q.y * q.y;
+        float yz  = q.y * q.z;
+        float yw  = q.y * q.w;
 
-        double zz  = q.z * q.z;
-        double zw  = q.z * q.w;
+        float zz  = q.z * q.z;
+        float zw  = q.z * q.w;
 
-        double ww  = q.w * q.w;
+        float ww  = q.w * q.w;
 
-        Matrix<3,3,double> m3R;
+        Matrix<3,3,float> m3R;
 
         m3R[0][0] = ww + xx - yy - zz;
         m3R[0][1] = 2 * (xy + zw);
@@ -148,32 +178,38 @@ namespace cg
         so3 = SO3<>(m3R);
     }
 
-/*
- * Ref        : http://www.cnblogs.com/wqj1212/archive/2010/11/21/1883033.html
- * Constraint : Cartesion Coordinate System
- * quater[4]  : x, y, z, w
- * *euler[3]  : theta_x, theta_y, theta_z
- */
-    void Tools::Quaternion2Euler(float *quater, float **euler)
+    /**
+     * @brief transform array of Quaternion to array of Euler Angle
+     * @param quater array of Quaternion [x, y, z, w]
+     * @param euler pointer pointing to an array of Euler Angle [theta_x, theta_y, theta_z]
+     * @details Constraint: Cartesion Coordinate System \n
+     *          Refrence: http://www.cnblogs.com/wqj1212/archive/2010/11/21/1883033.html
+     */
+    void Tools::Quaternion2Euler(const float *quater, float **euler)
     {
         float x = quater[0];
         float y = quater[1];
         float z = quater[2];
         float w = quater[3];
-        (*euler)[0] = atan2 ( 2*(w*x+y*z), 1-2*(x*x+y*y) );
-        (*euler)[1] = asin  ( 2*(w*y-z*x) );
-        (*euler)[2] = atan2 ( 2*(w*z+x*y), 1-2*(y*y+z*z) );
+        (*euler)[0] = std::atan2 ( 2*(w*x+y*z), 1-2*(x*x+y*y) );
+        (*euler)[1] = std::asin  ( 2*(w*y-z*x) );
+        (*euler)[2] = std::atan2 ( 2*(w*z+x*y), 1-2*(y*y+z*z) );
     }
 
-    void Tools::Euler2Quaternion(float *euler, float **quater)
+    /**
+     * @brief transform array of Euler Angle to array of Quaternion
+     * @param euler array of Euler Angle [theta_x, theta_y, theta_z]
+     * @param quater pointer pointing to an array of Quaternion [x, y, z, w]
+     */
+    void Tools::Euler2Quaternion(const float *euler, float **quater)
     {
         // Abbreviations for the various angular functions
-        float cy = cos(euler[2] * 0.5);
-        float sy = sin(euler[2] * 0.5);
-        float cr = cos(euler[0] * 0.5);
-        float sr = sin(euler[0] * 0.5);
-        float cp = cos(euler[1] * 0.5);
-        float sp = sin(euler[1] * 0.5);
+        float cy = std::cos(euler[2] * 0.5f);
+        float sy = std::sin(euler[2] * 0.5f);
+        float cr = std::cos(euler[0] * 0.5f);
+        float sr = std::sin(euler[0] * 0.5f);
+        float cp = std::cos(euler[1] * 0.5f);
+        float sp = std::sin(euler[1] * 0.5f);
 
         (*quater)[3] = cy * cr * cp + sy * sr * sp;
         (*quater)[0] = cy * sr * cp - sy * cr * sp;
@@ -181,31 +217,37 @@ namespace cg
         (*quater)[2] = sy * cr * cp - cy * sr * sp;
     }
 
-    /*
-     * Ref       : https://stackoverflow.com/questions/15022630/how-to-calculate-the-angle-from-roational-matrix
-     *     rm[9] : x, y, z, w
-     * *euler[3] : theta_x, theta_y, theta_z
-     * R = Rz(φ)Ry(θ)Rx(ψ)
+    /**
+     * @brief transform array of Rotation Matrix to array of Euler Angle
+     * @param rm array of 3x3 Rotation Matrix
+     * @param euler pointer pointing to an array of Euler Angle [theta_x, theta_y, theta_z]
+     * @details R = Rz(φ)Ry(θ)Rx(ψ) \n
+     *          Reference: https://stackoverflow.com/questions/15022630/how-to-calculate-the-angle-from-roational-matrix
      */
-    void Tools::RotationMatrix2Euler(float *rm, float **euler)
+    void Tools::RotationMatrix2Euler(const float *rm, float **euler)
     {
         float rm11 = rm[0];
         float rm21 = rm[3];
         float rm31 = rm[6];
         float rm32 = rm[7];
         float rm33 = rm[8];
-        (*euler)[0] = atan2( rm32 , rm33 );
-        (*euler)[1] = atan2(-rm31 , sqrt(rm32*rm32+rm33*rm33) );
-        (*euler)[2] = atan2( rm21 , rm11 );
+        (*euler)[0] = std::atan2( rm32 , rm33 );
+        (*euler)[1] = std::atan2(-rm31 , std::sqrt(rm32*rm32+rm33*rm33) );
+        (*euler)[2] = std::atan2( rm21 , rm11 );
 
         (*euler)[0] = (*euler)[0] ;//* 180.0 / 3.1415926;
         (*euler)[1] = (*euler)[1] ;//* 180.0 / 3.1415926;
         (*euler)[2] = (*euler)[2] ;//* 180.0 / 3.1415926;
     }
 
+    /**
+     * @brief Get the center of a mass of 3d points
+     * @param vvPts a mass of 3d points
+     * @param center the center to return
+     */
     void Tools::GetCenterOfMass3D(const std::vector<Vector<3> > &vvPts, Vector<3> &center)
     {
-        unsigned int nSize = vvPts.size();
+        auto nSize = static_cast<unsigned int>(vvPts.size());
         if(nSize < 1)
             return;
         for(unsigned int i=0; i<nSize; i++)
@@ -215,11 +257,17 @@ namespace cg
         center /= nSize;
     }
 
-//ICP using Sigular Values Decomposition
+    /**
+     * @brief estimate pose from some pairs of 3d points
+     * @param ptsA
+     * @param ptsB
+     * @param se3AfromB
+     * @details ICP using Sigular Values Decomposition
+     */
     void Tools::ICP_SVD(const std::vector<Vector<3> > &ptsA, const std::vector<Vector<3> > &ptsB, SE3<> &se3AfromB)
     {
-        unsigned int nSizeA = ptsA.size();
-        unsigned int nSizeB = ptsB.size();
+        auto nSizeA = static_cast<unsigned int>(ptsA.size());
+        auto nSizeB = static_cast<unsigned int>(ptsB.size());
 
         if(nSizeA==0 || nSizeA != nSizeB)
             return;
@@ -231,15 +279,15 @@ namespace cg
         GetCenterOfMass3D(ptsB,ptCenterB);
 
         //compute W
-        Matrix<3> W;
+        Matrix<3,3,float> W;
         for(unsigned int i=0; i<nSizeA; i++)
         {
             W += (ptsA[i]-ptCenterA).as_col() * (ptsB[i]-ptCenterB).as_row();
         }
 
-        int determinantW = W(0,0)*W(1,1)*W(2,2) + W(0,1)*W(1,2)*W(2,0) + W(0,2)*W(1,0)*W(2,1) -
+        float determinantW = W(0,0)*W(1,1)*W(2,2) + W(0,1)*W(1,2)*W(2,0) + W(0,2)*W(1,0)*W(2,1) -
                            (W(0,0)*W(1,2)*W(2,1) + W(0,1)*W(1,0)*W(2,2) + W(0,2)*W(1,1)*W(2,0));
-        assert(determinantW);
+        assert(determinantW<1e-8);
 
         //svd decomposition
         SVD<3,3> svd(W);
@@ -251,11 +299,17 @@ namespace cg
         se3AfromB.get_translation() = translation;
     }
 
-// ICP using Quarternion Decomposition
+    /**
+     * @brief estimate pose from some pairs of 3d points
+     * @param ptsA
+     * @param ptsB
+     * @param se3AfromB
+     * @details ICP using Quarternion Decomposition
+     */
     void Tools::ICP_QD(const std::vector<Vector<3> > &ptsA, const std::vector<Vector<3> > &ptsB, SE3<> &se3AfromB)
     {
-        unsigned int nSizeA = ptsA.size();
-        unsigned int nSizeB = ptsB.size();
+        auto nSizeA = static_cast<unsigned int>(ptsA.size());
+        auto nSizeB = static_cast<unsigned int>(ptsB.size());
 
         if(nSizeA==0 || nSizeA != nSizeB)
             return;
@@ -303,7 +357,7 @@ namespace cg
         Q.slice<1,1,3,3>() = M + M.T() - TooN::trace(M)*TooN::Identity;
 
         SymEigen<4> eigM(Q);
-        float eigenvalueMax = eigM.get_evalues()[3];
+        float eigenvalueMax = static_cast<float>(eigM.get_evalues()[3]);
         SVD<4> svd(Q-eigenvalueMax*TooN::Identity);
         Vector<4> v4Quarter = -svd.get_VT()[3];
 
