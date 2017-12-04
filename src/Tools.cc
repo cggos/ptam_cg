@@ -93,11 +93,12 @@ namespace cg
     }
 
     /**
-     * @brief transform Quaternion of Quat4d struct to TooN::SO3
+     * @brief transform Quaternion of Quat struct to TooN::SO3
      * @param q a Quaternion object
      * @param so3 TooN::SO3 object
+     * @details the output so3 is the transpose or inverse of the one from matlab quat2dcm
      */
-    void Tools::Quaternion2SO3(Quat4d q, SO3<> &so3)
+    void Tools::Quaternion2SO3(Quat q, SO3<> &so3)
     {
         float norm2QInv = 1.f / std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
         q.x *= norm2QInv;
@@ -134,11 +135,12 @@ namespace cg
     }
 
     /**
-     * @brief transform Quaternion of Quat4d struct to TooN::SO3
+     * @brief transform Quaternion of Quat struct to TooN::SO3
      * @param q a Quaternion object
      * @param so3 TooN::SO3 object
+     * @details be same to quat2dcm of matlab
      */
-    void Tools::Quaternion2SO3_matlab(Quat4d q, SO3<> &so3)
+    void Tools::Quaternion2SO3_matlab(Quat q, SO3<> &so3)
     {
         //normalize Q
         float norm2QInv = 1.f / std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z+q.w*q.w);
@@ -176,6 +178,44 @@ namespace cg
         m3R[2][2] = ww - xx - yy + zz;
 
         so3 = SO3<>(m3R);
+    }
+
+    /**
+     * @brief transform TooN::SO3 to Quaternion of Quat struct
+     * @param so3 TooN::SO3 object
+     * @param q a Quaternion object
+     * @details the output q is equal to [-x,-y,-z,w] where [x,y,z,w] is the output of matlab dcm2quat
+     */
+    void Tools::SO32Quaternion(SO3<> so3, Quat &q)
+    {
+        Matrix<3,3,float> rot = so3.get_matrix();
+        float tr = rot(0,0) + rot(1,1) + rot(2,2);
+
+        if (tr > 0) {
+            float S = std::sqrt(tr+1.0f) * 2; // S=4*qw
+            q.w = 0.25f * S;
+            q.x = (rot(2,1) - rot(1,2)) / S;
+            q.y = (rot(0,2) - rot(2,0)) / S;
+            q.z = (rot(1,0) - rot(0,1)) / S;
+        } else if ((rot(0,0) > rot(1,1))&(rot(0,0) > rot(2,2))) {
+            float S = std::sqrt(1.0f + rot(0,0) - rot(1,1) - rot(2,2)) * 2; // S=4*qx
+            q.w = (rot(2,1) - rot(1,2)) / S;
+            q.x = 0.25f * S;
+            q.y = (rot(0,1) + rot(1,0)) / S;
+            q.z = (rot(0,2) + rot(2,0)) / S;
+        } else if (rot(1,1) > rot(2,2)) {
+            float S = std::sqrt(1.0f + rot(1,1) - rot(0,0) - rot(2,2)) * 2; // S=4*qy
+            q.w = (rot(0,2) - rot(2,0)) / S;
+            q.x = (rot(0,1) + rot(1,0)) / S;
+            q.y = 0.25f * S;
+            q.z = (rot(1,2) + rot(2,1)) / S;
+        } else {
+            float S = std::sqrt(1.0f + rot(2,2) - rot(0,0) - rot(1,1)) * 2; // S=4*qz
+            q.w = (rot(1,0) - rot(0,1)) / S;
+            q.x = (rot(0,2) + rot(2,0)) / S;
+            q.y = (rot(1,2) + rot(2,1)) / S;
+            q.z = 0.25f * S;
+        }
     }
 
     /**
