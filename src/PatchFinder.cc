@@ -32,7 +32,27 @@ PatchFinder::PatchFinder(int nPatchSize) : mimTemplate(ImageRef(nPatchSize,nPatc
  * @param p
  * @param se3CFromW
  * @param m2CamDerivs
- * @return
+ * @return mnSearchLevel
+ * @details
+ * (1) \f$ \{u_s,v_s\} \f$ 对应源帧金字塔层水平和竖直方向的像素位移，\f$ \{u_c,v_c\} \f$ 对应当前帧金字塔0层水平和竖直方向的像素位移，
+ *     \f$ u_c,v_c \f$ 分别为 \f$ u_s,v_s \f$ 的函数，则 \f$ u_c,v_c \f$ 的微分（矩阵形式）为：
+ *     \f[
+ *        \begin{bmatrix} du_c \\ dv_c \end{bmatrix} =
+ *        \begin{bmatrix}
+ *              \frac{\partial{u_c}}{\partial{u_s}} & \frac{\partial{u_c}}{\partial{v_s}} \\
+ *              \frac{\partial{v_c}}{\partial{u_s}} & \frac{\partial{v_c}}{\partial{v_s}}
+ *        \end{bmatrix}
+ *        \begin{bmatrix} du_s \\ dv_s \end{bmatrix}
+ *     \f]
+ * (2) Affine Warp Matrix 为：
+ *     \f[
+ *        A =
+ *        \begin{bmatrix}
+ *              \frac{\partial{u_c}}{\partial{u_s}} & \frac{\partial{u_c}}{\partial{v_s}} \\
+ *              \frac{\partial{v_c}}{\partial{u_s}} & \frac{\partial{v_c}}{\partial{v_s}}
+ *        \end{bmatrix}
+ *     \f]
+ * (3) 行列式\f$ |A^{-1}| \f$ 的几何意义： 向量 \f$ du_s , dv_s \f$ 与 向量 \f$ du_c , dv_c \f$ 分别张成的平行四边形的面积之比
  */
 int PatchFinder::CalcSearchLevelAndWarpMatrix(MapPoint &p, SE3<> se3CFromW, Matrix<2> &m2CamDerivs)
 {
