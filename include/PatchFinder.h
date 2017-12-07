@@ -37,10 +37,11 @@
 #ifndef __PATCHFINDER_H
 #define __PATCHFINDER_H
 
-#include <TooN/se3.h>
 #include <cvd/image.h>
 #include <cvd/byte.h>
+#include <cvd/vector_image_ref.h>
 #include <TooN/TooN.h>
+#include <TooN/se3.h>
 
 #include "Map.h"
 #include "KeyFrame.h"
@@ -50,7 +51,6 @@ using namespace TooN;
 class PatchFinder
 {
 public:
-    // Constructor defines size of search patch.
     PatchFinder(int nPatchSize = 8);
 
     // Step 1 Function.
@@ -62,19 +62,14 @@ public:
     // transformation.
     int CalcSearchLevelAndWarpMatrix(MapPoint &p, SE3<> se3CFromW, Matrix<2> &m2CamDerivs);
     inline int GetLevel() { return mnSearchLevel; }
-    inline int GetLevelScale() { return Level::LevelScale(mnSearchLevel); }
 
     // Step 2 Functions
-    // Generates the NxN search template either from the pre-calculated warping matrix,
-    // or an identity transformation.
+    // Generates the NxN search template either from the pre-calculated warping matrix, or an identity transformation.
     void MakeTemplateCoarseCont(MapPoint &p); // If the warping matrix has already been pre-calced, use this.
-    void MakeTemplateCoarse(MapPoint &p, SE3<> se3CFromW, Matrix<2> &m2CamDerivs); // This also calculates the warp.
-    void MakeTemplateCoarseNoWarp(MapPoint &p);  // Identity warp: just copies pixels from the source KF.
     void MakeTemplateCoarseNoWarp(KeyFrame &k, int nLevel, CVD::ImageRef irLevelPos); // Identity warp if no MapPoint struct exists yet.
 
-    // If the template making failed (i.e. it needed pixels outside the source image),
-    // this bool will return false.
-    inline bool TemplateBad()      { return mbTemplateBad;}
+    // If the template making failed (i.e. it needed pixels outside the source image), this bool will return false.
+    inline bool TemplateBad() { return mbTemplateBad;}
 
     // Step 3 Functions
     // This is the raison d'etre of the class: finds the patch in the current input view,
@@ -98,21 +93,28 @@ public:
 
     // Get the uncertainty estimate of a found patch;
     // This for just returns an appropriately-scaled identity!
-    inline Matrix<2> GetCov()
-    {
-        return Level::LevelScale(mnSearchLevel) * Identity;
-    };
+    inline Matrix<2> GetCov() { return Level::LevelScale(mnSearchLevel) * Identity; }
 
     int mnMaxSSD; // This is the max ZMSSD for a valid match. It's set in the constructor.
 
 protected:
-
     int mnPatchSize; // Size of one side of the matching template.
 
     // Some values stored for the coarse template:
     int mnTemplateSum;    // Cached pixel-sum of the coarse template
     int mnTemplateSumSq;  // Cached pixel-squared sum of the coarse template
-    inline void MakeTemplateSums(); // Calculate above values
+    inline void MakeTemplateSums() { // Calculate above values
+        int nSum = 0;
+        int nSumSq = 0;
+        CVD::ImageRef ir;
+        do {
+            int b = mimTemplate[ir];
+            nSum += b;
+            nSumSq += b * b;
+        } while (ir.next(mimTemplate.size()));
+        mnTemplateSum = nSum;
+        mnTemplateSumSq = nSumSq;
+    }
 
     CVD::Image<CVD::byte> mimTemplate;   // The matching template
     CVD::Image<std::pair<float,float> > mimJacs;  // Inverse composition jacobians; stored as floats to save a bit of space.

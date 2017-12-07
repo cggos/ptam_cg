@@ -10,8 +10,8 @@ Map::Map()
 
 void Map::Reset()
 {
-    for(unsigned int i=0; i<vpPoints.size(); i++)
-        delete vpPoints[i];
+    for (auto &vpPoint : vpPoints)
+        delete vpPoint;
     vpPoints.clear();
     bGood = false;
     EmptyTrash();
@@ -20,21 +20,19 @@ void Map::Reset()
 void Map::MoveBadPointsToTrash()
 {
     int nBad = 0;
-    for(int i = vpPoints.size()-1; i>=0; i--)
-    {
-        if(vpPoints[i]->bBad)
-        {
+    for(int i = (int)vpPoints.size()-1; i>=0; i--) {
+        if (vpPoints[i]->bBad) {
             vpPointsTrash.push_back(vpPoints[i]);
             vpPoints.erase(vpPoints.begin() + i);
             nBad++;
         }
-    };
+    }
 }
 
 void Map::EmptyTrash()
 {
-    for(unsigned int i=0; i<vpPointsTrash.size(); i++)
-        delete vpPointsTrash[i];
+    for (auto &i : vpPointsTrash)
+        delete i;
     vpPointsTrash.clear();
 }
 

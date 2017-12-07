@@ -179,9 +179,7 @@ protected:
     void AssessTrackingQuality();   // Heuristics to choose between good, poor, bad.
     void PredictPoseWithMotionModel();        // Decaying velocity motion model applied prior to TrackMap
     void UpdateMotionModel();       // Motion model is updated after TrackMap
-    int SearchForPoints(std::vector<TrackerData*> &vTD,
-                        int nRange,
-                        int nFineIts);  // Finds points in the image
+    unsigned int SearchForPoints(std::vector<TrackerData*> &vTD, unsigned int nRange, int nFineIts);  // Finds points in the image
     Vector<6> CalcPoseUpdate(std::vector<TrackerData*> vTD,
                              double dOverrideSigma = 0.0,
                              bool bMarkOutliers = false); // Updates pose from found points.

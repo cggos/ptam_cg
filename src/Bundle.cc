@@ -129,7 +129,7 @@ int Bundle::Compute(bool *pbAbortSignal)
     mnAccepted = 0;
 
     // What MEstimator are we using today?
-    static gvar3<string> gvsMEstimator("BundleMEstimator", "Tukey", SILENT);
+    static gvar3<string> gvsMEstimator("Bundle.MEstimator", "Tukey", SILENT);
 
     while(!mbConverged  && !mbHitMaxIterations && !*pbAbortSignal)
     {

@@ -272,10 +272,10 @@ bool MapMaker::InitFromStereo(KeyFrame &kF, KeyFrame &kS, vector<pair<ImageRef, 
     mCamera.SetImageSize(kF.aLevels[0].im.size());
 
     vector<HomographyMatch> vMatches;
-    for(unsigned int i=0; i<vTrailMatches.size(); i++) {
+    for (auto &vTrailMatche : vTrailMatches) {
         HomographyMatch m;
-        m.v2CamPlaneFirst = mCamera.UnProject(vTrailMatches[i].first);
-        m.v2CamPlaneSecond = mCamera.UnProject(vTrailMatches[i].second);
+        m.v2CamPlaneFirst = mCamera.UnProject(vTrailMatche.first);
+        m.v2CamPlaneSecond = mCamera.UnProject(vTrailMatche.second);
         m.m2PixelProjectionJac = mCamera.GetProjectionDerivs();
         vMatches.push_back(m);
     }
@@ -298,8 +298,8 @@ bool MapMaker::InitFromStereo(KeyFrame &kF, KeyFrame &kS, vector<pair<ImageRef, 
     mdWiggleScale = *mgvdWiggleScale;
     se3.get_translation() *= mdWiggleScale/dTransMagn;
 
-    KeyFrame *pkFirst = new KeyFrame();
-    KeyFrame *pkSecond = new KeyFrame();
+    auto *pkFirst = new KeyFrame();
+    auto *pkSecond = new KeyFrame();
     *pkFirst = kF;
     *pkSecond = kS;
 
@@ -329,7 +329,7 @@ bool MapMaker::InitFromStereo(KeyFrame &kF, KeyFrame &kS, vector<pair<ImageRef, 
         p->RefreshPixelVectors();
 
         // Do sub-pixel alignment on the second image
-        finder.MakeTemplateCoarseNoWarp(*p);
+        finder.MakeTemplateCoarseNoWarp(*p->pPatchSourceKF,p->nSourceLevel,p->irCenter);
         finder.MakeSubPixTemplate();
         finder.SetSubPixPos(vec(vTrailMatches[i].second));
         bool bGood = finder.IterateSubPixToConvergence(*pkSecond,10);
@@ -981,7 +981,9 @@ bool MapMaker::ReFind_Common(KeyFrame &k, MapPoint &p)
     }
 
     Matrix<2> m2CamDerivs = mCamera.GetProjectionDerivs();
-    Finder.MakeTemplateCoarse(p, k.se3CfromW, m2CamDerivs);
+    //Finder.MakeTemplateCoarse(p, k.se3CfromW, m2CamDerivs);
+    Finder.CalcSearchLevelAndWarpMatrix(p, k.se3CfromW, m2CamDerivs);
+    Finder.MakeTemplateCoarseCont(p);
 
     if(Finder.TemplateBad())
     {
