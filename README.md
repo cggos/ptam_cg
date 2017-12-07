@@ -25,8 +25,15 @@ PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented r
 * [Installation of PTAM in ROS](https://sites.google.com/site/zhilongliuwebsite/research/computer-vision-embedded-systems/ptam)
 
 # Tools
+
 ## Static Analysis of C/C++
 * cppcheck: [Add cppcheck and clang-format for a cmake project](https://arcanis.me/en/2015/10/17/cppcheck-and-clang-format)
+
+## Test Code Coverage
+* coveralls-cmake
+
+## Generate API documentation
+* Doxygen
 
 # Relate Source Code
 
