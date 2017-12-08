@@ -194,12 +194,11 @@ protected:
     // Interface with map maker:
     int mnFrame;                    // Frames processed since last reset
     int mnLastKeyFrameDropped;      // Counter of last keyframe inserted.
-    void AddNewKeyFrame();          // Gives the current frame to the mapmaker to use as a keyframe
 
     // Tracking quality control:
     int manMeasAttempted[LEVELS];
     int manMeasFound[LEVELS];
-    enum {BAD, DODGY, GOOD} mTrackingQuality;
+    enum {BAD, GOOD} mTrackingQuality;
     int mnLostFrames;
 
     // Relocalisation functions:

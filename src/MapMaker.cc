@@ -476,15 +476,17 @@ void MapMaker::ApplyGlobalTransformationToMap(SE3<> se3NewFromOld)
     }
 }
 
-// The tracker entry point for adding a new keyframe;
-// the tracker thread doesn't want to hang about, so 
-// just dumps it on the top of the mapmaker's queue to 
-// be dealt with later, and return.
+/**
+ * @brief The tracker entry point for adding a new keyframe
+ * @param k KeyFrame to be added
+ * @details the tracker thread doesn't want to hang about, so just dumps it on the top of the mapmaker's queue
+ *          to be dealt with later, and return.
+ */
 void MapMaker::AddKeyFrame(KeyFrame &k)
 {
-    KeyFrame *pK = new KeyFrame;
+    auto *pK = new KeyFrame;
     *pK = k;
-    pK->pSBI = NULL; // Mapmaker uses a different SBI than the tracker, so will re-gen its own
+    pK->pSBI = nullptr; // Mapmaker uses a different SBI than the tracker, so will re-gen its own
     mvpKeyFrameQueue.push_back(pK);
     if(mbBundleRunning)   // Tell the mapmaker to stop doing low-priority stuff and concentrate on this KF first.
         mbBundleAbortRequested = true;
@@ -743,7 +745,7 @@ double MapMaker::DistToNearestKeyFrame(KeyFrame &kCurrent)
     return dDist;
 }
 
-bool MapMaker::NeedNewKeyFrame(KeyFrame &kCurrent)
+bool MapMaker::IsNeedNewKeyFrame(KeyFrame &kCurrent)
 {
     double dDist = DistToNearestKeyFrame(kCurrent);
     dDist *= (1.0 / kCurrent.dSceneDepthMean);

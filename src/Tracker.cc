@@ -136,7 +136,6 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
             {
                 mMessageForUser << "Tracking Map, quality ";
                 if(mTrackingQuality == GOOD)  mMessageForUser << "good.";
-                if(mTrackingQuality == DODGY) mMessageForUser << "poor.";
                 if(mTrackingQuality == BAD)   mMessageForUser << "bad.";
                 mMessageForUser << " Found:";
                 for(int i=0; i<LEVELS; i++)
@@ -145,10 +144,12 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
             }
 
             // Heuristics to check if a key-frame should be added to the map:
-            if(mTrackingQuality==GOOD && mMapMaker.NeedNewKeyFrame(mCurrentKF) && mnFrame-mnLastKeyFrameDropped>20 && mMapMaker.QueueSize()<3)
+            if(mTrackingQuality==GOOD && mMapMaker.IsNeedNewKeyFrame(mCurrentKF) &&
+                    mnFrame-mnLastKeyFrameDropped>20 && mMapMaker.QueueSize()<3)
             {
                 mMessageForUser << " Adding key-frame.";
-                AddNewKeyFrame();
+                mMapMaker.AddKeyFrame(mCurrentKF);
+                mnLastKeyFrameDropped = mnFrame;
             }
         }
         else  // what if there is a map, but tracking has been lost?
@@ -882,16 +883,10 @@ void Tracker::UpdateMotionModel()
     mdMSDScaledVelocityMagnitude = sqrt(v6*v6);
 }
 
-// Time to add a new keyframe? The MapMaker handles most of this.
-void Tracker::AddNewKeyFrame()
-{
-    mMapMaker.AddKeyFrame(mCurrentKF);
-    mnLastKeyFrameDropped = mnFrame;
-}
-
-// Some heuristics to decide if tracking is any good, for this frame.
-// This influences decisions to add key-frames, and eventually
-// causes the tracker to attempt relocalisation.
+/**
+ * @brief Some heuristics to decide if tracking is any good, for this frame.
+ * @details This influences decisions to add key-frames, and eventually causes the tracker to attempt relocalisation.
+ */
 void Tracker::AssessTrackingQuality()
 {
     int nTotalAttempted = 0;
@@ -899,21 +894,21 @@ void Tracker::AssessTrackingQuality()
     int nLargeAttempted = 0;
     int nLargeFound = 0;
 
-    for(int i=0; i<LEVELS; i++)
-    {
+    for(int i=0; i<LEVELS; i++) {
         nTotalAttempted += manMeasAttempted[i];
         nTotalFound += manMeasFound[i];
-        if(i>=2) nLargeAttempted += manMeasAttempted[i];
-        if(i>=2) nLargeFound += manMeasFound[i];
+        if (i >= 2) {
+            nLargeAttempted += manMeasAttempted[i];
+            nLargeFound += manMeasFound[i];
+        }
     }
 
     if(nTotalFound == 0 || nTotalAttempted == 0)
         mTrackingQuality = BAD;
-    else
-    {
+    else {
         double dTotalFracFound = (double) nTotalFound / nTotalAttempted;
         double dLargeFracFound;
-        if(nLargeAttempted > 10)
+        if (nLargeAttempted > 10)
             dLargeFracFound = (double) nLargeFound / nLargeAttempted;
         else
             dLargeFracFound = dTotalFracFound;
@@ -921,20 +916,11 @@ void Tracker::AssessTrackingQuality()
         static gvar3<double> gvdQualityGood("Tracker.TrackingQualityGood", 0.3, SILENT);
         static gvar3<double> gvdQualityLost("Tracker.TrackingQualityLost", 0.13, SILENT);
 
-
-        if(dTotalFracFound > *gvdQualityGood)
+        if (dTotalFracFound > *gvdQualityGood)
             mTrackingQuality = GOOD;
-        else if(dLargeFracFound < *gvdQualityLost)
+        else if (dLargeFracFound < *gvdQualityLost)
             mTrackingQuality = BAD;
-        else
-            mTrackingQuality = DODGY;
-    }
-
-    if(mTrackingQuality == DODGY)
-    {
-        // Further heuristics to see if it's actually bad, not just dodgy...
-        // If the camera pose estimate has run miles away, it's probably bad.
-        if(mMapMaker.IsDistanceToNearestKeyFrameExcessive(mCurrentKF))
+        else if (mMapMaker.DistToNearestKeyFrame(mCurrentKF) > mMapMaker.GetWiggleScale() * 10.0)
             mTrackingQuality = BAD;
     }
 

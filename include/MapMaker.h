@@ -50,8 +50,10 @@ public:
     void RequestReset();   // Request that the we reset. Called by the tracker.
     bool ResetDone();      // Returns true if the has been done.
     int  QueueSize() { return mvpKeyFrameQueue.size() ;} // How many KFs in the queue waiting to be added?
-    bool NeedNewKeyFrame(KeyFrame &kCurrent);            // Is it a good camera pose to add another KeyFrame?
+    bool IsNeedNewKeyFrame(KeyFrame &kCurrent);            // Is it a good camera pose to add another KeyFrame?
     bool IsDistanceToNearestKeyFrameExcessive(KeyFrame &kCurrent);  // Is the camera far away from the nearest KeyFrame (i.e. maybe lost?)
+    double DistToNearestKeyFrame(KeyFrame &kCurrent);
+    double GetWiggleScale() { return mdWiggleScale; }
 
 protected:
     Map &mMap;               // The map
@@ -87,7 +89,6 @@ protected:
     // General Maintenance/Utility:
     void Reset();
     void HandleBadPoints();
-    double DistToNearestKeyFrame(KeyFrame &kCurrent);
     double KeyFrameLinearDist(KeyFrame &k1, KeyFrame &k2);
     KeyFrame* ClosestKeyFrame(KeyFrame &k);
     std::vector<KeyFrame*> NClosestKeyFrames(KeyFrame &k, unsigned int N);
