@@ -866,7 +866,7 @@ void Tracker::UpdateMotionModel()
     Vector<6> v6Motion = SE3<>::ln(se3NewFromOld);
 
     static gvar3<int> gvnConstVel("Tracker.UseConstantVelocity", 1, SILENT);
-    bool bConstVel = (bool)*gvnConstVel;
+    auto bConstVel = (bool)*gvnConstVel;
     if(bConstVel) {
         mv6CameraVelocity = v6Motion;
     }
@@ -920,8 +920,12 @@ void Tracker::AssessTrackingQuality()
             mTrackingQuality = GOOD;
         else if (dLargeFracFound < *gvdQualityLost)
             mTrackingQuality = BAD;
-        else if (mMapMaker.DistToNearestKeyFrame(mCurrentKF) > mMapMaker.GetWiggleScale() * 10.0)
-            mTrackingQuality = BAD;
+        else { // Is the camera far away from the nearest KeyFrame (i.e. maybe lost?)
+            KeyFrame *pClosest = mMapMaker.ClosestKeyFrame(mCurrentKF);
+            double dDist = mMapMaker.KeyFrameLinearDist(mCurrentKF, *pClosest);
+            if (dDist > mMapMaker.GetWiggleScale() * 10.0)
+                mTrackingQuality = BAD;
+        }
     }
 
     if(mTrackingQuality==BAD)

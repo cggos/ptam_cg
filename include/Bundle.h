@@ -50,6 +50,7 @@ struct OffDiagScriptEntry
 {
     int j;
     int k;
+    OffDiagScriptEntry():j(0),k(0){}
 };
 
 // A map point, plus computation intermediates.
@@ -115,7 +116,6 @@ public:
     Vector<3> GetPoint(int n);       // Point coords after adjustment
     SE3<> GetCamera(int n);            // Camera pose after adjustment
     std::vector<std::pair<int,int> > GetOutlierMeasurements();  // Measurements flagged as outliers
-    std::set<int> GetOutliers();                                // Points flagged as outliers
 
 protected:
     inline void ProjectAndFindSquaredError(Meas &meas); // Project a single point in a single view, compare to measurement

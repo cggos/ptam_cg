@@ -51,8 +51,8 @@ public:
     bool ResetDone();      // Returns true if the has been done.
     int  QueueSize() { return mvpKeyFrameQueue.size() ;} // How many KFs in the queue waiting to be added?
     bool IsNeedNewKeyFrame(KeyFrame &kCurrent);            // Is it a good camera pose to add another KeyFrame?
-    bool IsDistanceToNearestKeyFrameExcessive(KeyFrame &kCurrent);  // Is the camera far away from the nearest KeyFrame (i.e. maybe lost?)
-    double DistToNearestKeyFrame(KeyFrame &kCurrent);
+    double KeyFrameLinearDist(KeyFrame &k1, KeyFrame &k2);
+    KeyFrame* ClosestKeyFrame(KeyFrame &k);
     double GetWiggleScale() { return mdWiggleScale; }
 
 protected:
@@ -89,8 +89,6 @@ protected:
     // General Maintenance/Utility:
     void Reset();
     void HandleBadPoints();
-    double KeyFrameLinearDist(KeyFrame &k1, KeyFrame &k2);
-    KeyFrame* ClosestKeyFrame(KeyFrame &k);
     std::vector<KeyFrame*> NClosestKeyFrames(KeyFrame &k, unsigned int N);
     void RefreshSceneDepth(KeyFrame *pKF);
 

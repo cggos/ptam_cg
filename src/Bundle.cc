@@ -107,11 +107,12 @@ void Bundle::ClearAccumulators()
     }
 }
 
-// Perform bundle adjustment. The parameter points to a signal bool 
-// which mapmaker will set to high if another keyframe is incoming
-// and bundle adjustment needs to be aborted.
-// Returns number of accepted iterations if all good, negative 
-// value for big error.
+/**
+ * @brief Perform bundle adjustment.
+ * @param pbAbortSignal The parameter points to a signal bool which mapmaker will set to high
+ *                      if another keyframe is incoming and bundle adjustment needs to be aborted.
+ * @return Returns number of accepted iterations if all good, negative value for big error.
+ */
 int Bundle::Compute(bool *pbAbortSignal)
 {
     mpbAbortSignal = pbAbortSignal;
@@ -128,46 +129,45 @@ int Bundle::Compute(bool *pbAbortSignal)
     mnCounter = 0;
     mnAccepted = 0;
 
-    // What MEstimator are we using today?
-    static gvar3<string> gvsMEstimator("Bundle.MEstimator", "Tukey", SILENT);
+    static gvar3<string> gvsMEstimator("Bundle.MEstimator", "Tukey", SILENT);//What MEstimator are we using today?
 
-    while(!mbConverged  && !mbHitMaxIterations && !*pbAbortSignal)
-    {
+    while(!mbConverged  && !mbHitMaxIterations && !*pbAbortSignal) {
         bool bNoError;
-        if(*gvsMEstimator == "Cauchy")
+        if (*gvsMEstimator == "Cauchy")
             bNoError = Do_LM_Step<cg::Cauchy>(pbAbortSignal);
-        else if(*gvsMEstimator == "Tukey")
+        else if (*gvsMEstimator == "Tukey")
             bNoError = Do_LM_Step<cg::Tukey>(pbAbortSignal);
-        else if(*gvsMEstimator == "Huber")
+        else if (*gvsMEstimator == "Huber")
             bNoError = Do_LM_Step<cg::Huber>(pbAbortSignal);
-        else
-        {
+        else {
             cout << "Invalid BundleMEstimator selected !! " << endl;
             cout << "Defaulting to Tukey." << endl;
             *gvsMEstimator = "Tukey";
             bNoError = Do_LM_Step<cg::Tukey>(pbAbortSignal);
-        };
+        }
 
-        if(!bNoError)
+        if (!bNoError)
             return -1;
     }
 
     if(mbHitMaxIterations)
         cout << "  Hit max iterations." << endl;
     cout << "Final Sigma Squared: " << mdSigmaSquared << " (= " << sqrt(mdSigmaSquared) / 4.685 << " pixels.)" << endl;
-    return mnAccepted;
-};
 
-// Reproject a single measurement, find error
+    return mnAccepted;
+}
+
+/**
+ * @brief Reproject a single measurement, find error
+ * @param meas
+ */
 inline void Bundle::ProjectAndFindSquaredError(Meas &meas)
 {
     Camera &cam = mvCameras[meas.c];
     Point &point = mvPoints[meas.p];
 
-    // Project the point.
     meas.v3Cam = cam.se3CfW * point.v3Pos;
-    if(meas.v3Cam[2] <= 0)
-    {
+    if(meas.v3Cam[2] <= 0) {
         meas.bBad = true;
         return;
     }
@@ -177,6 +177,33 @@ inline void Bundle::ProjectAndFindSquaredError(Meas &meas)
     meas.m2CamDerivs = mCamera.GetProjectionDerivs();
     meas.v2Epsilon = meas.dSqrtInvNoise * (meas.v2Found - v2Image);
     meas.dErrorSquared = meas.v2Epsilon * meas.v2Epsilon;
+}
+
+
+/**
+ * @brief Find the new total error if cameras and points used their new coordinates
+ * @tparam MEstimator
+ * @return
+ */
+template<class MEstimator>
+double Bundle::FindNewError()
+{
+    double dNewError = 0;
+    vector<double> vdErrorSquared;
+    for (auto &meas : mMeasList) {
+        Vector<3> v3Cam = mvCameras[meas.c].se3CfWNew * mvPoints[meas.p].v3PosNew;
+        if(v3Cam[2] <= 0) {
+            dNewError += 1.0;
+            cout << ".";
+            continue;
+        }
+        Vector<2> v2ImPlane = project(v3Cam);
+        Vector<2> v2Image   = mCamera.Project(v2ImPlane);
+        Vector<2> v2Error =   meas.dSqrtInvNoise * (meas.v2Found - v2Image);
+        double dErrorSquared = v2Error * v2Error;
+        dNewError += MEstimator::ObjectiveScore(dErrorSquared, mdSigmaSquared);
+    }
+    return dNewError;
 }
 
 template<class MEstimator>
@@ -523,47 +550,20 @@ bool Bundle::Do_LM_Step(bool *pbAbortSignal)
     return true;
 }
 
-// Find the new total error if cameras and points used their 
-// new coordinates
-template<class MEstimator>
-double Bundle::FindNewError()
-{
-    ofstream ofs;
-    double dNewError = 0;
-    vector<double> vdErrorSquared;
-    for(list<Meas>::iterator itr = mMeasList.begin(); itr!=mMeasList.end(); itr++)
-    {
-        Meas &meas = *itr;
-        // Project the point.
-        Vector<3> v3Cam = mvCameras[meas.c].se3CfWNew * mvPoints[meas.p].v3PosNew;
-        if(v3Cam[2] <= 0)
-        {
-            dNewError += 1.0;
-            cout << ".";
-            continue;
-        };
-        Vector<2> v2ImPlane = project(v3Cam);
-        Vector<2> v2Image   = mCamera.Project(v2ImPlane);
-        Vector<2> v2Error =   meas.dSqrtInvNoise * (meas.v2Found - v2Image);
-        double dErrorSquared = v2Error * v2Error;
-        dNewError += MEstimator::ObjectiveScore(dErrorSquared, mdSigmaSquared);
-    }
-    return dNewError;
-}
-
-// Optimisation: make a bunch of tables, one per camera
-// which point to measurements (if any) for each point
-// This is faster than a std::map lookup.
+/**
+ * @brief Optimisation: make a bunch of tables, one per camera
+ *        which point to measurements (if any) for each point
+ *        This is faster than a std::map lookup.
+ */
 void Bundle::GenerateMeasLUTs()
 {
     mvMeasLUTs.clear();
-    for(unsigned int nCam = 0; nCam < mvCameras.size(); nCam++)
-    {
-        mvMeasLUTs.push_back(vector<Meas*>());
-        mvMeasLUTs.back().resize(mvPoints.size(), NULL);
-    };
-    for(list<Meas>::iterator it = mMeasList.begin(); it!=mMeasList.end(); it++)
-        mvMeasLUTs[it->c][it->p] =  &(*it);
+    for(unsigned int nCam = 0; nCam < mvCameras.size(); nCam++) {
+        mvMeasLUTs.push_back(vector<Meas *>());
+        mvMeasLUTs.back().resize(mvPoints.size(), nullptr);
+    }
+    for (auto &it : mMeasList)
+        mvMeasLUTs[it.c][it.p] =  &it;
 }
 
 // Optimisation: make a per-point list of all
@@ -571,26 +571,23 @@ void Bundle::GenerateMeasLUTs()
 // scanned to make the off-diagonal elements of matrix S
 void Bundle::GenerateOffDiagScripts()
 {
-    for(unsigned int i=0; i<mvPoints.size(); i++)
-    {
+    for(unsigned int i=0; i<mvPoints.size(); i++) {
         Point &p = mvPoints[i];
         p.vOffDiagonalScript.clear();
-        for(set<int>::iterator it_j = p.sCameras.begin(); it_j!=p.sCameras.end(); it_j++)
-        {
+        for (auto it_j = p.sCameras.begin(); it_j != p.sCameras.end(); it_j++) {
             int j = *it_j;
-            if(mvCameras[j].bFixed)
+            if (mvCameras[j].bFixed)
                 continue;
             Meas *pMeas_j = mvMeasLUTs[j][i];
-            assert(pMeas_j != NULL);
+            assert(pMeas_j != nullptr);
 
-            for(set<int>::iterator it_k = p.sCameras.begin(); it_k!=it_j; it_k++)
-            {
+            for (auto it_k = p.sCameras.begin(); it_k != it_j; it_k++) {
                 int k = *it_k;
-                if(mvCameras[k].bFixed)
+                if (mvCameras[k].bFixed)
                     continue;
 
                 Meas *pMeas_k = mvMeasLUTs[k][i];
-                assert(pMeas_k != NULL);
+                assert(pMeas_k != nullptr);
 
                 OffDiagScriptEntry e;
                 e.j = j;
@@ -605,14 +602,13 @@ void Bundle::ModifyLambda_GoodStep()
 {
     mdLambdaFactor = 2.0;
     mdLambda *= 0.3;
-};
+}
 
 void Bundle::ModifyLambda_BadStep()
 {
     mdLambda = mdLambda * mdLambdaFactor;
     mdLambdaFactor = mdLambdaFactor * 2;
-};
-
+}
 
 Vector<3> Bundle::GetPoint(int n)
 {
@@ -623,19 +619,6 @@ SE3<> Bundle::GetCamera(int n)
 {
     return mvCameras.at(n).se3CfW;
 }
-
-set<int> Bundle::GetOutliers()
-{
-    set<int> sOutliers;
-    set<int>::iterator hint = sOutliers.begin();
-    for(unsigned int i=0; i<mvPoints.size(); i++)
-    {
-        Point &p = mvPoints[i];
-        if(p.nMeasurements > 0 && p.nMeasurements == p.nOutliers)
-            hint = sOutliers.insert(hint, i);
-    }
-    return sOutliers;
-};
 
 vector<pair<int, int> > Bundle::GetOutlierMeasurements()
 {
