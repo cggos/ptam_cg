@@ -487,7 +487,9 @@ void MapMaker::AddKeyFrame(KeyFrame &k)
         mbBundleAbortRequested = true;
 }
 
-// Mapmaker's code to handle incoming key-frames.
+/**
+ * @brief Mapmaker's code to handle incoming key-frames.
+ */
 void MapMaker::AddKeyFrameFromTopOfQueue()
 {
     if(mvpKeyFrameQueue.empty())
@@ -498,7 +500,7 @@ void MapMaker::AddKeyFrameFromTopOfQueue()
     pK->MakeKeyFrame_Rest();
     mMap.vpKeyFrames.push_back(pK);
     // Any measurements? Update the relevant point's measurement counter status map
-    for(std::map<MapPoint*, Measurement>::iterator it = pK->mMeasurements.begin(); it!=pK->mMeasurements.end(); it++) {
+    for(auto it = pK->mMeasurements.begin(); it!=pK->mMeasurements.end(); it++) {
         it->first->pMMData->sMeasurementKFs.insert(pK);
         it->second.Source = Measurement::SRC_TRACKER;
     }
