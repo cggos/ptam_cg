@@ -36,8 +36,8 @@ Tracker::Tracker(ImageRef irVideoSize, const ATANCamera &c, Map &m, MapMaker &mm
     GUI.RegisterCommand("PokeTracker", GUICommandCallBack, this);
     TrackerData::irImageSize = mirSize;
 
-    mpSBILastFrame = NULL;
-    mpSBIThisFrame = NULL;
+    mpSBILastFrame = nullptr;
+    mpSBIThisFrame = nullptr;
 
     // Most of the initialisation is done in Reset()
     Reset();
@@ -451,7 +451,7 @@ void Tracker::TrackMap()
             continue;
 
         // Calculate camera projection derivatives of this point.
-        TData.GetDerivsUnsafe(mCamera);
+        TData.m2CamDerivs = mCamera.GetProjectionDerivs();
 
         // And check what the PatchFinder (included in TrackerData) makes of the mappoint in this view..
         TData.nSearchLevel = TData.Finder.CalcSearchLevelAndWarpMatrix(TData.Point, mse3CamFromWorld, TData.m2CamDerivs);

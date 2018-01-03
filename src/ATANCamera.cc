@@ -166,14 +166,18 @@ Matrix<4> ATANCamera::MakeUFBLinearFrustumMatrix(double near, double far)
     m4[2][3] = 2*near*far / (near - far);
 
     return m4;
-};
+}
 
+/**
+ * @brief get the derivative of image frame wrt camera z=1 frame at the last computed projection
+ * @return Jacobian Matrix \f$ J_1 \f$
+ * @details
+ *         \f[
+ *            J_1 = \frac{\partial{(u,v)}}{\partial{(x_c,y_c)}}
+ *         \f]
+ */
 Matrix<2,2> ATANCamera::GetProjectionDerivs()
 {
-    // get the derivative of image frame wrt camera z=1 frame at the last computed projection
-    // in the form (d im1/d cam1, d im1/d cam2)
-    //             (d im2/d cam1, d im2/d cam2)
-
     double dFracBydx;
     double dFracBydy;
 

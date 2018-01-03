@@ -60,7 +60,6 @@ struct TrackerData
     Vector<2> v2Found;      // Pixel coords of found patch (L0)
     double dSqrtInvNoise;   // Only depends on search level..
 
-
     // Stuff for pose update:
     Vector<2> v2Error_CovScaled;
     Matrix<2,6> m26Jacobian;   // Jacobian wrt camera position
@@ -86,37 +85,54 @@ struct TrackerData
         bInImage = true;
     }
 
-    // Get the projection derivatives (depend only on the camera.)
-    // This is called Unsafe because it depends on the camera caching
-    // results from the previous projection:
-    // Only do this right after the same point has been projected!
-    inline void GetDerivsUnsafe(ATANCamera &Cam)
-    {
-        m2CamDerivs = Cam.GetProjectionDerivs();
-    }
-
     // Does projection and gets camera derivs all in one.
     inline void ProjectAndDerivs(SE3<> &se3, ATANCamera &Cam)
     {
         Project(se3, Cam);
         if(bFound)
-            GetDerivsUnsafe(Cam);
+            m2CamDerivs = Cam.GetProjectionDerivs();
     }
 
-    // Jacobian of projection W.R.T. the camera position
-    // I.e. if  p_cam = SE3Old * p_world,
-    //         SE3New = SE3Motion * SE3Old
+    /**
+     * @brief Jacobian of projection W.R.T. the camera position
+     *        I.e. if  p_cam = SE3Old * p_world,
+     *                 SE3New = SE3Motion * SE3Old
+     * @details
+     *         \f[
+     *
+     *           J_2 = \frac{\partial{(x_c,y_c)}}{\partial{(X_c,Y_c,Z_c)}}
+     *               = \begin{bmatrix}
+     *                       \frac{1}{Z_c} & 0 & -\frac{X_c}{{Z_c}^2} \\
+     *                       0 & \frac{1}{Z_c} & -\frac{Y_c}{{Z_c}^2}
+     *                 \end{bmatrix}
+     *               = \begin{bmatrix}
+     *                       1 & 0 & -\frac{X_c}{Z_c} \\
+     *                       0 & 1 & -\frac{Y_c}{Z_c}
+     *                 \end{bmatrix}
+     *                 * \frac{1}{Z_c} \\
+     *
+     *           J_3 = \frac{\partial{(X_c,Y_c,Z_c)}}{\partial{\xi}}
+     *               = \begin{bmatrix}
+     *                       1 & 0 & 0 &   0  &  Z_c &  -Y_c \\
+     *                       0 & 1 & 0 & -Z_c &   0  &   X_c \\
+     *                       0 & 0 & 1 &  Y_c & -X_c &    0
+     *                 \end{bmatrix} \\
+     *
+     *             J = J_1 \cdot J_2 \cdot J_3
+     *
+     *         \f]
+     */
     inline void CalcJacobian()
     {
         double dOneOverCameraZ = 1.0 / v3Cam[2];
         for(int m=0; m<6; m++)
         {
             const Vector<4> v4Motion = SE3<>::generator_field(m, unproject(v3Cam));
-            Vector<2> v2CamFrameMotion;
+            Vector<2> v2CamFrameMotion; //J_2 * J_3
             v2CamFrameMotion[0] = (v4Motion[0] - v3Cam[0] * v4Motion[2] * dOneOverCameraZ) * dOneOverCameraZ;
             v2CamFrameMotion[1] = (v4Motion[1] - v3Cam[1] * v4Motion[2] * dOneOverCameraZ) * dOneOverCameraZ;
-            m26Jacobian.T()[m] = m2CamDerivs * v2CamFrameMotion;
-        };
+            m26Jacobian.T()[m] = m2CamDerivs * v2CamFrameMotion; // J = J_1 * J_2 * J_3
+        }
     }
 
     // Sometimes in tracker instead of reprojecting, just update the error linearly!
