@@ -350,15 +350,16 @@ pair<SE2<>,double> SmallBlurryImage::IteratePosRelToTarget(SmallBlurryImage &oth
     return result_pair;
 }
 
-
-// What is the 3D camera rotation (zero trans) SE3<> which causes an
-// input image SO2 rotation?
+/**
+ * @brief What is the 3D camera rotation (zero trans) SE3<> which causes an input image SO2 rotation?
+ * @param se2
+ * @param camera
+ * @return
+ * @details Do this by projecting two points, and then iterating the SE3<> (SO3 actually) until convergence.
+ *          It might seem stupid doing this so precisely when the whole SE2-finding is one big hack, but hey.
+ */
 SE3<> SmallBlurryImage::SE3fromSE2(SE2<> se2, ATANCamera camera)
 {
-    // Do this by projecting two points, and then iterating the SE3<> (SO3
-    // actually) until convergence. It might seem stupid doing this so
-    // precisely when the whole SE2-finding is one big hack, but hey.
-
     camera.SetImageSize(mirSize);
 
     Vector<2> av2Turned[2];   // Our two warped points in pixels
@@ -380,6 +381,7 @@ SE3<> SmallBlurryImage::SE3fromSE2(SE2<> se2, ATANCamera camera)
             Vector<3> v3Cam = so3 * av3OrigPoints[i];
             Vector<2> v2Implane = project(v3Cam);
             Vector<2> v2Pixels = camera.Project(v2Implane);
+
             Vector<2> v2Error = av2Turned[i] - v2Pixels;
 
             Matrix<2> m2CamDerivs = camera.GetProjectionDerivs();
