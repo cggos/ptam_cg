@@ -11,47 +11,10 @@ ENDIF()
 
 message("CMake Build Type: " ${CMAKE_BUILD_TYPE})
 
-
-############### set CMake Compiler ######################
-
-set( CMAKE_CXX_COMPILER "g++" )
-
-# check compiler version > 5.1
-message(STATUS "CMAKE_CXX_COMPILER_VERSION: " ${CMAKE_CXX_COMPILER_VERSION})
-if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
-    message(FATAL_ERROR "Too low CXX Version, it must equal or great than 5.1")
-endif()
-
-# check and set C++11
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-if(NOT COMPILER_SUPPORTS_CXX11)
-    message(FATAL_ERROR "CXX does not support -std=c++11")
-endif()
-
-# output C++ features
-message(STATUS "My C++ compiler supports these C++ features:")
-foreach(i ${CMAKE_CXX_COMPILE_FEATURES})
-    message(STATUS "  ${i}")
-endforeach()
-
-# set CMAKE_CXX_FLAGS
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(MY_OVERALL_CXX_FLAGS    "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -Wall -Wno-deprecated-declarations -lpthread -lm")
-    if(CMAKE_BUILD_TYPE MATCHES "Release")
-        set(CMAKE_CXX_FLAGS_RELEASE "${MY_OVERALL_CXX_FLAGS} -O3")
-        set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_RELEASE})
-    else(CMAKE_BUILD_TYPE MATCHES "Debug")
-        set(CMAKE_CXX_FLAGS_DEBUG   "${MY_OVERALL_CXX_FLAGS} -g")
-        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} --coverage -lgcov") # enabling coverage
-        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -pg") # enabling gprof
-        set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
-        add_definitions(-D__USER_DEBUG__)
-    endif(CMAKE_BUILD_TYPE MATCHES "Release")
-endif()
-
-
-# set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
+set(USER_USE_GCOV     TRUE) # gcov
+set(USER_USE_GPROF    TRUE) # gprof
+set(USER_USE_CPPCHECK TRUE) # cppcheck
+set(USER_USE_DOXYGEN  TRUE) # Doxygen
 
 
 ############### set SRC_LIST_PTAM & SRC_LIST_CameraCalibrator ######################
@@ -85,54 +48,107 @@ set( SRC_LIST_CameraCalibrator
         ${PROJECT_SOURCE_DIR}/src/VideoSource.cc )
 
 
-############### Static Analysis of C/C++ using cppcheck ######################
+############### set CMake Compiler ######################
 
-# generating compile_commands.json(JSON compilation database)
-set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
-# execute `make cppcheck` after `cmake`
-include(cmake_modules/cppcheck.cmake)
+set( CMAKE_CXX_COMPILER "g++" )
 
-
-############### coveralls-cmake: test code coverage ######################
-
-# Add coveralls-cmake project cmake modules to path.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/coveralls-cmake/cmake)
-
-# We probably don't want this to run on every build.
-option(COVERALLS "Generate coveralls data" OFF)
-if (COVERALLS)
-    include(Coveralls)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -g -O0 -fprofile-arcs -ftest-coverage")
-    # Create the coveralls target.
-    coveralls_setup( "${SRC_LIST_PTAM}" ON )
+# check compiler version > 5.1
+message(STATUS "CMAKE_CXX_COMPILER_VERSION: " ${CMAKE_CXX_COMPILER_VERSION})
+if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
+    message(FATAL_ERROR "Too low CXX Version, it must equal or great than 5.1")
 endif()
+
+# check and set C++11
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+if(NOT COMPILER_SUPPORTS_CXX11)
+    message(FATAL_ERROR "CXX does not support -std=c++11")
+endif()
+
+# output C++ features
+message(STATUS "My C++ compiler supports these C++ features:")
+foreach(i ${CMAKE_CXX_COMPILE_FEATURES})
+    message(STATUS "  ${i}")
+endforeach()
+
+# set CMAKE_CXX_FLAGS
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+
+    set(MY_OVERALL_CXX_FLAGS    "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -Wall -Wno-deprecated-declarations -lpthread -lm")
+
+    if(CMAKE_BUILD_TYPE MATCHES "Release")
+
+        set(CMAKE_CXX_FLAGS_RELEASE "${MY_OVERALL_CXX_FLAGS} -O3")
+        set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_RELEASE})
+
+    else(CMAKE_BUILD_TYPE MATCHES "Debug")
+        set(CMAKE_CXX_FLAGS_DEBUG   "${MY_OVERALL_CXX_FLAGS} -g")
+
+        if(USER_USE_GPROF)
+            set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -pg") # enabling gprof
+        endif()
+
+        if(USER_USE_GCOV)
+            ############### coveralls-cmake: test code coverage ######################
+            # Add coveralls-cmake project cmake modules to path.
+            set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/coveralls-cmake/cmake)
+            # We probably don't want this to run on every build.
+            option(COVERALLS "Generate coveralls data" OFF)
+            if (COVERALLS)
+                include(Coveralls)
+                #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} --coverage -lgcov") # enabling coverage gcov
+                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage -lgcov")
+                # Create the coveralls target.
+                coveralls_setup( "${SRC_LIST_PTAM}" ON )
+            endif()
+        endif()
+
+        set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
+
+        add_definitions(-D__USER_DEBUG__)
+
+    endif(CMAKE_BUILD_TYPE MATCHES "Release")
+
+endif()
+
+
+# set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
+
+
+############### Static Analysis of C/C++ using cppcheck ######################
+if (USER_USE_CPPCHECK)
+    # generating compile_commands.json(JSON compilation database)
+    set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+    # execute `make cppcheck` after `cmake`
+    include(cmake_modules/cppcheck.cmake)
+endif ()
 
 
 ############### Generating API documentation with Doxygen ######################
+if (USER_USE_DOXYGEN)
+    # add a target to generate API documentation with Doxygen
+    find_package(Doxygen)
+    option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
 
-# add a target to generate API documentation with Doxygen
-find_package(Doxygen)
-option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
+    if(BUILD_DOCUMENTATION)
+        if(NOT DOXYGEN_FOUND)
+            message(FATAL_ERROR "Doxygen is needed to build the documentation.")
+        endif()
 
-if(BUILD_DOCUMENTATION)
-    if(NOT DOXYGEN_FOUND)
-        message(FATAL_ERROR "Doxygen is needed to build the documentation.")
+        set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/Doxyfile.config)
+        set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+        configure_file(${doxyfile_in} ${doxyfile} @ONLY)
+
+        add_custom_target(doc
+                COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                COMMENT "Generating API documentation with Doxygen"
+                VERBATIM)
+
+        install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc)
     endif()
-
-    set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/Doxyfile.config)
-    set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-
-    configure_file(${doxyfile_in} ${doxyfile} @ONLY)
-
-    add_custom_target(doc
-        COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT "Generating API documentation with Doxygen"
-        VERBATIM)
-
-    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc)
-endif()
+endif ()
 
 
 ############### Dependencies or AddOns ######################
