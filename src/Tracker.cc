@@ -842,12 +842,11 @@ void Tracker::PredictPoseWithMotionModel()
     Vector<6> v6Velocity = mv6CameraVelocity;
     if(mbUseSBIInit)
     {
-        //CalcSBIRotation
         mpSBILastFrame->MakeJacs(mpSBILastFrame->mimTemplate, mpSBILastFrame->mimImageJacs);
-        pair<SE2<>, double> result_pair;
-        result_pair = mpSBIThisFrame->IteratePosRelToTarget(*mpSBILastFrame, 6);
-        SE3<> se3Adjust = SmallBlurryImage::SE3fromSE2(result_pair.first, mCamera);
-        Vector<6> v6SBIRot = se3Adjust.ln();
+
+        std::pair<SE3<>, double> result_pair = mpSBIThisFrame->CalcSBIRotation(mpSBILastFrame, mCamera);
+
+        Vector<6> v6SBIRot = result_pair.first.ln();
 
         v6Velocity.slice<3,3>() = v6SBIRot.slice<3,3>();
         v6Velocity[0] = 0.0;

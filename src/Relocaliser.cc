@@ -30,13 +30,10 @@ bool Relocaliser::AttemptRecovery(KeyFrame &kCurrent)
         }
     }
 
-    // And estimate a camera rotation from a 3DOF image alignment
-    pair<SE2<>, double> result_pair = kCurrent.pSBI->IteratePosRelToTarget(*mMap.vpKeyFrames[mnBest]->pSBI, 6);
-    mse2 = result_pair.first;
-    double dScore =result_pair.second;
-    SE3<> se3KeyFramePos = mMap.vpKeyFrames[mnBest]->se3CfromW;
-    mse3Best = SmallBlurryImage::SE3fromSE2(mse2, mCamera) * se3KeyFramePos;
+    std::pair<SE3<>, double> result_pair = kCurrent.pSBI->CalcSBIRotation(mMap.vpKeyFrames[mnBest]->pSBI, mCamera);
 
-    return dScore < GV2.GetDouble("Reloc2.MaxScore", 9e6, SILENT);
+    mse3Best = result_pair.first * mMap.vpKeyFrames[mnBest]->se3CfromW;
+
+    return result_pair.second < GV2.GetDouble("Reloc2.MaxScore", 9e6, SILENT);
 }
 

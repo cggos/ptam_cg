@@ -408,3 +408,22 @@ SE3<> SmallBlurryImage::SE3fromSE2(SE2<> se2, ATANCamera camera)
     se3Result.get_rotation() = so3;
     return se3Result;
 }
+
+/**
+ * @brief And estimate a camera rotation from a 3DOF image alignment
+ * @param pSBIRef
+ * @param camera
+ * @param nIterations
+ * @return
+ */
+std::pair<SE3<>,double> SmallBlurryImage::CalcSBIRotation(SmallBlurryImage *pSBIRef, ATANCamera camera, int nIterations)
+{
+    std::pair<SE2<>, double> pair_ret = IteratePosRelToTarget(*pSBIRef, nIterations);
+
+    std::pair<SE3<>, double> result_pair;
+
+    result_pair.first  = SE3fromSE2(pair_ret.first, camera);
+    result_pair.second = pair_ret.second;
+
+    return result_pair;
+}

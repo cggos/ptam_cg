@@ -32,7 +32,6 @@ protected:
     ATANCamera mCamera;
     int mnBest;
     double mdBestScore;
-    SE2<> mse2;
     SE3<> mse3Best;
 };
 #endif

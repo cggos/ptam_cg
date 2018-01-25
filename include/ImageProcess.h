@@ -50,15 +50,18 @@ private:
 class SmallBlurryImage : public ImageProcess
 {
 public:
-
-    CVD::Image<float> mimTemplate;
-    CVD::Image<Vector<2> > mimImageJacs;
-
     SmallBlurryImage();
     SmallBlurryImage(KeyFrame &kf, double dBlur = 2.5);
     void MakeFromKF(KeyFrame &kf, double dBlur = 2.5);
+    std::pair<SE3<>,double> CalcSBIRotation(SmallBlurryImage *pSBIRef, ATANCamera camera, int nIterations=6);
+
+private:
     std::pair<SE2<>,double> IteratePosRelToTarget(SmallBlurryImage &other, int nIterations = 10);
     static SE3<> SE3fromSE2(SE2<> se2, ATANCamera camera);
+
+public:
+    CVD::Image<float> mimTemplate;
+    CVD::Image<Vector<2> > mimImageJacs;
 
 protected:
     CVD::Image<CVD::byte> mimSmall;
