@@ -63,7 +63,7 @@ int PatchFinder::CalcSearchLevelAndWarpMatrix(MapPoint &p, SE3<> se3CFromW, Matr
 
     // Project the source keyframe's one-pixel-right and one-pixel-down vectors into the current view
     Vector<3> v3MotionRight = se3CFromW.get_rotation() * p.v3PixelRight_W;
-    Vector<3> v3MotionDown = se3CFromW.get_rotation() * p.v3PixelDown_W;
+    Vector<3> v3MotionDown  = se3CFromW.get_rotation() * p.v3PixelDown_W;
 
     // Calculate in-image derivatives of source image pixel motions:
     mm2WarpInverse.T()[0] = m2CamDerivs * (v3MotionRight.slice<0,2>() - v3Cam.slice<0,2>() * v3MotionRight[2] * dOneOverCameraZ) * dOneOverCameraZ;
@@ -215,11 +215,12 @@ bool PatchFinder::FindPatchCoarse(ImageRef irPos, KeyFrame &kf, unsigned int nRa
     return mbFound;
 }
 
-// Makes an inverse composition template out of the coarse template.
-// Includes calculating image of derivatives (gradients.) The inverse composition
-// used here operates on three variables: x offet, y offset, and difference in patch
-// means; hence things like mm3HInv are dim 3, but the trivial mean jacobian 
-// (always unity, for each pixel) is not stored.
+/**
+ * @brief Makes an inverse composition template out of the coarse template.
+ * @details Includes calculating image of derivatives (gradients.)
+ *          The inverse composition used here operates on three variables: x offet, y offset, and difference in patch means;
+ *          hence things like mm3HInv are dim 3, but the trivial mean jacobian (always unity, for each pixel) is not stored.
+ */
 void PatchFinder::MakeSubPixTemplate()
 {
     mimJacs.resize(mimTemplate.size() - ImageRef(2,2));
@@ -243,9 +244,14 @@ void PatchFinder::MakeSubPixTemplate()
     mdMeanDiff = 0.0;
 }
 
-// Iterate inverse composition until convergence. Since it should never have 
-// to travel more than a pixel's distance, set a max number of iterations; 
-// if this is exceeded, consider the IC to have failed.
+/**
+ * @details Iterate inverse composition until convergence.
+ *          Since it should never have to travel more than a pixel's distance, set a max number of iterations;
+ *          if this is exceeded, consider the IC to have failed.
+ * @param kf
+ * @param nMaxIts
+ * @return
+ */
 bool PatchFinder::IterateSubPixToConvergence(KeyFrame &kf, int nMaxIts)
 {
     const double dConvLimit = 0.03;
@@ -259,31 +265,28 @@ bool PatchFinder::IterateSubPixToConvergence(KeyFrame &kf, int nMaxIts)
     return false;
 }
 
-// Single iteration of inverse composition. This compares integral image positions in the 
-// template image to floating point positions in the target keyframe. Interpolation is
-// bilinear, and performed manually (rather than using CVD::image_interpolate) since 
-// this is a special case where the mixing fractions for each pixel are identical.
+/**
+ * @brief Single iteration of inverse composition
+ * @param kf
+ * @return
+ * @details This compares integral image positions in the template image to floating point positions in the target keyframe.
+ *          Each template pixel will be compared to an interpolated target pixel. \n
+ *          The target value is made using [bilinear interpolation](https://en.wikipedia.org/wiki/Bilinear_interpolation)
+ *          as the weighted sum of four target image pixels. \n
+ *          Interpolation is bilinear, and performed manually (rather than using CVD::image_interpolate)
+ *          since this is a special case where the mixing fractions for each pixel are identical.
+ *
+ */
 double PatchFinder::IterateSubPix(KeyFrame &kf)
 {
-    // Search level pos of patch center
     Vector<2> v2Center = Level::LevelNPos(mv2SubPixPos, mnSearchLevel);
     BasicImage<byte> &im = kf.aLevels[mnSearchLevel].im;
     if(!im.in_image_with_border(ir_rounded(v2Center), mnPatchSize / 2 + 1))
-        return -1.0;       // Negative return value indicates off edge of image
+        return -1.0;
 
-    // Position of top-left corner of patch in search level
-    Vector<2> v2Base = v2Center - vec(mirCenter);
+    Vector<2> v2Base = v2Center - vec(mirCenter); //Position of top-left corner of patch in search level
 
-    // I.C. JT*d accumulator
-    Vector<3> v3Accum = Zeros;
-
-    ImageRef ir;
-
-    byte* pTopLeftPixel;
-
-    // Each template pixel will be compared to an interpolated target pixel
-    // The target value is made using bilinear interpolation as the weighted sum
-    // of four target image pixels. Calculate mixing fractions:
+    // Calculate mixing fractions:
     double dX = v2Base[0]-floor(v2Base[0]); // Distances from pixel center of TL pixel
     double dY = v2Base[1]-floor(v2Base[1]);
     auto fMixTL = static_cast<float>((1.0 - dX) * (1.0 - dY));
@@ -291,11 +294,12 @@ double PatchFinder::IterateSubPix(KeyFrame &kf)
     auto fMixBL = static_cast<float>((1.0 - dX) * (dY));
     auto fMixBR = static_cast<float>((dX) * (dY));
 
-    // Loop over template image
+    ImageRef ir;
+    Vector<3> v3Accum = Zeros; // I.C. JT*d accumulator
     unsigned long nRowOffset = &kf.aLevels[mnSearchLevel].im[ImageRef(0,1)] - &kf.aLevels[mnSearchLevel].im[ImageRef(0,0)];
     for(ir.y = 1; ir.y < mnPatchSize - 1; ir.y++)
     {
-        pTopLeftPixel = &im[::ir(v2Base) + ImageRef(1,ir.y)]; // n.b. the x=1 offset, as with y
+        byte* pTopLeftPixel = &im[::ir(v2Base) + ImageRef(1,ir.y)]; // n.b. the x=1 offset, as with y
         for(ir.x = 1; ir.x < mnPatchSize - 1; ir.x++)
         {
             float fPixel =   // Calc target interpolated pixel
@@ -306,7 +310,7 @@ double PatchFinder::IterateSubPix(KeyFrame &kf)
             v3Accum[0] += dDiff * mimJacs[ir - ImageRef(1,1)].first;
             v3Accum[1] += dDiff * mimJacs[ir - ImageRef(1,1)].second;
             v3Accum[2] += dDiff;  // Update JT*d
-        };
+        }
     }
 
     // All done looping over image - find JTJ^-1 * JTd:
@@ -495,9 +499,9 @@ int PatchFinder::ZMSSDAtPoint(CVD::BasicImage<CVD::byte> &im, const CVD::ImageRe
                 nImageSum += n;
                 nImageSumSq += n*n;
                 nCrossSum += n * templatepointer[nCol];
-            };
+            }
         }
-    };
+    }
 
     int SA = mnTemplateSum;
     int SB = nImageSum;
