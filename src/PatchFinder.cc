@@ -1,17 +1,12 @@
 // Copyright 2008 Isis Innovation Limited
 #include "PatchFinder.h"
 
-// tmmintrin.h contains SSE3<> instrinsics, used for the ZMSSD search at the bottom..
-// If this causes problems, just do #define CVD_HAVE_XMMINTRIN 0
-#if CVD_HAVE_XMMINTRIN
-#include <tmmintrin.h>
-#endif
-
 #include <cvd/vision.h>
 #include <cvd/image_interpolate.h>
 #include <TooN/Cholesky.h>
 
 #include "Tools.h"
+#include "ImageProcess.h"
 
 using namespace CVD;
 using namespace std;
@@ -322,196 +317,13 @@ double PatchFinder::IterateSubPix(KeyFrame &kf)
     return dPixelUpdateSquared;
 }
 
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-// 
-//
-//              ZMSSDatpoint, which is SSE optimised, follows
-//
-// The top version is the SSE version for 8x8 patches. It is compiled
-// only if CVD_HAVE_XMMINTRIN is true, also you need to give your 
-// compiler the appropriate flags (e.g. -march=core2 -msse3 for g++.)
-// The standard c++ version, which is about half as quick (not a disaster
-// by any means) is below.
-//
-// The 8x8 SSE version looks long because it has been unrolled, 
-// it just does the same thing eight times. Both versions are one-pass
-// and need pre-calculated template sums and sum-squares.
-//
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-
-#if CVD_HAVE_XMMINTRIN
-// Horizontal sum of uint16s stored in an XMM register
-inline int SumXMM_16(__m128i &target)
-{
-    unsigned short int sums_store[8];
-    _mm_storeu_si128((__m128i*)sums_store, target);
-    return sums_store[0] + sums_store[1] + sums_store[2] + sums_store[3] +
-            sums_store[4] + sums_store[5] + sums_store[6] + sums_store[7];
-}
-// Horizontal sum of uint32s stored in an XMM register
-inline int SumXMM_32(__m128i &target)
-{
-    unsigned int sums_store[4];
-    _mm_storeu_si128((__m128i*)sums_store, target);
-    return sums_store[0] + sums_store[1] + sums_store[2] + sums_store[3];
-}
-#endif
-
-// Calculate the Zero-mean SSD of the coarse patch and a target imate at a specific 
-// point.
+/**
+ * @brief Calculate the Zero-mean SSD of the coarse patch and a target imate at a specific point
+ * @param im
+ * @param ir
+ * @return value
+ */
 int PatchFinder::ZMSSDAtPoint(CVD::BasicImage<CVD::byte> &im, const CVD::ImageRef &ir)
 {
-    if(!im.in_image_with_border(ir, mirCenter[0]))
-        return mnMaxSSD + 1;
-
-    ImageRef irImgBase = ir - mirCenter;
-    byte *imagepointer;
-    byte *templatepointer;
-
-    int nImageSumSq = 0;
-    int nImageSum = 0;
-    int nCrossSum = 0;
-
-#if CVD_HAVE_XMMINTRIN
-    if(mnPatchSize == 8)
-    {
-        long unsigned int imagepointerincrement;
-
-        __m128i xImageAsEightBytes;
-        __m128i xImageAsWords;
-        __m128i xTemplateAsEightBytes;
-        __m128i xTemplateAsWords;
-        __m128i xZero;
-        __m128i xImageSums; // These sums are 8xuint16
-        __m128i xImageSqSums; // These sums are 4xint32
-        __m128i xCrossSums;   // These sums are 4xint32
-        __m128i xProduct;
-
-
-        xImageSums = _mm_setzero_si128();
-        xImageSqSums = _mm_setzero_si128();
-        xCrossSums = _mm_setzero_si128();
-        xZero = _mm_setzero_si128();
-
-        imagepointer = &im[irImgBase + ImageRef(0,0)];
-        templatepointer = &mimTemplate[ImageRef(0,0)];
-        imagepointerincrement = &im[irImgBase + ImageRef(0,1)] - imagepointer;
-
-        xImageAsEightBytes=_mm_loadl_epi64((__m128i*) imagepointer);
-        imagepointer += imagepointerincrement;
-        xImageAsWords = _mm_unpacklo_epi8(xImageAsEightBytes,xZero);
-        xImageSums = _mm_adds_epu16(xImageAsWords,xImageSums);
-        xProduct = _mm_madd_epi16(xImageAsWords, xImageAsWords);
-        xImageSqSums = _mm_add_epi32(xProduct, xImageSqSums);
-        xTemplateAsEightBytes=_mm_load_si128((__m128i*) templatepointer);
-        templatepointer += 16;
-        xTemplateAsWords = _mm_unpacklo_epi8(xTemplateAsEightBytes,xZero);
-        xProduct = _mm_madd_epi16(xImageAsWords, xTemplateAsWords);
-        xCrossSums = _mm_add_epi32(xProduct, xCrossSums);
-        xImageAsEightBytes=_mm_loadl_epi64((__m128i*) imagepointer);
-        imagepointer += imagepointerincrement;
-        xImageAsWords = _mm_unpacklo_epi8(xImageAsEightBytes,xZero);
-        xImageSums = _mm_adds_epu16(xImageAsWords,xImageSums);
-        xProduct = _mm_madd_epi16(xImageAsWords, xImageAsWords);
-        xImageSqSums = _mm_add_epi32(xProduct, xImageSqSums);
-        xTemplateAsWords = _mm_unpackhi_epi8(xTemplateAsEightBytes,xZero);
-        xProduct = _mm_madd_epi16(xImageAsWords, xTemplateAsWords);
-        xCrossSums = _mm_add_epi32(xProduct, xCrossSums);
-
-        xImageAsEightBytes=_mm_loadl_epi64((__m128i*) imagepointer);
-        imagepointer += imagepointerincrement;
-        xImageAsWords = _mm_unpacklo_epi8(xImageAsEightBytes,xZero);
-        xImageSums = _mm_adds_epu16(xImageAsWords,xImageSums);
-        xProduct = _mm_madd_epi16(xImageAsWords, xImageAsWords);
-        xImageSqSums = _mm_add_epi32(xProduct, xImageSqSums);
-        xTemplateAsEightBytes=_mm_load_si128((__m128i*) templatepointer);
-        templatepointer += 16;
-        xTemplateAsWords = _mm_unpacklo_epi8(xTemplateAsEightBytes,xZero);
-        xProduct = _mm_madd_epi16(xImageAsWords, xTemplateAsWords);
-        xCrossSums = _mm_add_epi32(xProduct, xCrossSums);
-        xImageAsEightBytes=_mm_loadl_epi64((__m128i*) imagepointer);
-        imagepointer += imagepointerincrement;
-        xImageAsWords = _mm_unpacklo_epi8(xImageAsEightBytes,xZero);
-        xImageSums = _mm_adds_epu16(xImageAsWords,xImageSums);
-        xProduct = _mm_madd_epi16(xImageAsWords, xImageAsWords);
-        xImageSqSums = _mm_add_epi32(xProduct, xImageSqSums);
-        xTemplateAsWords = _mm_unpackhi_epi8(xTemplateAsEightBytes,xZero);
-        xProduct = _mm_madd_epi16(xImageAsWords, xTemplateAsWords);
-        xCrossSums = _mm_add_epi32(xProduct, xCrossSums);
-
-        xImageAsEightBytes=_mm_loadl_epi64((__m128i*) imagepointer);
-        imagepointer += imagepointerincrement;
-        xImageAsWords = _mm_unpacklo_epi8(xImageAsEightBytes,xZero);
-        xImageSums = _mm_adds_epu16(xImageAsWords,xImageSums);
-        xProduct = _mm_madd_epi16(xImageAsWords, xImageAsWords);
-        xImageSqSums = _mm_add_epi32(xProduct, xImageSqSums);
-        xTemplateAsEightBytes=_mm_load_si128((__m128i*) templatepointer);
-        templatepointer += 16;
-        xTemplateAsWords = _mm_unpacklo_epi8(xTemplateAsEightBytes,xZero);
-        xProduct = _mm_madd_epi16(xImageAsWords, xTemplateAsWords);
-        xCrossSums = _mm_add_epi32(xProduct, xCrossSums);
-        xImageAsEightBytes=_mm_loadl_epi64((__m128i*) imagepointer);
-        imagepointer += imagepointerincrement;
-        xImageAsWords = _mm_unpacklo_epi8(xImageAsEightBytes,xZero);
-        xImageSums = _mm_adds_epu16(xImageAsWords,xImageSums);
-        xProduct = _mm_madd_epi16(xImageAsWords, xImageAsWords);
-        xImageSqSums = _mm_add_epi32(xProduct, xImageSqSums);
-        xTemplateAsWords = _mm_unpackhi_epi8(xTemplateAsEightBytes,xZero);
-        xProduct = _mm_madd_epi16(xImageAsWords, xTemplateAsWords);
-        xCrossSums = _mm_add_epi32(xProduct, xCrossSums);
-
-        xImageAsEightBytes=_mm_loadl_epi64((__m128i*) imagepointer);
-        imagepointer += imagepointerincrement;
-        xImageAsWords = _mm_unpacklo_epi8(xImageAsEightBytes,xZero);
-        xImageSums = _mm_adds_epu16(xImageAsWords,xImageSums);
-        xProduct = _mm_madd_epi16(xImageAsWords, xImageAsWords);
-        xImageSqSums = _mm_add_epi32(xProduct, xImageSqSums);
-        xTemplateAsEightBytes=_mm_load_si128((__m128i*) templatepointer);
-        templatepointer += 16;
-        xTemplateAsWords = _mm_unpacklo_epi8(xTemplateAsEightBytes,xZero);
-        xProduct = _mm_madd_epi16(xImageAsWords, xTemplateAsWords);
-        xCrossSums = _mm_add_epi32(xProduct, xCrossSums);
-        xImageAsEightBytes=_mm_loadl_epi64((__m128i*) imagepointer);
-        xImageAsWords = _mm_unpacklo_epi8(xImageAsEightBytes,xZero);
-        xImageSums = _mm_adds_epu16(xImageAsWords,xImageSums);
-        xProduct = _mm_madd_epi16(xImageAsWords, xImageAsWords);
-        xImageSqSums = _mm_add_epi32(xProduct, xImageSqSums);
-        xTemplateAsWords = _mm_unpackhi_epi8(xTemplateAsEightBytes,xZero);
-        xProduct = _mm_madd_epi16(xImageAsWords, xTemplateAsWords);
-        xCrossSums = _mm_add_epi32(xProduct, xCrossSums);
-
-        nImageSum = SumXMM_16(xImageSums);
-        nCrossSum = SumXMM_32(xCrossSums);
-        nImageSumSq = SumXMM_32(xImageSqSums);
-    }
-    else
-#endif 
-    {
-        for(int nRow = 0; nRow < mnPatchSize; nRow++)
-        {
-            imagepointer = &im[irImgBase + ImageRef(0,nRow)];
-            templatepointer = &mimTemplate[ImageRef(0,nRow)];
-            for(int nCol = 0; nCol < mnPatchSize; nCol++)
-            {
-                int n = imagepointer[nCol];
-                nImageSum += n;
-                nImageSumSq += n*n;
-                nCrossSum += n * templatepointer[nCol];
-            }
-        }
-    }
-
-    int SA = mnTemplateSum;
-    int SB = nImageSum;
-
-    int N = mnPatchSize * mnPatchSize;
-    return ((2*SA*SB - SA*SA - SB*SB)/N + nImageSumSq + mnTemplateSumSq - 2*nCrossSum);
+    return ImageProcess::ZMSSDAtPoint(im, ir, mimTemplate, mnTemplateSum, mnTemplateSumSq, mnMaxSSD);
 }
-
-
-
-
-
-

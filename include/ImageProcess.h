@@ -25,6 +25,9 @@ public:
     static double ShiTomasiScoreAtPoint(CVD::BasicImage<CVD::byte> &image, int nHalfBoxSize, CVD::ImageRef irCenter);
     inline int SSDAtPoint(CVD::BasicImage<byte> &im, const CVD::ImageRef &ir, CVD::Image<byte> &imTemplate, int nMaxSSD); // Score function
     double SSDofImgs(CVD::Image<float> im1, CVD::Image<float> im2);
+    static int ZMSSDAtPoint(CVD::BasicImage<CVD::byte> &im, const CVD::ImageRef &ir,
+                                   CVD::Image<CVD::byte> &imTemplate, int nTemplateSum, int nTemplateSumSq,
+                                   int nMaxSSD);
     void MakeJacs(CVD::Image<float> imTemplate, CVD::Image<Vector<2> > &imImageJacs);
 };
 

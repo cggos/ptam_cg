@@ -46,11 +46,19 @@ double ImageProcess::ShiTomasiScoreAtPoint(BasicImage<byte> &image, int nHalfBox
     return 0.5 * (dXX + dYY - sqrt( (dXX + dYY) * (dXX + dYY) - 4 * (dXX * dYY - dXY * dXY) ));
 }
 
-// Scoring function
+/**
+ * @brief Calculate the SSD at one point
+ * @param im
+ * @param ir
+ * @param imTemplate
+ * @param nMaxSSD
+ * @return
+ */
 inline int ImageProcess::SSDAtPoint(CVD::BasicImage<CVD::byte> &im, const CVD::ImageRef &ir, CVD::Image<CVD::byte> &imTemplate, int nMaxSSD)
 {
     if(!im.in_image_with_border(ir, imTemplate.size().x/2) || !im.in_image_with_border(ir, imTemplate.size().y/2))
         return nMaxSSD + 1;
+
     ImageRef irImgBase = ir - imTemplate.size()/2;
     int nRows = imTemplate.size().y;
     int nCols = imTemplate.size().x;
@@ -96,8 +104,69 @@ double ImageProcess::SSDofImgs(CVD::Image<float> im1, CVD::Image<float> im2)
     return dSSD;
 }
 
-// Make the jacobians (actually, no more than a gradient image)
-// of the blurred template
+/**
+ * @brief calculate Zero Mean Sum of Squared Difference
+ * @param im
+ * @param ir
+ * @param imTemplate
+ * @param nTemplateSum
+ * @param nTemplateSumSq
+ * @param nMaxSSD
+ * @return nValueZMSSD
+ * @details
+ *     \f[
+ *     \begin{align}
+ *        ST &= \sum_{i=1}^N T_i \\
+ *        SI &= \sum_{i=1}^N I_i \\
+ *        \text{nValueZMSSD} &= \sum_{i=1}^N (
+ *                                            ( I_i - \frac{SI}{N} ) - ( T_i - \frac{ST}{N} )
+ *                                           )^2 \\
+ *                           &= \sum_{i=1}^N (I_i - T_i + \frac{ ST - SI } {N})^2 \\
+ *                           &= \sum_{i=1}^N {I_i}^2 + \sum_{i=1}^N {T_i}^2 - 2 \cdot \sum_{i=1}^N I_i \cdot T_i +
+ *                              \frac{ 2 \cdot SI \cdot ST - {ST}^2 - {SI}^2 }{N}
+ *     \end{align}
+ *     \f]
+ */
+int ImageProcess::ZMSSDAtPoint(CVD::BasicImage<CVD::byte> &im, const CVD::ImageRef &ir,
+                               CVD::Image<CVD::byte> &imTemplate, int nTemplateSum, int nTemplateSumSq,
+                               int nMaxSSD)
+{
+    if(!im.in_image_with_border(ir, imTemplate.size().x/2) || !im.in_image_with_border(ir, imTemplate.size().y/2))
+        return nMaxSSD + 1;
+
+    ImageRef irImgBase = ir - imTemplate.size()/2;
+
+    int nImageSumSq = 0;
+    int nImageSum = 0;
+    int nCrossSum = 0;
+
+    int nRows = imTemplate.size().y;
+    int nCols = imTemplate.size().x;
+    for(int nRow = 0; nRow < nRows; nRow++)
+    {
+        byte *imagepointer    = &im[irImgBase + ImageRef(0,nRow)];
+        byte *templatepointer = &imTemplate[ImageRef(0,nRow)];
+        for(int nCol = 0; nCol < nCols; nCol++)
+        {
+            int n = imagepointer[nCol];
+            nImageSum += n;
+            nImageSumSq += n*n;
+            nCrossSum += n * templatepointer[nCol];
+        }
+    }
+
+    int SA = nTemplateSum;
+    int SB = nImageSum;
+
+    int N = imTemplate.size().area();
+    return ((2*SA*SB - SA*SA - SB*SB)/N + nImageSumSq + nTemplateSumSq - 2*nCrossSum);
+}
+
+/**
+ * @brief Make the jacobians (actually, no more than a gradient image) of the blurred template
+ * @param imTemplate
+ * @param imImageJacs
+ */
 void ImageProcess::MakeJacs(CVD::Image<float> imTemplate, CVD::Image<Vector<2> > &imImageJacs)
 {
     CVD::ImageRef irSize = imTemplate.size();
