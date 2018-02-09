@@ -312,37 +312,36 @@ void SmallBlurryImage::MakeFromKF(KeyFrame &kf, double dBlur)
  */
 pair<SE2<>,double> SmallBlurryImage::IteratePosRelToTarget(SmallBlurryImage &other, int nIterations)
 {
+    if(!other.mbMadeJacs)
+    {
+        cerr << "You spanner, you didn't make the jacs for the target." << endl;
+        assert(other.mbMadeJacs);
+    }
+
     SE2<> se2CtoC;
     SE2<> se2WfromC;
     ImageRef irCenter = mirSize / 2;
     se2WfromC.get_translation() = vec(irCenter);
 
-    pair<SE2<>, double> result_pair;
-    if(!other.mbMadeJacs)
-    {
-        cerr << "You spanner, you didn't make the jacs for the target." << endl;
-        assert(other.mbMadeJacs);
-    };
-
-    double dMeanOffset = 0.0;
+    Vector<2> v2Zero = Zeros;
     Vector<4> v4Accum;
-
+    Vector<4> v4Jac;
+    v4Jac[3] = 1.0;
     Vector<10> v10Triangle;
     Image<float> imWarped(mirSize);
 
+    double dMeanOffset = 0.0;
     double dFinalScore = 0.0;
+
     for(int it = 0; it<nIterations; it++)
     {
         dFinalScore = 0.0;
         v4Accum = Zeros;
         v10Triangle = Zeros; // Holds the bottom-left triangle of JTJ
-        Vector<4> v4Jac;
-        v4Jac[3] = 1.0;
 
         SE2<> se2XForm = se2WfromC * se2CtoC * se2WfromC.inverse();
 
         // Make the warped current image template:
-        Vector<2> v2Zero = Zeros;
         CVD::transform(mimTemplate, imWarped, se2XForm.get_rotation().get_matrix(), se2XForm.get_translation(), v2Zero, -9e20f);
 
         // Now compare images, calc differences, and current image jacobian:
@@ -351,6 +350,7 @@ pair<SE2<>,double> SmallBlurryImage::IteratePosRelToTarget(SmallBlurryImage &oth
         {
             if(!imWarped.in_image_with_border(ir,1))
                 continue;
+
             float l,r,u,d,here;
             l = imWarped[ir - ImageRef(1,0)];
             r = imWarped[ir + ImageRef(1,0)];
@@ -372,7 +372,6 @@ pair<SE2<>,double> SmallBlurryImage::IteratePosRelToTarget(SmallBlurryImage &oth
             v4Jac[0] = v2SumGrad[0];
             v4Jac[1] = v2SumGrad[1];
             v4Jac[2] = -(ir.y - irCenter.y) * v2SumGrad[0] + (ir.x - irCenter.x) * v2SumGrad[1];
-            //	  v4Jac[3] = 1.0;
 
             double dDiff = imWarped[ir] - other.mimTemplate[ir] + dMeanOffset;
             dFinalScore += dDiff * dDiff;
@@ -394,26 +393,24 @@ pair<SE2<>,double> SmallBlurryImage::IteratePosRelToTarget(SmallBlurryImage &oth
         }
         while(ir.next(mirSize));
 
-        Vector<4> v4Update;
-
         // Solve for JTJ-1JTv;
-        {
-            Matrix<4> m4;
-            int v=0;
-            for(int j=0; j<4; j++)
-                for(int i=0; i<=j; i++)
-                    m4[j][i] = m4[i][j] = v10Triangle[v++];
-            Cholesky<4> chol(m4);
-            v4Update = chol.backsub(v4Accum);
-        }
+        Matrix<4> m4;
+        int v=0;
+        for(int j=0; j<4; j++)
+            for(int i=0; i<=j; i++)
+                m4[j][i] = m4[i][j] = v10Triangle[v++];
+        Cholesky<4> chol(m4);
+        Vector<4> v4Update = chol.backsub(v4Accum);
 
         SE2<> se2Update;
         se2Update.get_translation() = -v4Update.slice<0,2>();
-        se2Update.get_rotation() = SO2<>::exp(-v4Update[2]);
+        se2Update.get_rotation()    = SO2<>::exp(-v4Update[2]);
         se2CtoC = se2CtoC * se2Update;
+
         dMeanOffset -= v4Update[3];
     }
 
+    std::pair<SE2<>, double> result_pair;
     result_pair.first = se2CtoC;
     result_pair.second = dFinalScore;
     return result_pair;
