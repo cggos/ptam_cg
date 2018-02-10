@@ -14,7 +14,7 @@ using namespace std;
 using namespace GVars3;
 
 System::System()
-    : mpVideoSource(new VideoSourceDataSet())
+    : mpVideoSource(new VideoSourceV4L())
     , mGLWindow(mpVideoSource->Size(), "PTAM")
 {
     GUI.RegisterCommand("exit", GUICommandCallBack, this);
