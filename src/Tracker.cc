@@ -143,9 +143,22 @@ void Tracker::TrackFrame(Image<byte> &imFrame, bool bDraw)
                 mMessageForUser << " Map: " << mMap.vpPoints.size() << "P, " << mMap.vpKeyFrames.size() << "KF";
             }
 
+            bool isTrackGood = mTrackingQuality == GOOD;
+            bool isNeedFrame = mMapMaker.IsNeedNewKeyFrame(mCurrentKF);
+            bool isFarEnough = mnFrame - mnLastKeyFrameDropped > 20;
+            bool isQueueNeed = mMapMaker.QueueSize() < 3;
+
+            if(isTrackGood)
+                mMessageForUser << " 1";
+            if(isNeedFrame)
+                mMessageForUser << " 2";
+            if(isFarEnough)
+                mMessageForUser << " 3";
+            if(isQueueNeed)
+                mMessageForUser << " 4";
+
             // Heuristics to check if a key-frame should be added to the map:
-            if(mTrackingQuality==GOOD && mMapMaker.IsNeedNewKeyFrame(mCurrentKF) &&
-                    mnFrame-mnLastKeyFrameDropped>20 && mMapMaker.QueueSize()<3)
+            if( isTrackGood &&  isFarEnough && isQueueNeed )//isNeedFrame
             {
                 mMessageForUser << " Adding key-frame.";
                 mMapMaker.AddKeyFrame(mCurrentKF);
@@ -683,6 +696,166 @@ void Tracker::TrackMap()
         }
     }
 }
+
+void Tracker::TrackMapLocal() {
+
+    set<MapPoint*> sMapPoints;
+    const int nKF = 4;
+    const int nPt = 200;
+
+    if(mMap.vpKeyFrames.size() < nKF+1) {
+        for(int i=0; i<mMap.vpPoints.size() && i<nPt; ++i){
+            sMapPoints.insert(mMap.vpPoints[i]);
+        }
+    }
+    else {
+        set<KeyFrame *> sAdjustSet;
+        KeyFrame *pkfNewest = mMap.vpKeyFrames.back();
+        sAdjustSet.insert(pkfNewest);
+
+        vector<KeyFrame *> vClosest = mMapMaker.NClosestKeyFrames(*pkfNewest, nKF);
+        for (int i = 0; i < nKF; i++)
+            sAdjustSet.insert(vClosest[i]);
+
+        int nMapPoints = 0;
+        for (auto iter : sAdjustSet) {
+            map<MapPoint *, Measurement> &mKFMeas = iter->mMeasurements;
+            for (auto &mKFMea : mKFMeas) {
+                sMapPoints.insert(mKFMea.first);
+                nMapPoints++;
+                if(nMapPoints>nPt)
+                    break;
+            }
+        }
+    }
+
+    for(int i=0; i<LEVELS; i++)
+        manMeasAttempted[i] = manMeasFound[i] = 0;
+
+    vector<TrackerData*> avPVS[LEVELS];
+    for (auto &i : avPVS)
+        i.reserve(100);
+
+    for (auto &spPoint : sMapPoints) {
+        MapPoint &p= *spPoint;
+
+        if(!p.pTData)
+            p.pTData = new TrackerData(&p);
+        TrackerData &TData = *p.pTData;
+
+        TData.Project(mse3CamFromWorld, mCamera);
+        if(!TData.bInImage)
+            continue;
+
+        TData.m2CamDerivs = mCamera.GetProjectionDerivs();
+
+        TData.nSearchLevel = TData.Finder.CalcSearchLevelAndWarpMatrix(TData.Point, mse3CamFromWorld, TData.m2CamDerivs);
+        if(TData.nSearchLevel == -1)
+            continue;   // a negative search pyramid level indicates an inappropriate warp for this view, so skip.
+
+        TData.bSearched = false;
+        TData.bFound = false;
+        avPVS[TData.nSearchLevel].push_back(&TData);
+    }
+
+    for (auto &i : avPVS)
+        std::random_shuffle(i.begin(), i.end());
+
+
+    vector<TrackerData*> vIterationSet;
+
+    for (int l = LEVELS - 1; l >= 0; l--) {
+        for (auto &i : avPVS[l])
+            i->ProjectAndDerivs(mse3CamFromWorld, mCamera);
+        SearchForPoints(avPVS[l], 20, 8);
+        for (auto i : avPVS[l])
+            vIterationSet.push_back(i);
+    }
+
+    // Again, ten gauss-newton pose update iterations.
+    Vector<6> v6LastUpdate = Zeros;
+    for(int iter = 0; iter<10; iter++) {
+        // For a bit of time-saving: don't do full nonlinear reprojection at every iteration - it really isn't necessary!
+        // Even this is probably overkill, the reason we do many iterations is for M-Estimator convergence rather than linearisation effects.
+        bool bNonLinearIteration = iter == 0 || iter == 4 || iter == 9;
+        if (iter != 0) { // Either way: first iteration doesn't need projection update.
+            if (bNonLinearIteration) {
+                for (auto &i : vIterationSet)
+                    if (i->bFound)
+                        i->ProjectAndDerivs(mse3CamFromWorld, mCamera);
+            } else {
+                for (auto &i : vIterationSet)
+                    if (i->bFound)
+                        i->LinearUpdate(v6LastUpdate);
+            }
+        }
+
+        if (bNonLinearIteration)
+            for (auto &i : vIterationSet)
+                if (i->bFound)
+                    i->CalcJacobian();
+
+        // Again, an M-Estimator hack beyond the fifth iteration.
+        double dOverrideSigma = iter > 5 ? 16.0 : 0.0;
+
+        // Calculate and update pose; also store update vector for linear iteration updates.
+        Vector<6> v6Update = CalcPoseUpdate(vIterationSet, dOverrideSigma, iter == 9);
+        mse3CamFromWorld = SE3<>::exp(v6Update) * mse3CamFromWorld;
+        v6LastUpdate = v6Update;
+    }
+
+    if(mbDraw) {
+        glPointSize(6);
+        glEnable(GL_BLEND);
+        glEnable(GL_POINT_SMOOTH);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBegin(GL_POINTS);
+        for (auto it = vIterationSet.rbegin(); it != vIterationSet.rend(); it++) {
+            if (!(*it)->bFound)
+                continue;
+            glColor(Level::mvLevelColors[(*it)->nSearchLevel]);
+            glVertex((*it)->v2Image);
+        }
+        glEnd();
+        glDisable(GL_BLEND);
+    }
+
+    mCurrentKF.se3CfromW = mse3CamFromWorld;
+
+    // Record successful measurements. Use the KeyFrame-Measurement struct for this.
+    mCurrentKF.mMeasurements.clear();
+    for (auto &it : vIterationSet) {
+        if (!it->bFound)
+            continue;
+        Measurement m;
+        m.v2RootPos = it->v2Found;
+        m.nLevel = it->nSearchLevel;
+        m.bSubPix = it->bDidSubPix;
+        mCurrentKF.mMeasurements[&(it->Point)] = m;
+    }
+
+    // Finally, find the mean scene depth from tracked features
+    {
+        double dSum = 0;
+        double dSumSq = 0;
+        int nNum = 0;
+        for (auto &it : vIterationSet) {
+            if (it->bFound) {
+                double z = it->v3Cam[2];
+                dSum += z;
+                dSumSq += z * z;
+                nNum++;
+            }
+        }
+        if(nNum > 20)
+        {
+            mCurrentKF.dSceneDepthMean = dSum/nNum;
+            mCurrentKF.dSceneDepthSigma = sqrt((dSumSq / nNum) - (mCurrentKF.dSceneDepthMean) * (mCurrentKF.dSceneDepthMean));
+        }
+    }
+
+}
+
 
 /**
  * @brief Find points in the image

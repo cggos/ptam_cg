@@ -757,7 +757,9 @@ bool MapMaker::IsNeedNewKeyFrame(KeyFrame &kCurrent)
     double dDist = KeyFrameLinearDist(kCurrent, *pClosest);
     dDist *= (1.0 / kCurrent.dSceneDepthMean);
 
-    return dDist > GV2.GetDouble("MapMaker.MaxKFDistWiggleMult", 1.0, SILENT) * mdWiggleScaleDepthNormalized;
+    double dDistToCompared = GV2.GetDouble("MapMaker.MaxKFDistWiggleMult", 0.05, SILENT) * mdWiggleScaleDepthNormalized;
+
+    return dDist > dDistToCompared;
 }
 
 /**

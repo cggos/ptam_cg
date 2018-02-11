@@ -53,6 +53,7 @@ public:
     bool IsNeedNewKeyFrame(KeyFrame &kCurrent);            // Is it a good camera pose to add another KeyFrame?
     double KeyFrameLinearDist(KeyFrame &k1, KeyFrame &k2);
     KeyFrame* ClosestKeyFrame(KeyFrame &k);
+    std::vector<KeyFrame*> NClosestKeyFrames(KeyFrame &k, unsigned int N);
     double GetWiggleScale() { return mdWiggleScale; }
 
 protected:
@@ -89,7 +90,6 @@ protected:
     // General Maintenance/Utility:
     void Reset();
     void HandleBadPoints();
-    std::vector<KeyFrame*> NClosestKeyFrames(KeyFrame &k, unsigned int N);
     void RefreshSceneDepth(KeyFrame *pKF);
 
     // GUI Interface:

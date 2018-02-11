@@ -105,14 +105,12 @@ FILE_END:
     if(mIndexImg == 0)
     {
         std::string rgb_line;
-        std::cout << "\nwhile loop begin" << std::endl;
         std::getline(mFileIn,rgb_line);
         while(rgb_line.find('#')!=std::string::npos)
         {
             std::cout << rgb_line << std::endl;
             std::getline(mFileIn,rgb_line);
         }
-        std::cout << "while loop end\n" << std::endl;
     }
 
     std::string rgb_file, time_rgb;
@@ -121,7 +119,7 @@ FILE_END:
     {
         goto FILE_END;
     }
-    std::cout << "Img Index: " << std::setfill('0') << std::setw(3) << ++mIndexImg << ", time_rgb rgb_file: " << time_rgb << " " << rgb_file << std::endl;
+    //std::cout << "Img Index: " << std::setfill('0') << std::setw(3) << ++mIndexImg << ", time_rgb rgb_file: " << time_rgb << " " << rgb_file << std::endl;
     try
     {
         std::string rgb_path = mDatasetPath+"/"+rgb_file;

@@ -192,6 +192,7 @@ protected:
 
     // Methods for tracking the map once it has been made:
     void TrackMap();                // Called by TrackFrame if there is a map.
+    void TrackMapLocal();
     void AssessTrackingQuality();   // Heuristics to choose between good, poor, bad.
     void PredictPoseWithMotionModel();        // Decaying velocity motion model applied prior to TrackMap
     void UpdateMotionModel();       // Motion model is updated after TrackMap
