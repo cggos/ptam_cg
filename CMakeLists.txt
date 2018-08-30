@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 3.2 )
-project ( PTAM4AR )
+project ( ptam_cg )
 
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 3)
