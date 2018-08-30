@@ -117,10 +117,20 @@ endif()
 
 ############### Static Analysis of C/C++ using cppcheck ######################
 if (USER_USE_CPPCHECK)
+
     # generating compile_commands.json(JSON compilation database)
     set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
+    find_program(CPPCHECK NAMES cppcheck)
+    if(CPPCHECK)
+        message(STATUS "Found cppcheck: ${CPPCHECK}")
+    else()
+        message(WARNING "NOT Found cppcheck")
+    endif()
+
     # execute `make cppcheck` after `cmake`
     include(cmake_modules/cppcheck.cmake)
+
 endif ()
 
 
