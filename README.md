@@ -1,73 +1,53 @@
-# PTAM4AR
-PTAM source code for AR based on the one from Isis.
+# ptam_cg
 
-# Introduction
-PTAM (Parallel Tracking and Mapping) is a camera tracking system for augmented reality.
+[![Documentation](https://codedocs.xyz/GaoHongchen/ptam_cg.svg)](https://codedocs.xyz/GaoHongchen/ptam_cg/)  
 
-# Building
+[![Build Status](https://travis-ci.org/GaoHongchen/ptam_cg.svg?branch=master)](https://travis-ci.org/GaoHongchen/ptam_cg) [Linux (Ubuntu-14.04 64 bits, GCC-5)]
 
-## Build Status on CI
-* Linux (Ubuntu-14.04 64 bits, GCC-5) : [![Build Status](https://travis-ci.org/GaoHongchen/PTAM4AR.svg?branch=master)](https://travis-ci.org/GaoHongchen/PTAM4AR) [![Coverage Status](https://coveralls.io/repos/github/GaoHongchen/PTAM4AR/badge.svg?branch=master)](https://coveralls.io/github/GaoHongchen/PTAM4AR?branch=master) [![Documentation](https://codedocs.xyz/GaoHongchen/PTAM4AR.svg)](https://codedocs.xyz/GaoHongchen/PTAM4AR/)
+[![Coverage Status](https://coveralls.io/repos/github/GaoHongchen/ptam_cg/badge.svg?branch=master)](https://coveralls.io/github/GaoHongchen/ptam_cg?branch=master) [![Join the chat at https://gitter.im/ptam_cg/Lobby](https://badges.gitter.im/ptam_cg/Lobby.svg)](https://gitter.im/ptam_cg/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-## Build This Project locally
+Modified PTAM source code for AR based on [the one from Isis](http://www.robots.ox.ac.uk/~gk/PTAM).
 
-**1) Install dependencies**
-* Execute the script to install dependencies or 3rdParties on Linux: [3rdParty_install.sh](./scripts/3rdParty_install.sh)   
+**PTAM (Parallel Tracking and Mapping)** is a camera tracking system for augmented reality.
 
-**2) Build Project**
-* Execute the script: [build_project.sh](./scripts/build_project.sh)
+-----
 
-## Relate Compilation for PTAM
-* [PTAM Compilation on Linux](http://hustcalm.me/blog/2013/09/27/ptam-compilation-on-linux-howto/)
-* [Build PTAM on Ubuntu 11.10](http://irawiki.disco.unimib.it/irawiki/index.php/PTAM)
-* [Installation of PTAM in ROS](https://sites.google.com/site/zhilongliuwebsite/research/computer-vision-embedded-systems/ptam)
 
-# Tools
-## Static Analysis of C/C++
-* cppcheck: [Add cppcheck and clang-format for a cmake project](https://arcanis.me/en/2015/10/17/cppcheck-and-clang-format)
+# Build
 
-# Relate Source Code
+* **Build locally**
 
-## Linux
-* [PTAM-GPL (GitHub)](https://github.com/Oxford-PTAM/PTAM-GPL)
-* [PTAM-linux-cv2.3 (GitHub)](https://github.com/nttputus/PTAM-linux-cv2.3)
+|Dependencies	       |Project 	       |
+|:-:	               |---	             |
+|3rdParty_install.sh |build_project.sh |
 
-## Android
-* [APTAM-GPL](https://github.com/ICGJKU/APTAM-GPL)
-* [android-ptam](https://github.com/damienfir/android-ptam)
+* **Related Compilation for PTAM**
+  - [PTAM Compilation on Linux](http://hustcalm.me/blog/2013/09/27/ptam-compilation-on-linux-howto/)
+  - [Build PTAM on Ubuntu 11.10](http://irawiki.disco.unimib.it/irawiki/index.php/PTAM)
+  - [Installation of PTAM in ROS](https://sites.google.com/site/zhilongliuwebsite/research/computer-vision-embedded-systems/ptam)
 
-## Windows
-* [PTAM-Windows](https://github.com/LucRyan/PTAM-Windows)
 
-# Related Mathematical Theory
+# Related Source Code
 
-## Matrix
-* Matrix: Jacobian Matrix, Hessian Matrix, Covariance Matrix
-* Matrix Decomposition: EVD, SVD, LU, QR, Cholesky
+* **Linux**
+  - [PTAM-GPL (GitHub)](https://github.com/Oxford-PTAM/PTAM-GPL)
+  - [PTAM-linux-cv2.3 (GitHub)](https://github.com/nttputus/PTAM-linux-cv2.3)
 
-## RigidBody Transform
-* Rotation: Rotation Matrix, Rotation Vector, Euler Angle, Quarternion
-* Translate
-* Scale
+* **ROS**
+  - [http://wiki.ros.org/ptam](http://wiki.ros.org/ptam)
 
-## Lie Algebra and Lie Group
-* SE2, SE3, SO3
-* Exponential Map
+* **Android**
+  - [APTAM-GPL](https://github.com/ICGJKU/APTAM-GPL)
+  - [android-ptam](https://github.com/damienfir/android-ptam)
 
-## Probability Theory & Mathematical Statistics
-* M-Estimator
-* MLE(Maximum Likelihood Estimate)
-* OLS(Ordinary Least Squares)
-* RANSAC(RANdom SAmple Consensus)
+* **Windows**
+  - [PTAM-Windows](https://github.com/LucRyan/PTAM-Windows)
 
-## Optimization Theory
-* Gauss-Newton
-* Levenberg-Marquardt
-* Bundle Adjustment
 
 # PTAM Tutorials
-* [PTAM Official Site](http://www.robots.ox.ac.uk/~gk/PTAM/)
+
 * [PTAM news](https://ewokrampage.wordpress.com/)
 * [PTAM-Monocular SLAM](http://www.doc.ic.ac.uk/~gj414/monocular_slam/ptam.html)
 * [implementing-ptam-stereo-tracking-and-pose-estimation-for-ar-with-opencv-w-code](http://www.morethantechnical.com/2010/03/06/implementing-ptam-stereo-tracking-and-pose-estimation-for-ar-with-opencv-w-code/)
-* [PTAM on ROS](http://wiki.ros.org/ptam)
+* [窥探PTAM (CSDN)](https://blog.csdn.net/ilotuo/article/category/6297333)
+* [PTAM跟踪过程中的旋转预测方法](https://zhuanlan.zhihu.com/p/20302059)
