@@ -1,6 +1,8 @@
 # ptam_cg
 
-[![Documentation](https://codedocs.xyz/GaoHongchen/ptam_cg.svg)](https://codedocs.xyz/GaoHongchen/ptam_cg/)  
+[![Join the chat at https://gitter.im/ptam_cg_01/Lobby](https://badges.gitter.im/ptam_cg_01/Lobby.svg)](https://gitter.im/ptam_cg_01/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[![Documentation](https://codedocs.xyz/GaoHongchen/PTAM4AR.svg)](https://codedocs.xyz/GaoHongchen/PTAM4AR/)
 
 [![Build Status](https://travis-ci.org/GaoHongchen/ptam_cg.svg?branch=master)](https://travis-ci.org/GaoHongchen/ptam_cg) [Linux (Ubuntu-14.04 64 bits, GCC-5)]
 
