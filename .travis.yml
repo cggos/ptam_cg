@@ -32,7 +32,7 @@ before_script:
   - gcc --version
   - g++ --version
   - export COVERALLS_SERVICE_NAME=travis-ci
-  - export COVERALLS_REPO_TOKEN=AozuIr30I43ZXIG5ddfoPejrK7KtkmltS
+  - export COVERALLS_REPO_TOKEN=lOFskZk8FMLcZQBYrAWbDrb9ROXzTaGJl
 
 script:
   # Display cmake version
