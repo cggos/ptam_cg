@@ -1,10 +1,12 @@
 # ptam_cg
 
+[![Join the chat at https://gitter.im/ptam_cg_01/Lobby](https://badges.gitter.im/ptam_cg_01/Lobby.svg)](https://gitter.im/ptam_cg_01/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Documentation](https://codedocs.xyz/GaoHongchen/ptam_cg.svg)](https://codedocs.xyz/GaoHongchen/ptam_cg/)  
 
 [![Build Status](https://travis-ci.org/GaoHongchen/ptam_cg.svg?branch=master)](https://travis-ci.org/GaoHongchen/ptam_cg) [Linux (Ubuntu-14.04 64 bits, GCC-5)]
 
-[![Coverage Status](https://coveralls.io/repos/github/GaoHongchen/ptam_cg/badge.svg?branch=master)](https://coveralls.io/github/GaoHongchen/ptam_cg?branch=master) [![Join the chat at https://gitter.im/ptam_cg_01/Lobby](https://badges.gitter.im/ptam_cg_01/Lobby.svg)](https://gitter.im/ptam_cg_01/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Coverage Status](https://coveralls.io/repos/github/GaoHongchen/ptam_cg/badge.svg?branch=master)](https://coveralls.io/github/GaoHongchen/ptam_cg?branch=master) 
 
 Modified PTAM source code for AR based on [the one from Isis](http://www.robots.ox.ac.uk/~gk/PTAM).
 
