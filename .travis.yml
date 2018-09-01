@@ -16,6 +16,7 @@ matrix:
             - gcc-5
             - g++-5
             - git
+            - cppcheck
       env: COMPILER=g++-5
 
 before_install:
@@ -23,7 +24,8 @@ before_install:
   - echo $LC_ALL
   - if [ $TRAVIS_OS_NAME == linux ]; then ./scripts/3rdParty_install.sh; fi
   - git submodule update --init
-  - export COVERALLS_SERVICE_NAME=travis-ci
+  - sudo -H pip install --user cpp-coveralls
+  - sudo -H python -m easy_install --upgrade pyOpenSSL
 
 before_script:
   # use gcc-5 & g++-5
@@ -35,15 +37,13 @@ before_script:
   - export COVERALLS_REPO_TOKEN=lOFskZk8FMLcZQBYrAWbDrb9ROXzTaGJl
 
 script:
-  # Display cmake version
-  - cmake --version
-  # Create build folder
   - rm -rf build
   - mkdir build
   - cd build
-  # cmake
-  - cmake -DCMAKE_BUILD_TYPE=Debug -DCOVERALLS=ON ..
-  # limit GCC builds to a reduced number of thread for the virtual machine
-  - time make all -j2
-  - make coveralls
-  - cat coveralls.json
+  - cmake --version
+  - cmake -DCMAKE_BUILD_TYPE=Debug ..
+  - make cppcheck
+  - time make all -j$(nproc)
+
+after_success:
+  - coveralls --include ../ --extension .cc --gcov-options '\-lp' --dump coveralls.json

@@ -2,22 +2,19 @@ cmake_minimum_required( VERSION 3.2 )
 project ( ptam_cg )
 
 set(VERSION_MAJOR 1)
-set(VERSION_MINOR 3)
+set(VERSION_MINOR 4)
 set(VERSION_PATCH 0)
 
 IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE Release)
 ENDIF()
 
-message("CMake Build Type: " ${CMAKE_BUILD_TYPE})
-
-set(USER_USE_GCOV     TRUE) # gcov
-set(USER_USE_GPROF    TRUE) # gprof
-set(USER_USE_CPPCHECK TRUE) # cppcheck
-set(USER_USE_DOXYGEN  TRUE) # Doxygen
-
 
 ############### set SRC_LIST_PTAM & SRC_LIST_CameraCalibrator ######################
+
+file(GLOB_RECURSE ALL_SOURCE_FILES ${PROJECT_SOURCE_DIR} *.cc *.h)
+
+include_directories( "${PROJECT_SOURCE_DIR}/include" )
 
 set( SRC_LIST_PTAM
         ${PROJECT_SOURCE_DIR}/src/main.cc
@@ -65,100 +62,123 @@ if(NOT COMPILER_SUPPORTS_CXX11)
     message(FATAL_ERROR "CXX does not support -std=c++11")
 endif()
 
-# output C++ features
 message(STATUS "My C++ compiler supports these C++ features:")
-foreach(i ${CMAKE_CXX_COMPILE_FEATURES})
-    message(STATUS "  ${i}")
+foreach(feature ${CMAKE_CXX_COMPILE_FEATURES})
+    message(STATUS "  ${feature}")
 endforeach()
 
-# set CMAKE_CXX_FLAGS
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
-    set(MY_OVERALL_CXX_FLAGS    "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -Wall -Wno-deprecated-declarations -lpthread -lm")
+    set(MY_OVERALL_CXX_FLAGS "$ENV{CXXFLAGS} -D_LINUX -D_REENTRANT -std=c++11 -march=nocona -msse3 -Wno-deprecated-declarations -lpthread -lm")
 
     if(CMAKE_BUILD_TYPE MATCHES "Release")
 
         set(CMAKE_CXX_FLAGS_RELEASE "${MY_OVERALL_CXX_FLAGS} -O3")
+
         set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_RELEASE})
 
-    else(CMAKE_BUILD_TYPE MATCHES "Debug")
-        set(CMAKE_CXX_FLAGS_DEBUG   "${MY_OVERALL_CXX_FLAGS} -g")
+    elseif(CMAKE_BUILD_TYPE MATCHES "Debug")
 
-        if(USER_USE_GPROF)
-            set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -pg") # enabling gprof
+        add_definitions(-D__USER_DEBUG__)
+
+        set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE OFF)
+
+        set(CMAKE_CXX_FLAGS_DEBUG   "${MY_OVERALL_CXX_FLAGS} -g -O0 -Wall")
+
+        if(NOT WIN32 AND NOT APPLE)
+
+            message(STATUS "*****")
+            message(STATUS "***** CXX_FLAGS enabled for gprof,")
+            message(STATUS "***** generate a gmon.out file after executing project program successfully")
+            message(STATUS "***** run `gprof <program_name> gmon.out`")
+            set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -pg")
+
+            message(STATUS "*****")
+            message(STATUS "***** CXX_FLAGS enabled for gcov(debug, Linux builds only)")
+            message(STATUS "***** generate .gcno files after `make`")
+            message(STATUS "***** generate .gcda files after executing <project_program> successfully")
+            set(CMAKE_CXX_FLAGS_DEBUG  "${CMAKE_CXX_FLAGS_DEBUG}  -fprofile-arcs -ftest-coverage")
+            set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage -lgcov")
+
+            message(STATUS "*****")
+            message(STATUS "***** Create the gcov target for program ${CMAKE_PROJECT_NAME}")
+            message(STATUS "***** run `make gcov` after executing ${CMAKE_PROJECT_NAME}")
+            add_custom_target(gcov
+                COMMAND mkdir -p gcov_coverage_test
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+            )
+            add_custom_command(TARGET gcov
+                COMMAND echo "=================== GCOV ===================="
+                COMMAND gcov -b ${CMAKE_BINARY_DIR}/CMakeFiles/${CMAKE_PROJECT_NAME}.dir/src/*.gcno
+                COMMAND echo "-- Coverage files have been output to ${CMAKE_BINARY_DIR}/gcov_coverage_test"
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/gcov_coverage_test
+            )
+            add_dependencies(gcov ${CMAKE_PROJECT_NAME})
+            # Make sure to clean up the coverage folder
+            set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES gcov_coverage_test)
+
         endif()
 
-        if(USER_USE_GCOV)
-            ############### coveralls-cmake: test code coverage ######################
-            # Add coveralls-cmake project cmake modules to path.
-            set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/coveralls-cmake/cmake)
-            # We probably don't want this to run on every build.
-            option(COVERALLS "Generate coveralls data" OFF)
-            if (COVERALLS)
-                include(Coveralls)
-                #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG} --coverage -lgcov") # enabling coverage gcov
-                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage -lgcov")
-                # Create the coveralls target.
-                coveralls_setup( "${SRC_LIST_PTAM}" ON )
-            endif()
+        message(STATUS "*****")
+        message(STATUS "***** Static Analysis of C/C++ using cppcheck")
+        find_program(CPPCHECK NAMES cppcheck)
+        if(CPPCHECK)
+            message(STATUS "***** Found cppcheck: ${CPPCHECK}")
+
+            message(STATUS "*****")
+            message(STATUS "***** generate compile_commands.json(JSON compilation database)")
+            message(STATUS "***** run `cppcheck --project=compile_commands.json` ")
+            set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
+            message(STATUS "*****")
+            message(STATUS "***** run `make cppcheck` after `cmake`")
+            add_custom_target(
+                    cppcheck
+                    COMMAND /usr/bin/cppcheck
+                    --enable=warning,performance,portability,information,missingInclude
+                    --std=c++11
+                    --library=gnu.cfg
+                    --template="[{severity}][{id}] {message} {callstack} \(On {file}:{line}\)"
+                    --verbose
+                    --quiet
+                    ${ALL_SOURCE_FILES}
+            )
+        else()
+            message(WARNING "***** NOT Found cppcheck !!!")
         endif()
 
         set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
 
-        add_definitions(-D__USER_DEBUG__)
+        message(STATUS "*****")
 
     endif(CMAKE_BUILD_TYPE MATCHES "Release")
 
 endif()
 
 
-# set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin  )
-
-
-############### Static Analysis of C/C++ using cppcheck ######################
-if (USER_USE_CPPCHECK)
-
-    # generating compile_commands.json(JSON compilation database)
-    set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
-
-    find_program(CPPCHECK NAMES cppcheck)
-    if(CPPCHECK)
-        message(STATUS "Found cppcheck: ${CPPCHECK}")
-    else()
-        message(WARNING "NOT Found cppcheck")
-    endif()
-
-    # execute `make cppcheck` after `cmake`
-    include(cmake_modules/cppcheck.cmake)
-
-endif ()
-
-
 ############### Generating API documentation with Doxygen ######################
-if (USER_USE_DOXYGEN)
-    # add a target to generate API documentation with Doxygen
+option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ON)
+
+if(BUILD_DOCUMENTATION)
     find_package(Doxygen)
-    option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
 
-    if(BUILD_DOCUMENTATION)
-        if(NOT DOXYGEN_FOUND)
-            message(FATAL_ERROR "Doxygen is needed to build the documentation.")
-        endif()
-
-        set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/Doxyfile.config)
-        set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-
-        configure_file(${doxyfile_in} ${doxyfile} @ONLY)
-
-        add_custom_target(doc
-                COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                COMMENT "Generating API documentation with Doxygen"
-                VERBATIM)
-
-        install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc)
+    if(NOT DOXYGEN_FOUND)
+        message(FATAL_ERROR "Doxygen is needed to build the documentation.")
     endif()
-endif ()
+
+    set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/config/Doxyfile.config)
+    set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+    configure_file(${doxyfile_in} ${doxyfile} @ONLY)
+
+    add_custom_target(doc
+        COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM)
+
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc)
+endif()
 
 
 ############### Dependencies or AddOns ######################
@@ -187,19 +207,20 @@ link_libraries( GVars3 )
 
 ############### project: PTAM & CameraCalibrator ######################
 
-include_directories( "${PROJECT_SOURCE_DIR}/include" )
+add_executable( ${CMAKE_PROJECT_NAME} ${SRC_LIST_PTAM} )
 
-### PTAM
-add_executable( PTAM ${SRC_LIST_PTAM} )
-
-### CameraCalibrator
-add_executable( CameraCalibrator ${SRC_LIST_CameraCalibrator} )
+add_executable( ${CMAKE_PROJECT_NAME}_cam_calib ${SRC_LIST_CameraCalibrator} )
 
 
 ############### output some messages ######################
+message(STATUS "")
 
-message("CMAKE_CXX_FLAGS  : " ${CMAKE_CXX_FLAGS})
+message(STATUS "CMake Build Type: " ${CMAKE_BUILD_TYPE})
 
-message("CMAKE_CURRENT_BINARY_DIR: " ${CMAKE_CURRENT_BINARY_DIR})
-message("CMAKE_BINARY_DIR:         " ${CMAKE_BINARY_DIR})
-message("PROJECT_BINARY_DIR:       " ${PROJECT_BINARY_DIR})
+message(STATUS "CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+
+message(STATUS "CMAKE_CURRENT_BINARY_DIR: " ${CMAKE_CURRENT_BINARY_DIR})
+message(STATUS "CMAKE_BINARY_DIR:         " ${CMAKE_BINARY_DIR})
+message(STATUS "PROJECT_BINARY_DIR:       " ${PROJECT_BINARY_DIR})
+
+message(STATUS "")
