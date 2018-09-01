@@ -17,6 +17,7 @@ matrix:
             - g++-5
             - git
             - cppcheck
+            - doxygen
       env: COMPILER=g++-5
 
 before_install:
@@ -43,6 +44,7 @@ script:
   - cmake --version
   - cmake -DCMAKE_BUILD_TYPE=Debug ..
   - make cppcheck
+  - make doc
   - time make all -j$(nproc)
 
 after_success:
