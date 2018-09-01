@@ -157,7 +157,7 @@ endif()
 
 
 ############### Generating API documentation with Doxygen ######################
-option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ON)
+option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 
 if(BUILD_DOCUMENTATION)
     find_package(Doxygen)
