@@ -22,7 +22,7 @@ matrix:
 before_install:
   - echo $LANG
   - echo $LC_ALL
-  - if [ $TRAVIS_OS_NAME == linux ]; then ./scripts/3rdParty_install.sh; fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then ./install_deps.sh; fi
   - git submodule update --init
   - sudo -H pip install --user cpp-coveralls
   - sudo -H python -m easy_install --upgrade pyOpenSSL
