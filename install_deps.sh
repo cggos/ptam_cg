@@ -9,7 +9,7 @@ sudo apt-get install libx11-dev libncurses5-dev libreadline6 libreadline-dev
 # Build tools
 sudo apt-get install build-essential cmake pkg-config
 # Boost for C++
-sudo apt-get install libboost-dev libboost-doc
+sudo apt-get install libboost-dev
 # gfortran
 sudo apt-get install gfortran libgfortran-5-dev
 # Low level libraries for Linear Algebra
