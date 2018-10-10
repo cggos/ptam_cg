@@ -15,10 +15,8 @@ My Blogs:
 # Build
 
 * **Build locally**
-
-|Dependencies	       |Project 	       |
-|:-:	               |---	             |
-|3rdParty_install.sh |build_project.sh |
+  - Dependencies: `bash install_deps.sh`
+  - Project: `mkdir build && cd build && cmake .. && time make -j2`
 
 * **Related Compilation for PTAM**
   - [PTAM Compilation on Linux](http://hustcalm.me/blog/2013/09/27/ptam-compilation-on-linux-howto/)
@@ -32,7 +30,7 @@ My Blogs:
   - [PTAM-linux-cv2.3 (GitHub)](https://github.com/nttputus/PTAM-linux-cv2.3)
 
 * **ROS**
-  - [http://wiki.ros.org/ptam](http://wiki.ros.org/ptam)
+  - [ptam (ROS Wiki)](http://wiki.ros.org/ptam)
   - [Installation of PTAM in ROS](https://sites.google.com/site/zhilongliuwebsite/research/computer-vision-embedded-systems/ptam)
   - [ethz-asl/ethzasl_ptam](https://github.com/ethz-asl/ethzasl_ptam) issue **[Build on kinetic #98](https://github.com/ethz-asl/ethzasl_ptam/pull/98/files)**
 
