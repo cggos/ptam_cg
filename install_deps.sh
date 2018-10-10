@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-cd ..
 # Project directory
 PTAMDir=`pwd`
 
