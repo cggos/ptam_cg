@@ -20,7 +20,6 @@ Modified PTAM source code for AR based on [the one from Isis](http://www.robots.
 * **Related Compilation for PTAM**
   - [PTAM Compilation on Linux](http://hustcalm.me/blog/2013/09/27/ptam-compilation-on-linux-howto/)
   - [Build PTAM on Ubuntu 11.10](http://irawiki.disco.unimib.it/irawiki/index.php/PTAM)
-  - [Installation of PTAM in ROS](https://sites.google.com/site/zhilongliuwebsite/research/computer-vision-embedded-systems/ptam)
 
 
 # Related Source Code
@@ -31,6 +30,8 @@ Modified PTAM source code for AR based on [the one from Isis](http://www.robots.
 
 * **ROS**
   - [http://wiki.ros.org/ptam](http://wiki.ros.org/ptam)
+  - [Installation of PTAM in ROS](https://sites.google.com/site/zhilongliuwebsite/research/computer-vision-embedded-systems/ptam)
+  - [ethz-asl/ethzasl_ptam](https://github.com/ethz-asl/ethzasl_ptam) issue **[Build on kinetic #98](https://github.com/ethz-asl/ethzasl_ptam/pull/98/files)**
 
 * **Android**
   - [APTAM-GPL](https://github.com/ICGJKU/APTAM-GPL)
