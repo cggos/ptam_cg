@@ -30,9 +30,10 @@ My Blogs:
   - [PTAM-linux-cv2.3 (GitHub)](https://github.com/nttputus/PTAM-linux-cv2.3)
 
 * **ROS**
-  - [ptam (ROS Wiki)](http://wiki.ros.org/ptam)
-  - [Installation of PTAM in ROS](https://sites.google.com/site/zhilongliuwebsite/research/computer-vision-embedded-systems/ptam)
-  - [ethz-asl/ethzasl_ptam](https://github.com/ethz-asl/ethzasl_ptam) issue **[Build on kinetic #98](https://github.com/ethz-asl/ethzasl_ptam/pull/98/files)**
+  - [ethzasl_ptam (ROS Wiki)](http://wiki.ros.org/ptam)
+  - [ethzasl_ptam (GitHub)](https://github.com/ethz-asl/ethzasl_ptam)
+    - [Installation of PTAM in ROS](https://sites.google.com/site/zhilongliuwebsite/research/computer-vision-embedded-systems/ptam)
+    - issue **[Build on kinetic #98](https://github.com/ethz-asl/ethzasl_ptam/pull/98/files)**
 
 * **Android**
   - [APTAM-GPL](https://github.com/ICGJKU/APTAM-GPL)
