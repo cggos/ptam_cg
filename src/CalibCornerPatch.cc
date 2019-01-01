@@ -20,11 +20,10 @@ Image<float> CalibCornerPatch::mimSharedSourceTemplate;
 
 CalibCornerPatch::CalibCornerPatch(int nSideSize)
 {
-    mimTemplate.resize(ImageRef(nSideSize, nSideSize));
+    mimTemplate.resize( ImageRef(nSideSize, nSideSize));
     mimGradients.resize(ImageRef(nSideSize, nSideSize));
     mimAngleJacs.resize(ImageRef(nSideSize, nSideSize));
-    if(mimSharedSourceTemplate.size().x == 0)
-    {
+    if(mimSharedSourceTemplate.size().x == 0) {
         MakeSharedTemplate();
     }
 }
@@ -94,10 +93,9 @@ void CalibCornerPatch::MakeTemplateWithCurrentParams()
 bool CalibCornerPatch::IterateOnImageWithDrawing(CalibCornerPatch::Params &params, Image<byte> &im)
 {
     bool bReturn = IterateOnImage(params, im);
-    if(!bReturn)
-    {
+    if(!bReturn) {
         glPointSize(3);
-        glColor3f(1,0,0);
+        glColor3f(1, 0, 0);
         glBegin(GL_POINTS);
         glVertex(params.v2Pos);
         glEnd();
@@ -109,14 +107,13 @@ bool CalibCornerPatch::IterateOnImage(CalibCornerPatch::Params &params, Image<by
 {
     mParams = params;
     double dLastUpdate = 0.0;
-    for(int i=0; i<20; i++)
-    {
+    for(int i=0; i<20; i++) {
         MakeTemplateWithCurrentParams();
         dLastUpdate = Iterate(im);
 
-        if(dLastUpdate < 0)
+        if (dLastUpdate < 0)
             return false;
-        if(dLastUpdate < 0.00001)
+        if (dLastUpdate < 0.00001)
             break;
     }
     if(dLastUpdate > 0.001)
@@ -144,8 +141,6 @@ double CalibCornerPatch::Iterate(Image<byte> &im)
     image_interpolate<Interpolate::Bilinear, byte> imInterp(im);
     Matrix<6> m6JTJ = Zeros;
     Vector<6> v6JTD = Zeros;
-
-
 
     ImageRef ir;
     double dSum = 0.0;
@@ -189,14 +184,11 @@ void CalibCornerPatch::MakeSharedTemplate()
     mimSharedSourceTemplate.resize(ImageRef(nSideSize, nSideSize));
 
     ImageRef ir;
-
-    do
-    {
+    do {
         float fX = (ir.x < nHalf) ? 1.0 : -1.0;
         float fY = (ir.y < nHalf) ? 1.0 : -1.0;
         mimSharedSourceTemplate[ir] = fX * fY;
-    }
-    while(ir.next(mimSharedSourceTemplate.size()));
+    } while(ir.next(mimSharedSourceTemplate.size()));
 }
 
 CalibCornerPatch::Params::Params()
@@ -217,13 +209,3 @@ Matrix<2> CalibCornerPatch::Params::m2Warp()
     };
     return m2Warp;
 }
-
-
-
-
-
-
-
-
-
-

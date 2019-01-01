@@ -17,13 +17,18 @@ using namespace std;
 using namespace CVD;
 using namespace GVars3;
 
+/**
+ * @brief Does a quick check to see if a point in an image could be a grid corner
+ * @details Does this by going around a 16-pixel ring, and checking that
+ *          there's four transitions (black - white- black - white - )
+ *          Also checks that the central pixel is blurred.
+ * @param im
+ * @param ir
+ * @param nGate
+ * @return
+ */
 inline bool IsCorner(Image<byte> &im, ImageRef ir, int nGate)
 {
-    // Does a quick check to see if a point in an image could be a grid corner.
-    // Does this by going around a 16-pixel ring, and checking that there's four
-    // transitions (black - white- black - white - )
-    // Also checks that the central pixel is blurred.
-
     // Find the mean intensity of the pixel ring...
     int nSum = 0;
     static byte abPixels[16];
@@ -65,25 +70,27 @@ inline bool IsCorner(Image<byte> &im, ImageRef ir, int nGate)
     return (nSwaps == 4);
 };
 
+/**
+ * @details The iterative patch-finder works better if the initial guess is roughly aligned!
+ *          Find one of the line-axes by searching round the circle for the strongest gradient,
+ *          and use that and +90deg as the initial guesses for patch angle.
+ *          Yes, this is a very poor estimate,
+ *          but it's generally (hopefully?) enough for the iterative finder to converge.
+ * @param im
+ * @param irCenter
+ * @return
+ */
 Vector<2> GuessInitialAngles(Image<byte> &im, ImageRef irCenter)
 {
-    // The iterative patch-finder works better if the initial guess
-    // is roughly aligned! Find one of the line-axes by searching round
-    // the circle for the strongest gradient, and use that and +90deg as the
-    // initial guesses for patch angle.
-    //
-    // Yes, this is a very poor estimate, but it's generally (hopefully?)
-    // enough for the iterative finder to converge.
-
     image_interpolate<Interpolate::Bilinear, byte> imInterp(im);
-    double dBestAngle = 0;
+    double dBestAngle   = 0;
     double dBestGradMag = 0;
-    double dGradAtBest = 0;
-    for(double dAngle = 0.0; dAngle < M_PI; dAngle += 0.1)
-    {
+    double dGradAtBest  = 0;
+    for(double dAngle = 0.0; dAngle < M_PI; dAngle += 0.1) {
         Vector<2> v2Dirn;
         v2Dirn[0] = cos(dAngle);
         v2Dirn[1] = sin(dAngle);
+
         Vector<2> v2Perp;
         v2Perp[1] = -v2Dirn[0];
         v2Perp[0] = v2Dirn[1];
@@ -93,8 +100,8 @@ Vector<2> GuessInitialAngles(Image<byte> &im, ImageRef irCenter)
                 imInterp[vec(irCenter) + v2Dirn * 3.0 - v2Perp * 0.1] +
                 imInterp[vec(irCenter) - v2Dirn * 3.0 - v2Perp * 0.1] -
                 imInterp[vec(irCenter) - v2Dirn * 3.0 + v2Perp * 0.1];
-        if(fabs(dG) > dBestGradMag)
-        {
+
+        if (fabs(dG) > dBestGradMag) {
             dBestGradMag = fabs(dG);
             dGradAtBest = dG;
             dBestAngle = dAngle;
@@ -102,13 +109,11 @@ Vector<2> GuessInitialAngles(Image<byte> &im, ImageRef irCenter)
     }
 
     Vector<2> v2Ret;
-    if(dGradAtBest < 0)
-    {
+    if(dGradAtBest < 0) {
         v2Ret[0] = dBestAngle;
         v2Ret[1] = dBestAngle + M_PI / 2.0;
     }
-    else
-    {
+    else {
         v2Ret[1] = dBestAngle;
         v2Ret[0] = dBestAngle - M_PI / 2.0;
     }
@@ -273,13 +278,16 @@ void CalibGridCorner::Draw()
     glEnd();
 }
 
-
+/**
+ * @brief Scoring function. How good would this grid corner be at finding a neighbor?
+ * @details The best case is if it's already surrounded by three neighbors
+ *          and only needs to find the last one
+ *          (because it'll have the most accurate guess for where the last one should be)
+ *          and so on.
+ * @return
+ */
 double CalibGridCorner::ExpansionPotential()
 {
-    // Scoring function. How good would this grid corner be at finding a neighbor?
-    // The best case is if it's already surrounded by three neighbors and only needs
-    // to find the last one (because it'll have the most accurate guess for where
-    // the last one should be) and so on.
     int nMissing = 0;
     for(int i=0; i<4; i++)
         if(aNeighborStates[i].val == N_NOT_TRIED)
