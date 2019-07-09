@@ -46,7 +46,6 @@ My Blogs:
 # PTAM Tutorials
 
 * [PTAM news](https://ewokrampage.wordpress.com/)
-* [PTAM-Monocular SLAM](http://www.doc.ic.ac.uk/~gj414/monocular_slam/ptam.html)
 * [implementing-ptam-stereo-tracking-and-pose-estimation-for-ar-with-opencv-w-code](http://www.morethantechnical.com/2010/03/06/implementing-ptam-stereo-tracking-and-pose-estimation-for-ar-with-opencv-w-code/)
 * [窥探PTAM (CSDN)](https://blog.csdn.net/ilotuo/article/category/6297333)
 * [PTAM跟踪过程中的旋转预测方法](https://zhuanlan.zhihu.com/p/20302059)
