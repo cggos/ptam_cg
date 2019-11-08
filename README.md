@@ -28,6 +28,9 @@ My Blogs:
 * **Linux**
   - [PTAM-GPL (GitHub)](https://github.com/Oxford-PTAM/PTAM-GPL)
   - [PTAM-linux-cv2.3 (GitHub)](https://github.com/nttputus/PTAM-linux-cv2.3)
+  
+* **Python**
+  - [uoip/stereo_ptam](https://github.com/uoip/stereo_ptam)
 
 * **ROS**
   - [ethzasl_ptam (ROS Wiki)](http://wiki.ros.org/ptam)
